@@ -4,14 +4,14 @@ Canonical skills for all three agents:
 
 | Skill | Path |
 |-------|------|
-| Guide | `.agents/skills/buildmine-guide/SKILL.md` |
-| Judge | `.agents/skills/buildmine-judge/SKILL.md` |
+| Assignment coach | `.agents/skills/student-build/SKILL.md` |
+| Judge | `.agents/skills/student-judge/SKILL.md` |
 
 A copy also lives under `.cursor/skills/` for older Cursor builds.
 
 | Agent | How it loads these |
 |-------|--------------------|
-| **Cursor** | Discovers `.agents/skills/` and `.cursor/skills/`. Start a new Agent chat, then `/buildmine-guide`. |
+| **Cursor** | Discovers `.agents/skills/` and `.cursor/skills/`. Start a new Agent chat, then `/student-build`. |
 | **GitHub Copilot** | Agent mode and Copilot CLI load `.agents/skills/*/SKILL.md` plus `AGENTS.md` and `.github/copilot-instructions.md`. Use **Agent** mode (not Ask/Edit, not autocomplete-only). |
 | **OpenCode** | Loads `.agents/skills/` and always reads `AGENTS.md`. Run from the project root. Do not run `/init` (it overwrites `AGENTS.md`). |
 
@@ -28,14 +28,14 @@ https://github.com/settings/education/benefits
 1. GitHub account → apply at the benefits link above → activate Copilot (or use Copilot Free).
 2. VS Code + GitHub Copilot and Copilot Chat extensions, signed in.
 3. Open this repo. Copilot Chat → **Agent**.
-4. `Use the buildmine-guide skill.`
+4. `Use the student-build skill.`
 
 ## OpenCode setup
 
 1. Install: `npm install -g opencode-ai` (Windows also: `scoop install opencode` or `choco install opencode`). macOS/Linux: `curl -fsSL https://opencode.ai/install | bash`. Docs: https://opencode.ai/docs/
 2. From this repo root: `opencode`, then `/connect` a model.
 3. Do not run `/init`.
-4. `Use the buildmine-guide skill.`
+4. `Use the student-build skill.`
 
 Web chat (chatgpt.com, claude.ai, gemini.google.com) does **not** load these files. That path is not allowed for the assignment.
 
@@ -43,11 +43,13 @@ When you change a skill, update **both** `.agents/skills/` and `.cursor/skills/`
 
 ## This assignment's phases
 
+Use **student-build**. One phase per chat. Follow-ups are capped by that phase’s base confidence. Write the artefact, pause, and tell them to open a new chat for the next phase. The student may **skip** up to 3 needless questions. Report `Skips: n/3 used`.
+
 1. Select the project and name **three** workflows.
-2. Use cases and a Mermaid diagram in `docs/report.md`.
-3. First Mermaid model diagram (revise it later).
-4. Student wireframes exported into `docs/wireframes/`. The agent checks coverage. No code until every use case is covered.
-5. Implement from the model and wireframes until the three workflows work locally, then deploy Postgres and the web service with the Render MCP.
+2. Agent drafts the use-case diagram from that prompt.
+3. Agent drafts the model diagram from that prompt. It assumes entities and properties.
+4. Wait for student-crafted wireframe images in `docs/wireframes/`. That is the only drawing the student must do. No code until every use case is covered. Do not send them back to redraw for a tweak.
+5. Ask for theming and branding preferences, then implement. Deploy after local verification.
 
 Judge turns conversation confidence into the impression mark: `round(confidence × 10)` out of 10.
 

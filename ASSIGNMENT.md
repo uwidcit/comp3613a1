@@ -2,7 +2,7 @@
 
 **Individual** · this file lives in the [comp3613a1](https://github.com/uwidcit/comp3613a1) starter repo.
 
-Student-facing Google Doc: https://docs.google.com/document/d/1tU3O4W8vgmvcibbNXTURZa8UYcr0eiZy4NbklFnQRFg/edit
+Student-facing Google Doc: https://docs.google.com/document/d/15tCfviVZO9vnqT7wvXJ5VDMkuPzfKJOLIOf2cZB6E6Y/edit
 
 ## Description
 
@@ -61,29 +61,27 @@ You may add minimal supporting behaviour (login, roles, seed data, navigation) r
 
 ## How you build (phases)
 
-The brief does **not** list features for you. Work in this order. The Guide skill will send you back if you skip a gate. **No app code before Phase 5.**
+The brief does **not** list features for you. Work in this order. Use the **student-build** skill. **One phase per chat.** When a phase is done, the agent writes an artefact you can open, then stops. Start the next phase in a **new chat**. It may still ask one clarifying question to fill a gap, even if your prompt is clear. Extra follow-ups stay capped. If a question is too arduous or needless, say **skip**. You have **3 skips**. A skip does not replace your three workflows or your wireframes. **No app code before Phase 5.**
 
 ### Phase 1 — Select the project and name three workflows
 
-Interpret the assigned brief (actors, primary job, assumptions, edge cases, what is **out of scope**). Name **exactly three** workflows. For each: who acts, the step sequence, and what “done” looks like.
+One prompt: assigned project, and **exactly three** workflows. For each: who acts, the step sequence, and what “done” looks like.
 
-### Phase 2 — Use cases and diagram
+### Phase 2 — Use-case diagram (agent drafts)
 
-Turn those workflows into use cases. Draw the use-case diagram in **Mermaid** (a `flowchart`: actors as circle/stadium nodes, use cases as rectangles) inside `docs/report.md`. You must be able to explain every actor and use case.
+The agent drafts the Mermaid use-case diagram in `docs/report.md` from your Phase 1 prompt. You do not draw it. It will assume actors and use cases the prompt implies.
 
-### Phase 3 — First model diagram
+### Phase 3 — Model diagram (agent drafts)
 
-Draft a **Mermaid** `erDiagram` that can support the use cases. This is a first version. Expect to revise it in Phase 5 as you understand the features better. Record what changed and why in the report.
+The agent drafts the first Mermaid model from that same prompt. You do not list every entity and property. It will assume sensible fields and note what it assumed.
 
 ### Phase 4 — Wireframes (you, outside the agent)
 
-Draw wireframes for the **three workflows only**. Do this outside the agent (paper, Figma, Excalidraw, draw.io, and so on). Export **PNG or JPG** and put the images in `docs/wireframes/`.
+This is the only artifact you must draw. Draw wireframes for the **three workflows only**, outside the agent (paper, Figma, Excalidraw, draw.io, and so on). Export **PNG or JPG** and put the images in `docs/wireframes/`. The agent waits. **You cannot start Phase 5 until every use case has a wireframe image in the workspace.** Later tweaks do not mean a new wireframe.
 
-The agent checks coverage. It must not draw the wireframes for you. **You cannot start Phase 5 until every use case has a wireframe image in the workspace.**
+### Phase 5 — Theming, then implement and deploy
 
-### Phase 5 — Implement, then deploy
-
-Build from the current model and the imported wireframes. One workflow at a time. Update the Mermaid model when the design changes. Verify each workflow locally.
+State theming and branding preferences (colors, type, tone, logo or wordmark). Then the agent implements from the current model and the imported wireframes, one workflow at a time. If a detail is fleshed out in code, the agent updates the model. It will not send you back to redraw the wireframe. Verify each workflow locally.
 
 When the three workflows work locally, deploy **both** a Render Postgres database and the web service with the **Render MCP**. Steps are in [README.md](README.md). Put the public URL in the report. A local-only app cannot earn full implementation marks.
 
@@ -116,7 +114,7 @@ Use a verified academic email if you have one (UWI: `@my.uwi.edu`). After approv
 
 1. Install [Cursor](https://cursor.com) and stay on free **Hobby**.
 2. **File → Open Folder** → this project root.
-3. New **Agent** chat. Use `/buildmine-guide` and the start prompt in [README.md](README.md).
+3. New **Agent** chat. Use `/student-build` and the start prompt in [README.md](README.md).
 
 ### GitHub Copilot (agent mode)
 
@@ -125,7 +123,7 @@ Skills load only in **Agent** mode or the Copilot CLI — not inline autocomplet
 1. GitHub account, then the Education link above (or Copilot Free).
 2. [VS Code](https://code.visualstudio.com/) + **GitHub Copilot** and **GitHub Copilot Chat**. Sign in.
 3. Open this folder. Copilot Chat → mode **Agent** (not Ask, not Edit).
-4. If the skill does not attach: `Use the buildmine-guide skill in .agents/skills/buildmine-guide/SKILL.md`.
+4. If the skill does not attach: `Use the student-build skill in .agents/skills/student-build/SKILL.md`.
 
 Optional: [Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli) from this folder. It reads `AGENTS.md` and `.github/copilot-instructions.md`.
 
@@ -145,7 +143,7 @@ curl -fsSL https://opencode.ai/install | bash
 
 Then `cd` to this repo, run `opencode`, and `/connect` a model. **Do not run `/init`** — it overwrites `AGENTS.md`.
 
-App commands and the Guide start prompt are in [README.md](README.md). One slice at a time. When finished: `Use the buildmine-judge skill on this session.`
+App commands and the Guide start prompt are in [README.md](README.md). One slice at a time. When finished: `Use the student-judge skill on this session.`
 
 ### Allowed / not allowed
 

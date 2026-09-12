@@ -177,12 +177,15 @@ Pick **one** of these. All three load Guide and Judge from this repo. Web chatbo
 Start every build session with:
 
 ```text
-Use the buildmine-guide skill. I'm in Phase 1 for [assigned project].
-Here is the problem brief: …
-I will propose exactly 3 workflows. Question me before any diagrams or code.
+Use the student-build skill.
+
+Phase 1. Assigned project: …
+Workflow 1 — name, who acts, steps, done when: …
+Workflow 2 — name, who acts, steps, done when: …
+Workflow 3 — name, who acts, steps, done when: …
 ```
 
-When finished: `Use the buildmine-judge skill on this session.`
+When finished: `Use the student-judge skill on this session.`
 
 ### GitHub Education (student license)
 
@@ -200,7 +203,7 @@ If the student Copilot offer is not available yet, use **Copilot Free** in agent
 
 1. Install [Cursor](https://cursor.com) and sign in. Stay on free **Hobby**.
 2. **File → Open Folder** → this project root (not a parent folder).
-3. New **Agent** chat. Confirm it can see `buildmine-guide` (or type `/buildmine-guide`).
+3. New **Agent** chat. Confirm it can see `student-build` (or type `/student-build`).
 4. Paste the Guide prompt above.
 
 ### GitHub Copilot (agent mode)
@@ -212,7 +215,7 @@ Skills load only in **agent** mode or the Copilot CLI — not inline autocomplet
 3. Install [VS Code](https://code.visualstudio.com/) and the **GitHub Copilot** and **GitHub Copilot Chat** extensions. Sign in with the same GitHub account.
 4. **File → Open Folder** → this project root.
 5. Open Copilot Chat and switch the mode to **Agent** (not Ask, not Edit).
-6. Start with the Guide prompt above. If the skill does not attach, say: `Use the buildmine-guide skill in .agents/skills/buildmine-guide/SKILL.md`.
+6. Start with the prompt above. If the skill does not attach, say: `Use the student-build skill in .agents/skills/student-build/SKILL.md`.
 
 Optional CLI (same account): [Install GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli), then run it from this folder. It also reads `AGENTS.md` and `.github/copilot-instructions.md`.
 
@@ -243,7 +246,7 @@ Then:
 1. `cd` to this project root (the folder that contains `AGENTS.md`).
 2. Run `opencode`.
 3. Connect a model with `/connect` (or `opencode auth login`). Do **not** run `/init` — this repo already has `AGENTS.md`, and `/init` would overwrite it.
-4. Start with the Guide prompt above. OpenCode should follow `AGENTS.md` and can load `.agents/skills/buildmine-guide`.
+4. Start with the prompt above. OpenCode should follow `AGENTS.md` and can load `.agents/skills/student-build`.
 
 More setup detail: [`.agents/skills/README.md`](.agents/skills/README.md).
 

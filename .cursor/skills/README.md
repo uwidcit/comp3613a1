@@ -4,27 +4,27 @@ Two project skills for coursework. Canonical copies: `.agents/skills/` (also und
 
 | Skill | When to use |
 |-------|-------------|
-| **buildmine-guide** | While building |
-| **buildmine-judge** | After a session, when asked to score |
+| **student-build** | This assignment, while building |
+| **student-judge** | Rubric method. This assignment’s phases and impression mark come from **student-build**. |
 
 ## Which agents load them
 
 | Agent | Works? | How |
 |-------|--------|-----|
-| Cursor Hobby | Yes | Open folder; new Agent chat; `/buildmine-guide` |
-| GitHub Copilot agent / CLI | Yes | Open repo; agent mode (not autocomplete-only); `/buildmine-guide` |
+| Cursor Hobby | Yes | Open folder; new Agent chat; `/student-build` |
+| GitHub Copilot agent / CLI | Yes | Open repo; agent mode (not autocomplete-only); `/student-build` |
 | OpenCode | Yes | Run from repo root; it reads `AGENTS.md` and `.agents/skills/` |
 | ChatGPT / Claude / Gemini **web** | No | They never see these files |
 
-`AGENTS.md` and `.github/copilot-instructions.md` tell Copilot and OpenCode to follow Guide by default.
+`AGENTS.md` and `.github/copilot-instructions.md` tell Copilot and OpenCode to follow **student-build** by default.
 
 ## Cursor Hobby checklist
 
 1. Install [Cursor](https://cursor.com) and stay on free **Hobby**.
 2. **File → Open Folder** on this project root.
-3. Confirm `.agents/skills/buildmine-guide/SKILL.md`.
-4. New Agent chat → `Use buildmine-guide`.
-5. End with `Use buildmine-judge on this session.`
+3. Confirm `.agents/skills/student-build/SKILL.md`.
+4. New Agent chat → `Use student-build`.
+5. End with `Use student-judge on this session.`
 
 ## GitHub Education (student license)
 
@@ -37,7 +37,7 @@ Apply (signed in): **https://github.com/settings/education/benefits**
 1. GitHub account, then the Education link above.
 2. Install [VS Code](https://code.visualstudio.com/) and the **GitHub Copilot** and **GitHub Copilot Chat** extensions. Sign in.
 3. Open this project root. In Copilot Chat, set the mode to **Agent** (not Ask, not Edit, not autocomplete-only).
-4. `Use the buildmine-guide skill.` It reads `.agents/skills/` and `.github/copilot-instructions.md`.
+4. `Use the student-build skill.` It reads `.agents/skills/` and `.github/copilot-instructions.md`.
 
 Optional: [Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli) from this folder. One slice at a time — free quotas are limited.
 
@@ -49,7 +49,7 @@ Free client; you still need a model (local or a free API tier). Docs: https://op
 
 **macOS / Linux:** `curl -fsSL https://opencode.ai/install | bash` or `brew install anomalyco/tap/opencode`.
 
-Then `cd` to this repo, run `opencode`, and `/connect` a model. **Do not run `/init`** — it overwrites the course `AGENTS.md`. Start with `Use the buildmine-guide skill.`
+Then `cd` to this repo, run `opencode`, and `/connect` a model. **Do not run `/init`** — it overwrites the course `AGENTS.md`. Start with `Use the student-build skill.`
 
 ## Do / don’t
 
@@ -64,16 +64,16 @@ Skills under `.cursor/skills/` are **already included** when you clone or fork t
 1. Open this project folder in **Cursor** (File → Open Folder).
 2. Confirm the skills exist (paths above).
 3. Start an Agent chat in the project. Cursor discovers project skills automatically from `.cursor/skills/`.
-4. For the build: say you want **Guide** mode, or `@buildmine-guide` / ask the agent to follow the Buildmine guide skill.
-5. When finished (or for marking): ask for **Judge** / `@buildmine-judge` on the same chat or a saved agent transcript.
+4. For the build: `@student-build` / ask the agent to follow the student-build skill.
+5. When finished (or for marking): ask for **Judge** / `@student-judge` on the same chat or a saved agent transcript.
 
 ### If skills are missing (older fork / incomplete copy)
 
 Copy from a fresh [comp3613a1](https://github.com/uwidcit/comp3613a1) clone into your project root and commit:
 
 ```text
-.cursor/skills/buildmine-guide/
-.cursor/skills/buildmine-judge/
+.cursor/skills/student-build/
+.cursor/skills/student-judge/
 .cursor/skills/README.md
 ```
 
@@ -91,22 +91,23 @@ Do **not** put course skills only in `~/.cursor/skills/` if your assignment requ
 **Guide (start of assignment):**
 
 ```text
-Use buildmine-guide. I'm in Phase 1 for [project name].
-Here is the problem brief: …
-I need to interpret it and propose exactly 3 workflows.
-Question me before diagrams or code.
+Use student-build.
+
+Phase 1. Assigned project: …
+Workflow 1 — name, who acts, steps, done when: …
+Workflow 2 — name, who acts, steps, done when: …
+Workflow 3 — name, who acts, steps, done when: …
 ```
 
 **Judge (end of session):**
 
 ```text
-Use buildmine-judge on this chat.
-Target phases: 1–5 (or as far as this session went).
+Use the student-judge skill on this session.
 ```
 
 ## Notes
 
-- Course briefs are short on purpose — **you** choose the three workflows; Guide should challenge vague or oversized scope.
+- Course briefs are short on purpose — **you** choose the three workflows. Drive the next phase with one complete prompt. The agent does not interview you.
 - No app code until wireframe images in `docs/wireframes/` cover every use case. Diagrams are Mermaid in `docs/report.md`.
 - Deploy Postgres and the web app with the Render MCP after local verification (`render.yaml`).
 - Guide refuses shallow “just build it” prompts and quarantines paste-backs from other chatbots.
