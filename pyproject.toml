@@ -26,9 +26,9 @@ dependencies = [
     "ruff",
     "sqlmodel",
     "tabulate",
-    "typer",
     "uvicorn[standard]",
 ]
+
 [project.optional-dependencies]
 dev = [
 

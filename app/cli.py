@@ -1,0 +1,166 @@
+#!/usr/bin/env python3
+"""FastMVC project CLI — stdlib argparse (no extra CLI library).
+
+From the project root (venv active, deps installed, ``.env`` present):
+
+    python manage.py init
+    python manage.py seed
+    python manage.py run
+    python manage.py users
+"""
+
+from __future__ import annotations
+
+import argparse
+import sys
+
+import uvicorn
+from sqlmodel import select
+
+from app.config import get_settings
+from app.database import create_db_and_tables, drop_all, get_cli_session
+from app.models.user import User
+from app.repositories.user import UserRepository
+from app.schemas.user import AdminCreate, RegularUserCreate
+from app.utilities.security import encrypt_password
+
+
+def _ensure_models_loaded() -> None:
+    import app.models  # noqa: F401
+
+
+def cmd_init(args: argparse.Namespace) -> None:
+    """Create database tables (drops existing tables by default)."""
+    _ensure_models_loaded()
+    if args.drop:
+        print("Dropping all tables…")
+        drop_all()
+    print("Creating tables…")
+    create_db_and_tables()
+    print(f"Database ready ({get_settings().database_uri}).")
+    if args.seed:
+        cmd_seed(args)
+
+
+def cmd_seed(args: argparse.Namespace) -> None:
+    """Insert demo users.
+
+    bob / bobpass       (regular_user)
+    admin / adminpass   (admin)
+    """
+    _ensure_models_loaded()
+    create_db_and_tables()
+
+    demo_users = [
+        ("bob", "bob@example.com", "bobpass", "regular_user"),
+        ("admin", "admin@example.com", "adminpass", "admin"),
+    ]
+
+    created = 0
+    skipped = 0
+    with get_cli_session() as session:
+        repo = UserRepository(session)
+        for username, email, password, role in demo_users:
+            if repo.get_by_username(username):
+                print(f"  skip  {username} (already exists)")
+                skipped += 1
+                continue
+            payload_cls = AdminCreate if role == "admin" else RegularUserCreate
+            repo.create(
+                payload_cls(
+                    username=username,
+                    email=email,
+                    password=encrypt_password(password),
+                    role=role,
+                )
+            )
+            print(f"  create {username} ({role})")
+            created += 1
+
+    print(f"Seed done — created {created}, skipped {skipped}.")
+    print("Login with bob/bobpass or admin/adminpass")
+
+
+def cmd_run(args: argparse.Namespace) -> None:
+    """Start the FastAPI app with Uvicorn."""
+    settings = get_settings()
+    bind_host = args.host or settings.app_host
+    bind_port = args.port or settings.app_port
+    if args.reload is None:
+        use_reload = settings.env.lower() != "production"
+    else:
+        use_reload = args.reload
+    print(f"Starting FastMVC on http://{bind_host}:{bind_port} (reload={use_reload})")
+    uvicorn.run(
+        "app.main:app",
+        host=bind_host,
+        port=bind_port,
+        reload=use_reload,
+    )
+
+
+def cmd_users(args: argparse.Namespace) -> None:
+    """List users currently in the database."""
+    _ensure_models_loaded()
+    with get_cli_session() as session:
+        users = session.exec(select(User)).all()
+        if not users:
+            print("No users found. Run: python manage.py seed")
+            return
+        for user in users:
+            print(
+                f"  id={user.id}  username={user.username}  "
+                f"role={user.role}  email={user.email}"
+            )
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(
+        prog="python manage.py",
+        description="FastMVC Python CLI — init database, seed demo data, run the app.",
+    )
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    p_init = sub.add_parser("init", help="Create DB tables (drops existing by default)")
+    p_init.add_argument(
+        "--no-drop",
+        dest="drop",
+        action="store_false",
+        help="Create tables without dropping existing ones",
+    )
+    p_init.add_argument(
+        "--seed",
+        action="store_true",
+        help="Load demo seed data after creating tables",
+    )
+    p_init.set_defaults(drop=True, func=cmd_init)
+
+    p_seed = sub.add_parser("seed", help="Insert demo users (idempotent)")
+    p_seed.set_defaults(func=cmd_seed)
+
+    p_run = sub.add_parser("run", help="Start the web app (uvicorn)")
+    p_run.add_argument("--host", default=None, help="Bind host")
+    p_run.add_argument("--port", type=int, default=None, help="Bind port")
+    reload_group = p_run.add_mutually_exclusive_group()
+    reload_group.add_argument(
+        "--reload", dest="reload", action="store_true", default=None, help="Enable auto-reload"
+    )
+    reload_group.add_argument(
+        "--no-reload", dest="reload", action="store_false", help="Disable auto-reload"
+    )
+    p_run.set_defaults(func=cmd_run, reload=None)
+
+    p_users = sub.add_parser("users", help="List users in the database")
+    p_users.set_defaults(func=cmd_users)
+
+    return parser
+
+
+def main(argv: list[str] | None = None) -> None:
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    args.func(args)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
