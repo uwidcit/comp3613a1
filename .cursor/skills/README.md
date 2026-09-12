@@ -69,7 +69,7 @@ Skills under `.cursor/skills/` are **already included** when you clone or fork t
 
 ### If skills are missing (older fork / incomplete copy)
 
-Copy from a fresh FastMVC clone into your project root and commit:
+Copy from a fresh [comp3613a1](https://github.com/uwidcit/comp3613a1) clone into your project root and commit:
 
 ```text
 .cursor/skills/buildmine-guide/

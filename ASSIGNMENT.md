@@ -1,14 +1,14 @@
 # COMP 3613 Assignment 1 — 15%
 
-**Individual** · this file lives in the FastMVC starter repo.
+**Individual** · this file lives in the [comp3613a1](https://github.com/uwidcit/comp3613a1) starter repo.
 
-Student-facing Google Doc: https://docs.google.com/document/d/1BsA_FDDpX-SsZL2AzKtdvQpMPU5Dri6gklLgx4atbxc/edit
+Student-facing Google Doc: https://docs.google.com/document/d/1tU3O4W8vgmvcibbNXTURZa8UYcr0eiZy4NbklFnQRFg/edit
 
 ## Description
 
 In this assignment you will interpret a **brief problem description**, decide what an MVP needs, identify **three main workflows**, model a solution, design a usable interface, and implement a working web application.
 
-Build with **this** FastMVC template and develop with **Cursor**, **GitHub Copilot** (agent mode), or **OpenCode**, using the Buildmine Guide skill. Your process (not only the final code) will be assessed.
+Build with **this** starter ([comp3613a1](https://github.com/uwidcit/comp3613a1), FastMVC) and develop with **Cursor**, **GitHub Copilot** (agent mode), or **OpenCode**, using the Buildmine Guide skill. Your process (not only the final code) will be assessed.
 
 You will also submit a **5-minute unlisted YouTube** presentation: selected project, your features, and a demo of the main workflows only.
 
@@ -53,6 +53,9 @@ Students gain hours by volunteering, appear on a leaderboard, unlock milestones,
 ### 6. Student Accommodation
 
 An Airbnb-like marketplace for finding nearby student accommodation: trusted listings, reviews, and tenant / booking management.
+
+### 7. Research App
+Platform for authors to share their research work and explore others  
 
 You may add minimal supporting behaviour (login, roles, seed data, navigation) required to make the three MVP workflows usable. Do **not** invent a second product. Depth on three solid workflows beats a shallow feature dump.
 

@@ -1,6 +1,6 @@
-# FastMVC
+# comp3613a1
 
-Coursework starter ([uwidcit/FastMVC](https://github.com/uwidcit/FastMVC)).
+COMP 3613 Assignment 1 starter ([uwidcit/comp3613a1](https://github.com/uwidcit/comp3613a1)). Built on FastMVC (FastAPI MVC).
 
 **Assignment brief, agents, and GitHub Education link:** [ASSIGNMENT.md](ASSIGNMENT.md)
 
@@ -30,8 +30,8 @@ All project commands are a **Python CLI** (`manage.py`). There are no shell setu
 ### 1. Clone
 
 ```bash
-git clone https://github.com/uwidcit/FastMVC.git
-cd FastMVC
+git clone https://github.com/uwidcit/comp3613a1.git
+cd comp3613a1
 ```
 
 ### 2. Virtual environment and install dependencies
@@ -265,7 +265,7 @@ In this template, business rules often sit in a **service** layer, with reposito
 ## App structure
 
 ```text
-FastMVC
+comp3613a1
 |-- .agents/skills/           # Guide + Judge (Cursor, Copilot, OpenCode)
 |-- .cursor/skills/          # same skills (older Cursor)
 |-- .github/copilot-instructions.md
