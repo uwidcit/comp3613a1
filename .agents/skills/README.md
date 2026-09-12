@@ -45,7 +45,7 @@ When you change a skill, update **both** `.agents/skills/` and `.cursor/skills/`
 
 Use **student-build**. One phase per chat. Ask the question cap (at most 6; do not ask zero). The student picks the project in Phase 1. Write the artefact, pause, and tell them to open a new chat for the next phase. The student may **skip** up to 3 needless questions. A skip cannot assign the project or replace a workflow. Report `Skips: n/3 used`.
 
-1. Select the project and name **three** workflows.
+1. Select the project and name **at least three** workflows. More is allowed.
 2. Agent drafts the use-case diagram from that prompt.
 3. Agent drafts the model diagram from that prompt. It assumes entities and properties.
 4. Wait for student-crafted wireframe images in `docs/wireframes/`. That is the only drawing the student must do. No code until every use case is covered. Do not send them back to redraw for a tweak.
@@ -53,4 +53,4 @@ Use **student-build**. One phase per chat. Ask the question cap (at most 6; do n
 
 Judge turns conversation confidence into the impression mark: `round(confidence × 10)` out of 10.
 
-Export the report with `python manage.py report --name "..." --id "..."`.
+Export the report with `python manage.py report --name "..." --id "..."`. That command hashes the course skills against `.agents/skills.lock.json` and stamps the result on the PDF. Do not edit the skills or the lock. Course authors refresh the lock with `FASTMVC_SKILLS_LOCK=1 python manage.py skills-lock`.

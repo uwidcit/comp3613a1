@@ -129,7 +129,8 @@ Commands are implemented in `app/cli.py` (stdlib `argparse`) and invoked via `ma
 | `python manage.py seed` | Insert demo users |
 | `python manage.py run` | Start Uvicorn (reload unless `ENV=production`) |
 | `python manage.py users` | Print users in the DB |
-| `python manage.py report --name "..." --id "..."` | Export `docs/report.md` to `docs/report.pdf` (cover has name, ID, deployed app link, and logins) |
+| `python manage.py report --name "..." --id "..."` | Export `docs/report.md` to `docs/report.pdf` (cover has name, ID, deployed app link, logins, and skill-integrity hash). Fails if course skills were edited |
+| `python manage.py skills-verify` | Check course skills against `.agents/skills.lock.json` |
 | `python manage.py --help` | Show all commands |
 
 Typical reset-and-start:

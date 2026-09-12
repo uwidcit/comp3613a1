@@ -76,6 +76,8 @@ note: …
 
 Parse every such block in the transcript. They are primary evidence for M10–M12.
 
+Also read `docs/report.md` for `<!-- student-build:skill-integrity`. A `fail` status, a rewritten lock, or edited files under `.agents/skills/` / `.cursor/skills/` / `AGENTS.md` is **Edited skills**. Cap **M10** at **1**. Markers re-check with `python manage.py skills-verify`.
+
 ### Red flags (raise M10/M11 concerns; usually cap M3/M7 ≤ 2)
 
 | Signal | Example |
@@ -89,6 +91,7 @@ Parse every such block in the transcript. They are primary evidence for M10–M1
 | **Edited export** | Student-supplied transcript missing Guide pushback turns that native logs would keep |
 | **Suspicion spiral** | Multiple sincerity blocks with rising `round` / low confidence; student abandons mid-spiral |
 | **Spiral break without ownership** | Code applied (or Guide somehow continued) while confidence still low — treat as integrity failure |
+| **Edited skills** | Skill files or `.agents/skills.lock.json` changed; report `skill-integrity` is `fail` or missing after export |
 
 ### Using sincerity logs
 
@@ -164,7 +167,7 @@ Skills cannot stop a determined student from using another model offline. Guide�
 - One concrete exercise tied to the weakest metric (not “try harder”).
 
 ## Integrity note
-- Clean | Suspected external assist / paste-back | Cleared after suspicion spiral | Concerns: …
+- Clean | Suspected external assist / paste-back | Cleared after suspicion spiral | Edited skills | Concerns: …
 ## Provenance flags
 - None | List red flags with turn references
 ## Sincerity log summary

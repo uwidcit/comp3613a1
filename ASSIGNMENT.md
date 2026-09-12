@@ -6,7 +6,7 @@ Student-facing Google Doc: https://docs.google.com/document/d/15tCfviVZO9vnqT7wv
 
 ## Description
 
-In this assignment you will interpret a **brief problem description**, decide what an MVP needs, identify **three main workflows**, model a solution, design a usable interface, and implement a working web application.
+In this assignment you will interpret a **brief problem description**, decide what an MVP needs, identify **at least three** main workflows, model a solution, design a usable interface, and implement a working web application.
 
 Build with **this** starter ([comp3613a1](https://github.com/uwidcit/comp3613a1), FastMVC) and develop with **Cursor**, **GitHub Copilot** (agent mode), or **OpenCode**, using the Buildmine Guide skill. Your process (not only the final code) will be assessed.
 
@@ -19,9 +19,9 @@ Install, app commands, the Guide start prompt, and Render deploy steps are in [R
 ## Learning outcomes
 
 1. Produce a reasonably in-depth interpretation of a short problem brief (actors, goals, assumptions, edge cases, MVP scope).
-2. Derive **exactly three** important MVP workflows from that brief (not a laundry list of extras).
-3. Model entities and relationships that support those three workflows.
-4. Design wireframes for the three workflows and implement them as a usable UI on FastMVC.
+2. Derive **at least three** important MVP workflows from that brief (three is the minimum, not a cap — not a laundry list of extras).
+3. Model entities and relationships that support those workflows.
+4. Design wireframes for those workflows and implement them as a usable UI on FastMVC.
 5. Deploy the application and a Postgres database on Render.
 6. Work with an LLM as a coach under Guide rules — you own decisions, verification, and explanations. Judge converts conversation confidence into the impression mark.
 7. Demo the main workflows in a short video without wasting time on an empty app, signup, login, or basic CRUD.
@@ -57,15 +57,15 @@ An Airbnb-like marketplace for finding nearby student accommodation: trusted lis
 ### 7. Research App
 Platform for authors to share their research work and explore others  
 
-You may add minimal supporting behaviour (login, roles, seed data, navigation) required to make the three MVP workflows usable. Do **not** invent a second product. Depth on three solid workflows beats a shallow feature dump.
+You may add minimal supporting behaviour (login, roles, seed data, navigation) required to make the MVP workflows usable. Do **not** invent a second product. Depth on solid workflows beats a shallow feature dump. Three workflows is the minimum; more is allowed.
 
 ## How you build (phases)
 
-The brief does **not** list features for you. Work in this order. Use the **student-build** skill. **One phase per chat.** When a phase is done, the agent writes an artefact you can open, then stops. Start the next phase in a **new chat**. It asks a few questions based on how complete your prompt is, at most six, then writes the artefact. It will not pick your project for you. A pasted answer that looks like another chatbot’s will not stay inside that cap. If a question is too arduous or needless, say **skip**. You have **3 skips**. A skip does not replace your three workflows or your wireframes. **No app code before Phase 5.**
+The brief does **not** list features for you. Work in this order. Use the **student-build** skill. **One phase per chat.** When a phase is done, the agent writes an artefact you can open, then stops. Start the next phase in a **new chat**. It asks a few questions based on how complete your prompt is, at most six, then writes the artefact. It will not pick your project for you. A pasted answer that looks like another chatbot’s will not stay inside that cap. If a question is too arduous or needless, say **skip**. You have **3 skips**. A skip does not replace your workflows or your wireframes. **No app code before Phase 5.**
 
-### Phase 1 — Select the project and name three workflows
+### Phase 1 — Select the project and name at least three workflows
 
-You pick the assigned project. The agent does not. Name **exactly three** workflows. For each: who acts, the step sequence, and what “done” looks like. If you have not said those yet, it will ask. It will not invent them.
+You pick the assigned project. The agent does not. Name **at least three** workflows. Three is the minimum; more is allowed. For each: who acts, the step sequence, and what “done” looks like. If you have not said those yet, it will ask. It will not invent them, and it will not refuse extras you named.
 
 ### Phase 2 — Use-case diagram (agent drafts)
 
@@ -77,15 +77,15 @@ The agent drafts the first Mermaid model from that same prompt. You do not list 
 
 ### Phase 4 — Wireframes (you, outside the agent)
 
-This is the only artifact you must draw. Draw wireframes for the **three workflows only**, outside the agent (paper, Figma, Excalidraw, draw.io, and so on). Export **PNG or JPG** and put the images in `docs/wireframes/`. The agent waits. **You cannot start Phase 5 until every use case has a wireframe image in the workspace.** Later tweaks do not mean a new wireframe.
+This is the only artifact you must draw. Draw wireframes for **your named workflows only**, outside the agent (paper, Figma, Excalidraw, draw.io, and so on). Export **PNG or JPG** and put the images in `docs/wireframes/`. The agent waits. **You cannot start Phase 5 until every use case has a wireframe image in the workspace.** Later tweaks do not mean a new wireframe.
 
 ### Phase 5 — Theming, then implement and deploy
 
 State theming and branding preferences (colors, type, tone, logo or wordmark). Then the agent implements from the current model and the imported wireframes, one workflow at a time. If a detail is fleshed out in code, the agent updates the model. It will not send you back to redraw the wireframe. Verify each workflow locally.
 
-When the three workflows work locally, deploy **both** a Render Postgres database and the web service with the **Render MCP**. Steps are in [README.md](README.md). Put the public URL in the report. A local-only app cannot earn full implementation marks.
+When all named workflows work locally (at least three), deploy **both** a Render Postgres database and the web service with the **Render MCP**. Steps are in [README.md](README.md). Put the public URL in the report. A local-only app cannot earn full implementation marks.
 
-Markers will exercise **your** three named workflows on the deployed app. If a named workflow cannot be completed, you lose marks for that area.
+Markers will exercise **your** named workflows on the deployed app. If a named workflow cannot be completed, you lose marks for that area.
 
 ## Report
 
@@ -95,7 +95,9 @@ Draft the report **with** the agent as Markdown (`docs/report.md`). Diagrams in 
 python manage.py report --name "Your Name" --id "816000000"
 ```
 
-That writes `docs/report.pdf`. The export fails if the deployed link or the logins are missing. Submit that PDF. The YouTube video must show your name and must **not** show or say your student ID. App logins belong in the report. Database passwords do not.
+That writes `docs/report.pdf`. The export fails if the deployed link or the logins are missing, or if the course skills were edited. Submit that PDF. The YouTube video must show your name and must **not** show or say your student ID. App logins belong in the report. Database passwords do not.
+
+Do **not** edit `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`. Export hashes those files and stamps the result on the PDF cover. A mismatch is an integrity fail. Markers re-check with `python manage.py skills-verify`.
 
 Deploy, install, and the Guide start prompt: [README.md](README.md).
 
@@ -154,17 +156,17 @@ App commands and the Guide start prompt are in [README.md](README.md). One slice
 
 ## Deliverables
 
-### A. Interpretation and three workflows (PDF)
+### A. Interpretation and workflows (PDF)
 
-Actors, primary job, assumptions, out-of-scope items, edge cases, and **exactly three** named workflows with step sequences.
+Actors, primary job, assumptions, out-of-scope items, edge cases, and **at least three** named workflows with step sequences.
 
 ### B. Modelling and design (PDF)
 
-Mermaid use-case diagram, Mermaid model diagram (including revisions from implementation), and the wireframe images for those three workflows.
+Mermaid use-case diagram, Mermaid model diagram (including revisions from implementation), and the wireframe images for those workflows.
 
 ### C. Implementation and deployment (GitHub + Render)
 
-FastMVC web UI (not CLI-only), models matching the current diagram, all three workflows usable end-to-end, seed data. Wireframe images in `docs/wireframes/`. A Render Postgres database and a public web service, URL in the PDF.
+FastMVC web UI (not CLI-only), models matching the current diagram, all named workflows usable end-to-end, seed data. Wireframe images in `docs/wireframes/`. A Render Postgres database and a public web service, URL in the PDF.
 
 ### D. Impression evidence (PDF)
 
@@ -179,8 +181,8 @@ Publish **one unlisted** YouTube video, **at most 5 minutes**, and put the **vid
 Structure the video as:
 
 1. **Selected project** — which brief you were assigned, in one or two sentences
-2. **Features** — name your three workflows and who each is for
-3. **Demo** — walk those three workflows only
+2. **Features** — name your workflows (at least three) and who each is for
+3. **Demo** — walk those named workflows only
 
 **Demo rules (markers will stop watching filler):**
 
@@ -188,7 +190,7 @@ Structure the video as:
 - Do **not** show signup.
 - Do **not** show login. Have **multiple browsers** (or browser profiles) **already logged in as different users** before you hit record. Switch windows when the workflow changes role.
 - Do **not** spend the demo filling forms and walking basic create/read/update/delete. If a form is required to finish a workflow, show only the one submit that matters — not a tour of every field.
-- Demo **only** your three workflows, in a sensible order, through to the outcome (approval, match, milestone, booking, and so on — whatever “done” is for that workflow).
+- Demo **only** your named workflows, in a sensible order, through to the outcome (approval, match, milestone, booking, and so on — whatever “done” is for that workflow).
 
 If the video is longer than 5 minutes, only the first 5 minutes are marked. A missing or private (not unlisted/public) link scores 0 for the presentation.
 
@@ -198,10 +200,10 @@ One PDF via myeLearning, plus the unlisted YouTube link **inside that PDF**:
 
 1. Cover page — Name, ID, **deployed app link**, **user logins** (username / password / role), GitHub, YouTube URL, agent used, account email
 2. Problem interpretation
-3. The three workflows
+3. The named workflows (at least three)
 4. Use case diagram (Mermaid)
 5. Model diagram (Mermaid; note revisions)
-6. Wireframe images for the three workflows
+6. Wireframe images for the named workflows
 7. Implementation and deployment notes (public URL, what is seeded)
 8. Judge impression block (confidence and mark out of 10)
 
@@ -212,12 +214,12 @@ The PDF may include your student ID on the cover page. The **video must not**.
 | Feature | Description | Marks |
 | --- | --- | --- |
 | Problem interpretation | In-depth reading of the brief; clear MVP boundary | 10 |
-| Three workflows | Exactly three; concrete, role-aware, drive model and UI | 10 |
-| Use case diagram | Mermaid; actors and use cases for the three workflows | 10 |
+| Workflows | At least three; concrete, role-aware, drive model and UI | 10 |
+| Use case diagram | Mermaid; actors and use cases for the named workflows | 10 |
 | Model diagram | Mermaid; first draft revised as the features are built | 10 |
-| UI design | External wireframes for the three workflows; every use case covered | 10 |
-| Implementation and deployment | FastMVC; three workflows end-to-end; seed data; Render Postgres and public web URL | 30 |
-| Presentation | 5-min unlisted YouTube: project, features, demo of the three workflows only; name shown, no student ID; link in the report | 10 |
+| UI design | External wireframes for the named workflows; every use case covered | 10 |
+| Implementation and deployment | FastMVC; named workflows end-to-end; seed data; Render Postgres and public web URL | 30 |
+| Presentation | 5-min unlisted YouTube: project, features, demo of the named workflows only; name shown, no student ID; link in the report | 10 |
 | Impression | Judge confidence on the conversation, converted to a mark out of 10 | 10 |
 | **Total** |  | **100** |
 
@@ -235,7 +237,8 @@ Example: confidence 0.74 → 7/10. No transcript, or a web-chatbot-only session,
 
 - Individual work. FastMVC boilerplate may be used and cited.
 - LLMs only under Guide in Cursor, Copilot Agent, or OpenCode.
-- Prefer three deep workflows over many shallow ones.
+- Prefer deep workflows over many shallow ones. Three is the minimum; more is allowed.
 - Use-case and model diagrams are Mermaid in `docs/report.md`. Wireframes are images you make elsewhere and drop into `docs/wireframes/`.
+- Do not edit the course skills or the skill lockfile. Report export checks their hashes.
 - Only `main` is graded unless stated otherwise.
 - Video must be **unlisted** (or public). Unlisted is preferred. Do not submit a private video or a Drive file instead of YouTube.

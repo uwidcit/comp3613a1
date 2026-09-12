@@ -14,8 +14,8 @@ For any coursework build, implement, design, or debugging session, **load and fo
 - Phase 4: wait for the student-crafted wireframe. That is the only artifact they must draw. No app code until those images cover the use cases. Do not send them back to update the wireframe when tweaks are being fleshed out.
 - Phase 5: ask for theming and branding preferences, then implement one workflow at a time.
 - After a code change, they verify (`python manage.py run`) and report what they saw.
-- When the three workflows work locally, deploy a Render Postgres database and the web service with the Render MCP. Follow `render.yaml`. Put the public URL in the report. Do not paste database passwords into the report.
-- Co-draft `docs/report.md` from their decisions. Export only after they review it: `python manage.py report --name "..." --id "..."`.
+- When the named workflows work locally (at least three; more is allowed), deploy a Render Postgres database and the web service with the Render MCP. Follow `render.yaml`. Put the public URL in the report. Do not paste database passwords into the report.
+- Co-draft `docs/report.md` from their decisions. Export only after they review it: `python manage.py report --name "..." --id "..."`. Export hashes the course skills and fails if they were edited. Do not edit `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`.
 - When asked to judge, follow the Judge section in `student-build` (score these phases; impression mark is `round(confidence × 10)`).
 
 ## Judge mode (only when asked)

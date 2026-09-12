@@ -10,6 +10,8 @@ from pathlib import Path
 
 from fpdf import FPDF
 
+from app.skill_integrity import IntegrityResult, require_clean, stamp_markdown
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REPORT = REPO_ROOT / "docs" / "report.md"
 DEFAULT_PDF = REPO_ROOT / "docs" / "report.pdf"
@@ -50,12 +52,14 @@ def export_report(
     if not clean_name or not clean_id:
         raise SystemExit("Report export needs both --name and --id.")
 
-    markdown = src.read_text(encoding="utf-8")
+    integrity = require_clean()
+    markdown = stamp_markdown(src.read_text(encoding="utf-8"), integrity)
+    src.write_text(markdown, encoding="utf-8")
     app_url, logins = _require_marker_access(markdown)
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     pdf = _new_pdf()
-    _cover(pdf, clean_name, clean_id, app_url, logins)
+    _cover(pdf, clean_name, clean_id, app_url, logins, integrity)
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         _body(pdf, markdown, src.parent, Path(tmp))
     pdf.output(dest)
@@ -97,6 +101,7 @@ def _cover(
     student_id: str,
     app_url: str,
     logins: str,
+    integrity: IntegrityResult,
 ) -> None:
     pdf.add_page()
     _write(pdf, "COMP 3613 Assignment 1", 20, bold=True, line=12)
@@ -116,6 +121,10 @@ def _cover(
     for line in logins.splitlines():
         if line.strip():
             _write(pdf, line.strip(), 11, line=6)
+    pdf.ln(4)
+    _write(pdf, "Skill integrity", 12, bold=True)
+    _write(pdf, integrity.status.upper(), 12)
+    _write(pdf, f"Root {integrity.root}", 9, line=5)
     pdf.ln(4)
     _write(
         pdf,

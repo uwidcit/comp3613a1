@@ -50,3 +50,7 @@ Every account a marker needs, including extra users you added. Starter accounts:
 - admin / adminpass — admin
 
 ## YouTube URL
+
+## Skill integrity
+
+Filled by `python manage.py report`. Do not edit the course skills.

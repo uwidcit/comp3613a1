@@ -1,0 +1,18 @@
+{
+  "algorithm": "sha256",
+  "normalization": "utf-8-lf",
+  "root": "2d8cebb8f628c5eabb715254a13c62b4f3f4ca0739438bec880f560849e8ba6c",
+  "files": {
+    ".agents/skills/README.md": "7ff33e42a89212a2cd961a71cb23299d12cd7b8dfd6b631cf08cdba14675037d",
+    ".agents/skills/student-build/SKILL.md": "eb229d4e9b11e49adea999651795c629b30e8999edee4ab1752c59d79341e7a7",
+    ".agents/skills/student-build/framework-phases.md": "bd5aebb4d7b4b1dfcaf5ee25f51dfda177f0dd869915afe440324f3da10d6f0e",
+    ".agents/skills/student-judge/SKILL.md": "2e3c0d09fa9c841b1879e3b26dd3859d959856251ae63bc04deb65fc78a38828",
+    ".agents/skills/student-judge/framework-phases.md": "611df10f921c4b26a26d9d2774612aad7a1207f7676a0ecd665adc475da160d0",
+    ".cursor/skills/README.md": "554ae25d081dcbc8b2acbb4e248f84fedc2bed53da977a41e2b951b12a47b083",
+    ".cursor/skills/student-build/SKILL.md": "eb229d4e9b11e49adea999651795c629b30e8999edee4ab1752c59d79341e7a7",
+    ".cursor/skills/student-build/framework-phases.md": "bd5aebb4d7b4b1dfcaf5ee25f51dfda177f0dd869915afe440324f3da10d6f0e",
+    ".cursor/skills/student-judge/SKILL.md": "2e3c0d09fa9c841b1879e3b26dd3859d959856251ae63bc04deb65fc78a38828",
+    ".cursor/skills/student-judge/framework-phases.md": "611df10f921c4b26a26d9d2774612aad7a1207f7676a0ecd665adc475da160d0",
+    "AGENTS.md": "00b132dcfdef62caff7a1544fb46343672b0ed95a389501c7da220847edba225"
+  }
+}

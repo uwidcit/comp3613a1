@@ -8,8 +8,8 @@ The student drives the next phase with one complete prompt. Draft the use-case d
 
 | Phase | What the student does | Exit gate |
 |-------|------------------------|-----------|
-| **1** | Student picks the assigned project and names exactly three workflows (who, steps, done). Agent asks; it does not choose. | Those four lines are in the student’s words. No code. |
-| **2** | Prompt already given (the three workflows). | Agent drafts the Mermaid use-case diagram in `docs/report.md`. No fill-in form. No code. |
+| **1** | Student picks the assigned project and names **at least three** workflows (who, steps, done). Three is the minimum, not a cap. Agent asks; it does not choose or invent. | Project plus those workflow lines are in the student’s words. No code. |
+| **2** | Prompt already given (the named workflows). | Agent drafts the Mermaid use-case diagram in `docs/report.md`. No fill-in form. No code. |
 | **3** | Same prompt. | Agent drafts the first-draft Mermaid `erDiagram`. Assumes entities and properties. No code. |
 | **4** | Student crafts wireframe images in `docs/wireframes/`. | Agent waits. This is the only artifact the student must draw. No code until every use case has an image. |
 | **5** | State theming and branding preferences. Then implement. | Build from the model and wireframes. Tweaks update the model and the code, not the wireframe. Deploy after local verification. |
@@ -20,13 +20,13 @@ One question cap. Do not split clarifying and follow-ups. Ask that many so base 
 
 A laundering flag (paste-back, assistant voice, “just apply this”) leaves the cap. Follow-ups then grow exponentially while suspicion holds: **2, then 4, then 8, then 16**. Log a `student-judge:sincerity` block each round. Do not write the artefact from the paste.
 
-Phase 1: the student picks the assigned project and names the three workflows. Never pick the project for them. Never invent the workflows to finish the phase. If the project is unnamed, that is the first question. Wait.
+Phase 1: the student picks the assigned project and names at least three workflows. More is allowed. Never pick the project for them. Never invent the workflows to finish the phase, and never refuse extras they named. If the project is unnamed, that is the first question. Wait.
 
 This chat is one phase. Write the artefact, show the pause block (phase, artefact path, confidence, questions used/cap, suspicion, skips), and tell them to open a **new chat** for the next phase. Do not start it here.
 
 | Phase | Artefact the student can open |
 |-------|--------------------------------|
-| 1 | `docs/report.md` — three workflows |
+| 1 | `docs/report.md` — at least three workflows |
 | 2 | `docs/report.md` — use-case diagram |
 | 3 | `docs/report.md` — model diagram |
 | 4 | `docs/wireframes/` plus coverage notes in `docs/report.md` |
@@ -50,12 +50,12 @@ covered: yes|no
 
 ## Phase 5
 
-Ask only for theming and branding preferences. Then implement one workflow at a time from the model and the wireframes. Do not re-ask layout, fields, or flows the images already show. Do not send the student to update the wireframe when tweaks are being fleshed out. Deploy with the Render MCP after the three workflows work locally (`README.md`, `render.yaml`).
+Ask only for theming and branding preferences. Then implement one workflow at a time from the model and the wireframes. Do not re-ask layout, fields, or flows the images already show. Do not send the student to update the wireframe when tweaks are being fleshed out. Deploy with the Render MCP after all named workflows work locally (`README.md`, `render.yaml`).
 
 ## Anti-patterns
 
 - Asking zero questions, or picking the assigned project for the student
-- Inventing the three Phase 1 workflows so the phase can finish
+- Inventing the Phase 1 workflows so the phase can finish, or capping them at three when the student named more
 - Fine-grained questions past the confidence cap
 - Treating a skip as cheating, or allowing a 4th skip
 - Asking the student to list actors, use cases, entities, or properties the prompt already implies
@@ -64,3 +64,4 @@ Ask only for theming and branding preferences. Then implement one workflow at a 
 - Agent-drawn wireframes
 - Starting the next phase in the same chat
 - Using generic Buildmine phases 0–5 for this assignment
+- Editing `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`

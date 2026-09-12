@@ -8,6 +8,7 @@ From the project root (venv active, deps installed, ``.env`` present):
     python manage.py run
     python manage.py users
     python manage.py report --name "Student Name" --id "816000000"
+    python manage.py skills-verify
 """
 
 from __future__ import annotations
@@ -16,16 +17,6 @@ import argparse
 import sys
 from pathlib import Path
 
-import uvicorn
-from sqlmodel import select
-
-from app.config import get_settings
-from app.database import create_db_and_tables, drop_all, get_cli_session
-from app.models.user import User
-from app.repositories.user import UserRepository
-from app.schemas.user import AdminCreate, RegularUserCreate
-from app.utilities.security import encrypt_password
-
 
 def _ensure_models_loaded() -> None:
     import app.models  # noqa: F401
@@ -33,6 +24,9 @@ def _ensure_models_loaded() -> None:
 
 def cmd_init(args: argparse.Namespace) -> None:
     """Create database tables (drops existing tables by default)."""
+    from app.config import get_settings
+    from app.database import create_db_and_tables, drop_all
+
     _ensure_models_loaded()
     if args.drop:
         print("Dropping all tables…")
@@ -50,6 +44,11 @@ def cmd_seed(args: argparse.Namespace) -> None:
     bob / bobpass       (regular_user)
     admin / adminpass   (admin)
     """
+    from app.database import create_db_and_tables, get_cli_session
+    from app.repositories.user import UserRepository
+    from app.schemas.user import AdminCreate, RegularUserCreate
+    from app.utilities.security import encrypt_password
+
     _ensure_models_loaded()
     create_db_and_tables()
 
@@ -85,6 +84,10 @@ def cmd_seed(args: argparse.Namespace) -> None:
 
 def cmd_run(args: argparse.Namespace) -> None:
     """Start the FastAPI app with Uvicorn."""
+    import uvicorn
+
+    from app.config import get_settings
+
     settings = get_settings()
     bind_host = args.host or settings.app_host
     bind_port = args.port or settings.app_port
@@ -104,6 +107,7 @@ def cmd_run(args: argparse.Namespace) -> None:
 def cmd_report(args: argparse.Namespace) -> None:
     """Export docs/report.md to PDF with the student name and ID on the cover."""
     from app.report_pdf import export_report
+    from app.skill_integrity import format_report, verify
 
     export_report(
         name=args.name,
@@ -111,10 +115,34 @@ def cmd_report(args: argparse.Namespace) -> None:
         source=None if args.src is None else Path(args.src),
         output=None if args.output is None else Path(args.output),
     )
+    print(format_report(verify()))
+
+
+def cmd_skills_verify(args: argparse.Namespace) -> None:
+    """Check course skill files against .agents/skills.lock.json."""
+    from app.skill_integrity import format_report, verify
+
+    result = verify()
+    print(format_report(result))
+    if not result.ok:
+        raise SystemExit(1)
+
+
+def cmd_skills_lock(args: argparse.Namespace) -> None:
+    """Rewrite the skill lockfile (course authors only)."""
+    from app.skill_integrity import write_lock
+
+    dest = write_lock()
+    print(f"Wrote {dest}")
 
 
 def cmd_users(args: argparse.Namespace) -> None:
     """List users currently in the database."""
+    from sqlmodel import select
+
+    from app.database import get_cli_session
+    from app.models.user import User
+
     _ensure_models_loaded()
     with get_cli_session() as session:
         users = session.exec(select(User)).all()
@@ -176,6 +204,18 @@ def build_parser() -> argparse.ArgumentParser:
     p_report.add_argument("--src", default=None, help="Markdown path (default: docs/report.md)")
     p_report.add_argument("--output", default=None, help="PDF path (default: docs/report.pdf)")
     p_report.set_defaults(func=cmd_report)
+
+    p_skills_verify = sub.add_parser(
+        "skills-verify",
+        help="Check course skills against .agents/skills.lock.json",
+    )
+    p_skills_verify.set_defaults(func=cmd_skills_verify)
+
+    p_skills_lock = sub.add_parser(
+        "skills-lock",
+        help="Rewrite .agents/skills.lock.json (course authors; needs FASTMVC_SKILLS_LOCK=1)",
+    )
+    p_skills_lock.set_defaults(func=cmd_skills_lock)
 
     return parser
 
