@@ -61,11 +61,11 @@ You may add minimal supporting behaviour (login, roles, seed data, navigation) r
 
 ## How you build (phases)
 
-The brief does **not** list features for you. Work in this order. Use the **student-build** skill. **One phase per chat.** When a phase is done, the agent writes an artefact you can open, then stops. Start the next phase in a **new chat**. It may still ask one clarifying question to fill a gap, even if your prompt is clear. Extra follow-ups stay capped. If a question is too arduous or needless, say **skip**. You have **3 skips**. A skip does not replace your three workflows or your wireframes. **No app code before Phase 5.**
+The brief does **not** list features for you. Work in this order. Use the **student-build** skill. **One phase per chat.** When a phase is done, the agent writes an artefact you can open, then stops. Start the next phase in a **new chat**. It asks a few questions based on how complete your prompt is, at most six, then writes the artefact. It will not pick your project for you. A pasted answer that looks like another chatbot’s will not stay inside that cap. If a question is too arduous or needless, say **skip**. You have **3 skips**. A skip does not replace your three workflows or your wireframes. **No app code before Phase 5.**
 
 ### Phase 1 — Select the project and name three workflows
 
-One prompt: assigned project, and **exactly three** workflows. For each: who acts, the step sequence, and what “done” looks like.
+You pick the assigned project. The agent does not. Name **exactly three** workflows. For each: who acts, the step sequence, and what “done” looks like. If you have not said those yet, it will ask. It will not invent them.
 
 ### Phase 2 — Use-case diagram (agent drafts)
 

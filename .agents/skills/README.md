@@ -43,7 +43,7 @@ When you change a skill, update **both** `.agents/skills/` and `.cursor/skills/`
 
 ## This assignment's phases
 
-Use **student-build**. One phase per chat. Follow-ups are capped by that phase’s base confidence. Write the artefact, pause, and tell them to open a new chat for the next phase. The student may **skip** up to 3 needless questions. Report `Skips: n/3 used`.
+Use **student-build**. One phase per chat. Ask the question cap (at most 6; do not ask zero). The student picks the project in Phase 1. Write the artefact, pause, and tell them to open a new chat for the next phase. The student may **skip** up to 3 needless questions. A skip cannot assign the project or replace a workflow. Report `Skips: n/3 used`.
 
 1. Select the project and name **three** workflows.
 2. Agent drafts the use-case diagram from that prompt.

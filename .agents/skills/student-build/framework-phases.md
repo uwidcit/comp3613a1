@@ -2,23 +2,27 @@
 
 This is the assignment framework. Do not use generic Buildmine phases 0–5. They are not in this repo.
 
-The student drives the next phase with one complete prompt. Draft the use-case diagram and the model diagram from that prompt. Only the wireframe is user crafted. Do not ask fine-grained questions when no confidence flags are raised. Make reasonable assumptions. The student may **skip** up to 3 needless questions. Report `Skips: n/3 used` after each skip and when judging.
+The student drives the next phase with one complete prompt. Draft the use-case diagram and the model diagram from that prompt. Only the wireframe is user crafted. Ask the question cap, then assume. Do not keep asking fine-grained questions past that cap unless suspicion is open. The student may **skip** up to 3 needless questions. Report `Skips: n/3 used` after each skip and when judging.
 
 ## Phases and exit gates
 
 | Phase | What the student does | Exit gate |
 |-------|------------------------|-----------|
-| **1** | One prompt: assigned project and exactly three workflows (who, steps, done). | Those four lines are filled. No code. |
+| **1** | Student picks the assigned project and names exactly three workflows (who, steps, done). Agent asks; it does not choose. | Those four lines are in the student’s words. No code. |
 | **2** | Prompt already given (the three workflows). | Agent drafts the Mermaid use-case diagram in `docs/report.md`. No fill-in form. No code. |
 | **3** | Same prompt. | Agent drafts the first-draft Mermaid `erDiagram`. Assumes entities and properties. No code. |
 | **4** | Student crafts wireframe images in `docs/wireframes/`. | Agent waits. This is the only artifact the student must draw. No code until every use case has an image. |
 | **5** | State theming and branding preferences. Then implement. | Build from the model and wireframes. Tweaks update the model and the code, not the wireframe. Deploy after local verification. |
 
-## Follow-up cap and pause
+## Question cap and pause
 
-A **clarifying question** fills one gap the artefact cannot be written without. A **follow-up** is extra probing after that. Do not conflate them. Zero is too low: even at 0.75+ allow **1** clarifying question and **1** follow-up. At 0.40–0.74 allow **2** clarifying and **1** follow-up. Below 0.40 allow **2** and **2**. A confidence flag caps confidence at 0.40. Do not ask past either cap.
+One question cap. Do not split clarifying and follow-ups. Ask that many so base confidence can get there. Never more than **6** on this path. An empty Phase 1 is below 0.40 and gets **6**. At 0.40–0.59 ask **5**. At 0.60–0.74 ask **4**. At 0.75–0.89 ask **3**. At 0.90–1.00 ask **2**. Do not ask zero. Do not ask past the cap unless suspicion is open.
 
-This chat is one phase. Write the artefact, show the pause block (phase, artefact path, confidence, clarifying used/cap, follow-ups used/cap, skips), and tell them to open a **new chat** for the next phase. Do not start it here.
+A laundering flag (paste-back, assistant voice, “just apply this”) leaves the cap. Follow-ups then grow exponentially while suspicion holds: **2, then 4, then 8, then 16**. Log a `student-judge:sincerity` block each round. Do not write the artefact from the paste.
+
+Phase 1: the student picks the assigned project and names the three workflows. Never pick the project for them. Never invent the workflows to finish the phase. If the project is unnamed, that is the first question. Wait.
+
+This chat is one phase. Write the artefact, show the pause block (phase, artefact path, confidence, questions used/cap, suspicion, skips), and tell them to open a **new chat** for the next phase. Do not start it here.
 
 | Phase | Artefact the student can open |
 |-------|--------------------------------|
@@ -50,7 +54,9 @@ Ask only for theming and branding preferences. Then implement one workflow at a 
 
 ## Anti-patterns
 
-- Fine-grained questions when no confidence flag is raised
+- Asking zero questions, or picking the assigned project for the student
+- Inventing the three Phase 1 workflows so the phase can finish
+- Fine-grained questions past the confidence cap
 - Treating a skip as cheating, or allowing a 4th skip
 - Asking the student to list actors, use cases, entities, or properties the prompt already implies
 - Sending the student to update the wireframe for an implementation tweak
