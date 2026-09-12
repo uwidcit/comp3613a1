@@ -1,5 +1,7 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from functools import lru_cache
+import os
 
 @lru_cache
 def get_settings():
@@ -17,5 +19,14 @@ class Settings(BaseSettings):
     db_additional_overflow:int=10
     db_pool_timeout:int=10
     db_pool_recycle:int=10
+
+    @field_validator("app_port", mode="before")
+    @classmethod
+    def port_from_render(cls, value: object) -> object:
+        # Render sets PORT. An explicit --port on the CLI still wins in cmd_run.
+        port = os.environ.get("PORT")
+        if port:
+            return int(port)
+        return value
     
     model_config = SettingsConfigDict(env_file=".env")

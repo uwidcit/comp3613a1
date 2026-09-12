@@ -129,6 +129,7 @@ Commands are implemented in `app/cli.py` (stdlib `argparse`) and invoked via `ma
 | `python manage.py seed` | Insert demo users |
 | `python manage.py run` | Start Uvicorn (reload unless `ENV=production`) |
 | `python manage.py users` | Print users in the DB |
+| `python manage.py report --name "..." --id "..."` | Export `docs/report.md` to `docs/report.pdf` (cover has name, ID, deployed app link, and logins) |
 | `python manage.py --help` | Show all commands |
 
 Typical reset-and-start:
@@ -139,6 +140,34 @@ python manage.py init --seed
 python manage.py run
 ```
 
+The app binds `0.0.0.0` and reads `PORT` when Render sets it. Locally it uses port 8000.
+
+---
+
+## Deploy (Render MCP)
+
+Deploy a **Postgres database** and the **web app** on Render’s free plan. Use the Render MCP from your agent (Cursor, Copilot, or OpenCode). Config lives in `render.yaml` and `.cursor/mcp.json`. Do not commit an API key. Do not put the **database** password in the report or the video. **App** usernames and passwords belong in `docs/report.md`.
+
+1. Push your repo to GitHub (Render clones the remote; it cannot deploy an unpushed folder).
+2. Create a free [Render](https://render.com) account. Open this project so `.cursor/mcp.json` loads the Render MCP (`https://mcp.render.com/mcp`). Sign in when prompted, or install the [Render plugin](https://render.com/docs/mcp-server) and complete OAuth.
+3. Ask the agent to deploy using the Render MCP, matching `render.yaml`:
+   - `create_postgres` — name `fastmvc-db`, plan `free`, region `oregon`, disk 1 GB
+   - `create_web_service` — runtime `python`, plan `free`, **same region**, repo and branch, build `pip install .`
+4. Set env vars on the web service (use the database **internal** connection string, not the external one):
+   - `DATABASE_URI` — internal Postgres URL
+   - `SECRET_KEY` — long random string
+   - `ENV` — `production`
+   - `PYTHON_VERSION` — `3.12.7`
+5. Start command (do not drop tables on each boot):
+
+```bash
+python manage.py init --no-drop && python manage.py seed && python manage.py run --host 0.0.0.0 --port $PORT
+```
+
+6. Confirm the deploy is live and `GET /health` succeeds. Put the public URL and the marker logins (username, password, role) in `docs/report.md`.
+
+Free web services sleep after inactivity. Free Postgres expires after 30 days. Do not also apply `render.yaml` in the Dashboard if the MCP already created these resources — that makes a second copy.
+
 ---
 
 ## Agents: Cursor, Copilot, or OpenCode
@@ -148,8 +177,9 @@ Pick **one** of these. All three load Guide and Judge from this repo. Web chatbo
 Start every build session with:
 
 ```text
-Use the buildmine-guide skill. Phase 0 — here is my problem brief.
-I will propose exactly 4 MVP features/workflows. Question me before coding.
+Use the buildmine-guide skill. I'm in Phase 1 for [assigned project].
+Here is the problem brief: …
+I will propose exactly 3 workflows. Question me before any diagrams or code.
 ```
 
 When finished: `Use the buildmine-judge skill on this session.`

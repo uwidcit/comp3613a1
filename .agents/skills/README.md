@@ -40,3 +40,15 @@ https://github.com/settings/education/benefits
 Web chat (chatgpt.com, claude.ai, gemini.google.com) does **not** load these files. That path is not allowed for the assignment.
 
 When you change a skill, update **both** `.agents/skills/` and `.cursor/skills/` so they stay the same.
+
+## This assignment's phases
+
+1. Select the project and name **three** workflows.
+2. Use cases and a Mermaid diagram in `docs/report.md`.
+3. First Mermaid model diagram (revise it later).
+4. Student wireframes exported into `docs/wireframes/`. The agent checks coverage. No code until every use case is covered.
+5. Implement from the model and wireframes until the three workflows work locally, then deploy Postgres and the web service with the Render MCP.
+
+Judge turns conversation confidence into the impression mark: `round(confidence × 10)` out of 10.
+
+Export the report with `python manage.py report --name "..." --id "..."`.

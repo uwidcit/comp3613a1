@@ -7,12 +7,14 @@ From the project root (venv active, deps installed, ``.env`` present):
     python manage.py seed
     python manage.py run
     python manage.py users
+    python manage.py report --name "Student Name" --id "816000000"
 """
 
 from __future__ import annotations
 
 import argparse
 import sys
+from pathlib import Path
 
 import uvicorn
 from sqlmodel import select
@@ -99,6 +101,18 @@ def cmd_run(args: argparse.Namespace) -> None:
     )
 
 
+def cmd_report(args: argparse.Namespace) -> None:
+    """Export docs/report.md to PDF with the student name and ID on the cover."""
+    from app.report_pdf import export_report
+
+    export_report(
+        name=args.name,
+        student_id=args.student_id,
+        source=None if args.src is None else Path(args.src),
+        output=None if args.output is None else Path(args.output),
+    )
+
+
 def cmd_users(args: argparse.Namespace) -> None:
     """List users currently in the database."""
     _ensure_models_loaded()
@@ -152,6 +166,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_users = sub.add_parser("users", help="List users in the database")
     p_users.set_defaults(func=cmd_users)
+
+    p_report = sub.add_parser(
+        "report",
+        help="Export docs/report.md to PDF (cover includes student name and ID)",
+    )
+    p_report.add_argument("--name", required=True, help="Student name (printed on the PDF cover)")
+    p_report.add_argument("--id", dest="student_id", required=True, help="Student ID (PDF only)")
+    p_report.add_argument("--src", default=None, help="Markdown path (default: docs/report.md)")
+    p_report.add_argument("--output", default=None, help="PDF path (default: docs/report.pdf)")
+    p_report.set_defaults(func=cmd_report)
 
     return parser
 

@@ -5,8 +5,16 @@ from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
 
+def sqlalchemy_uri(uri: str) -> str:
+    """Accept Render's postgres:// URLs in the sync SQLAlchemy engine."""
+    if uri.startswith("postgres://"):
+        return "postgresql+psycopg2://" + uri[len("postgres://"):]
+    if uri.startswith("postgresql://"):
+        return "postgresql+psycopg2://" + uri[len("postgresql://"):]
+    return uri
+
 engine = create_engine(
-    get_settings().database_uri, 
+    sqlalchemy_uri(get_settings().database_uri), 
     echo=get_settings().env.lower() in ["dev", "development", "test", "testing", "staging"],
     pool_size=get_settings().db_pool_size,
     max_overflow=get_settings().db_additional_overflow,

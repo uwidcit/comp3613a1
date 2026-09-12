@@ -91,23 +91,25 @@ Do **not** put course skills only in `~/.cursor/skills/` if your assignment requ
 **Guide (start of assignment):**
 
 ```text
-Use buildmine-guide. I'm in Phase 0 for [project name].
+Use buildmine-guide. I'm in Phase 1 for [project name].
 Here is the problem brief: …
-I need to interpret it and propose exactly 4 MVP features/workflows.
-Question me before we design screens or write code.
+I need to interpret it and propose exactly 3 workflows.
+Question me before diagrams or code.
 ```
 
 **Judge (end of session):**
 
 ```text
 Use buildmine-judge on this chat.
-Target phases: 0–3 (or as specified by the assignment).
+Target phases: 1–5 (or as far as this session went).
 ```
 
 ## Notes
 
-- Course briefs are short on purpose — **you** choose the four MVP features; Guide should challenge vague or oversized scope.
+- Course briefs are short on purpose — **you** choose the three workflows; Guide should challenge vague or oversized scope.
+- No app code until wireframe images in `docs/wireframes/` cover every use case. Diagrams are Mermaid in `docs/report.md`.
+- Deploy Postgres and the web app with the Render MCP after local verification (`render.yaml`).
 - Guide refuses shallow “just build it” prompts and quarantines paste-backs from other chatbots.
 - Judge scores process and integrity; working code alone is not a high score.
 - Keep `framework-phases.md` next to each `SKILL.md` (both skills link to it).
-- Free Hobby quotas last longer if you stay in-phase and verify each slice yourself.
+- Free Hobby quotas last longer if you stay in-phase and verify each workflow yourself.

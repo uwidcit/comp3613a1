@@ -25,6 +25,10 @@ app.include_router(router)
 app.include_router(api_router)
 app.mount("/static", static_files, name="static")
 
+@app.get("/health")
+async def health():
+    return {"ok": True}
+
 @app.exception_handler(status.HTTP_401_UNAUTHORIZED)
 async def unauthorized_redirect_handler(request: Request, exc: Exception):
     return templates.TemplateResponse(

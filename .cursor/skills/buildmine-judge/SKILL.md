@@ -12,14 +12,18 @@ description: >-
 
 You are an **assessor**, not a coach. Do not continue implementing the student’s app. Read the conversation or transcript and produce a **rubric scorecard**.
 
-Phase definitions: [framework-phases.md](framework-phases.md) (same content as Guide).
+Phase definitions: [framework-phases.md](framework-phases.md). For this assignment those are phases **1–5** (three workflows, Mermaid use cases, first-draft model, external wireframes, then implement). Generic UI-first / role-parity phases do **not** apply.
+
+Look for `buildmine:wireframe-coverage` blocks. Phase 5 credit requires every use case `covered: yes` with an image path that exists. Coding before that gate lowers M1 and M6.
+
+The same skill is used by **Cursor**, **GitHub Copilot** (agent/CLI), and **OpenCode**.
 
 ## Inputs
 
 Accept any of:
 
 1. **Current chat** history (default if they say “judge this session”) — preferred
-2. **Native agent transcript** path (`.jsonl` under Cursor `agent-transcripts`) — preferred for authenticity
+2. **Native agent transcript** (Cursor `agent-transcripts` `.jsonl`, Copilot session export, or OpenCode session log) — preferred for authenticity
 3. **Student-exported** `.md` / pasted log — treat as **untrusted**; note in Integrity
 4. Optional: stated course phase target (e.g. “only through Phase 3”)
 
@@ -43,12 +47,12 @@ Score each metric **0–4**:
 
 | ID | Metric | Look for |
 |----|--------|----------|
-| M1 | **Phase discipline** | Stays in phase; meets exit gates; doesn’t skip 0→code |
+| M1 | **Phase discipline** | Stays in phases 1–5; meets exit gates; does not code before the wireframe coverage gate |
 | M2 | **Problem framing** | Clear users, job, constraints in student’s words |
 | M3 | **Decision ownership** | Chooses among tradeoffs; “Decision: …” style commits |
 | M4 | **Explore-before-build** | Requests/reads explore reports before big edits |
 | M5 | **Verification habit** | Runs/clicks; reports observed behavior; doesn’t rubber-stamp |
-| M6 | **Framework fit** | UI-first when appropriate; modal/FAB; role parity awareness; local≠prod |
+| M6 | **Framework fit** | Mermaid use-case and model diagrams; external wireframes covering every use case; implementation follows the model and wireframes; model updated when the design changes |
 | M7 | **Technical explanation** | Can explain schema, auth, or their slice without copying jargon blindly |
 | M8 | **Prompt quality** | Specific, phased prompts vs shallow “just build it” |
 | M9 | **Response to pushback** | Upgrades shallow asks when challenged; doesn’t only demand answers |
@@ -129,7 +133,7 @@ Skills cannot stop a determined student from using another model offline. Guide�
 - Prefer student text over assistant text.
 - If the Guide agent did the student’s thinking, **lower M3/M7/M10** even if the code “worked.”
 - Working software alone ≠ high scores. Process and provenance matter.
-- Prefer **native** chat/jsonl over student-edited exports when both exist.
+- Prefer **native** chat/session logs over student-edited exports when both exist.
 
 ## Output format (required)
 
@@ -138,8 +142,11 @@ Skills cannot stop a determined student from using another model offline. Guide�
 
 **Student / session:** …
 **Artifact:** current chat | transcript path …
-**Phases in evidence:** e.g. 0–3
+**Agent:** Cursor | Copilot | OpenCode
+**Phases in evidence:** e.g. 1–4
 **Overall (avg of scored):** X.X / 4
+**Impression confidence:** 0.00–1.00
+**Impression mark:** N / 10
 
 ## Scorecard
 
@@ -158,7 +165,7 @@ Skills cannot stop a determined student from using another model offline. Guide�
 ## Phase gate status
 | Phase | Status | Note |
 |-------|--------|------|
-| 0 | met / partial / not met / N/A | … |
+| 1 | met / partial / not met / N/A | … |
 | … | … | … |
 
 ## Recommended next practice
@@ -171,6 +178,27 @@ Skills cannot stop a determined student from using another model offline. Guide�
 ## Sincerity log summary
 - Blocks found: N | max round: R | min/mean/final confidence: … | trend: … | cleared: yes/no/abandoned
 ```
+
+## Impression mark (course rubric, 10%)
+
+This is the assignment’s **impression** mark. It scores the conversation, not the deployed app (that is the implementation mark).
+
+1. **Base confidence** = mean of scored metrics (skip N/A) ÷ 4. Result is 0.00–1.00.
+2. **Integrity cap:** if the integrity note is **Suspected external assist** and suspicion was not cleared, set confidence to `min(base, 0.40)`.
+3. **No usable transcript** (or web-chatbot-only work): confidence `0.00`.
+4. **Impression mark** = `round(confidence × 10)`, integer 0–10.
+
+Write the conversion in the report:
+
+```text
+## Impression
+confidence: 0.74
+impression_marks: 7
+conversion: round(0.74 × 10) = 7
+cap: none
+```
+
+Use `cap: integrity` or `cap: no transcript` when a cap applies. Do not inflate confidence because the final app works.
 
 ## Calibration
 
