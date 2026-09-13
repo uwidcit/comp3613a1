@@ -9,7 +9,7 @@ The student drives the next phase with one complete prompt. Draft the use-case d
 | Phase | What the student does | Exit gate |
 |-------|------------------------|-----------|
 | **1** | Student picks the assigned project and names **at least three** workflows as `Feature (user)`. Steps wait for the wireframe. Three is the minimum, not a cap. Agent asks only if a name or `(user)` is missing. | Project plus those `Feature (user)` lines are in the student’s words. No code. |
-| **2** | Prompt already given (`Feature (user)` lines). | Agent drafts the Mermaid use-case diagram in `docs/report.md`. Assumes actors and grouping. No invented choices. No fill-in form. No code. |
+| **2** | Prompt already given (`Feature (user)` lines). | Agent writes `docs/diagrams/use-case.json`, runs `python manage.py usecase`, and embeds the UML PNG in `docs/report.md`. Assumes actors and grouping. No Mermaid flowchart. No invented choices. No fill-in form. No code. |
 | **3** | Student names entities and properties. Agent asks about relationships, bridge tables, and important edge cases. | Agent drafts the first-draft Mermaid `erDiagram` from their answers. No code. |
 | **4** | Student crafts wireframe images in `docs/wireframes/`. | Agent checks coverage, suggests model edits, and flags broken or incomplete flows. Redesign only if really bad. No code until every use case has an image. |
 | **5** | State theming and branding preferences. Then implement. | Build from the model and wireframes. Tweaks update the model and the code, not the wireframe. Deploy after local verification. |
@@ -27,14 +27,14 @@ A design chat is one phase. Write the artefact, show the pause block (phase, art
 | Phase | Artefact the student can open |
 |-------|--------------------------------|
 | 1 | `docs/report.md` — at least three workflows |
-| 2 | `docs/report.md` — use-case diagram |
+| 2 | `docs/diagrams/use-case.png` embedded in `docs/report.md` |
 | 3 | `docs/report.md` — model diagram (student-named entities) |
 | 4 | `docs/wireframes/` plus coverage notes and any model revisions in `docs/report.md` |
 | 5 | theming in `docs/report.md`, then named workflows in the same implement chat |
 
 ## Diagrams
 
-Mermaid in `docs/report.md`. Use-case diagram is a flowchart. Model is an `erDiagram`. Phase 2 is drafted from the `Feature (user)` lines. Phase 3 waits for the student to name entities and properties, then asks about relationships, bridge tables, and edge cases before drafting. Phase 4 suggests model edits for metadata the wireframes show and flags broken or incomplete flows. Redesign only if really bad. The agent revises the model again in Phase 5 when the design moves.
+Use-case diagram is a UML PNG: write `docs/diagrams/use-case.json`, run `python manage.py usecase`, embed `docs/diagrams/use-case.png` in `docs/report.md`. Model is a Mermaid `erDiagram`. Do not use a Mermaid flowchart for use cases. Phase 2 is drafted from the `Feature (user)` lines. Phase 3 waits for the student to name entities and properties, then asks about relationships, bridge tables, and edge cases before drafting. Phase 4 suggests model edits for metadata the wireframes show and flags broken or incomplete flows. Redesign only if really bad. The agent revises the model again in Phase 5 when the design moves.
 
 ## Wireframes
 
@@ -75,6 +75,8 @@ When building or exporting the report, stop implementing, run student-judge, wri
 - Sending the student to redesign a wireframe that is only unoptimized or missing a field
 - Sending the student to update the wireframe for an implementation tweak
 - App code before Phase 4 images cover the use cases
+- Mermaid flowchart (stadium/circle + rectangles) as the use-case diagram
+- Using GenerateImage or a hand-drawn UML instead of `python manage.py usecase`
 - Agent-drawn wireframes
 - Starting the next *phase* in the same chat
 - Requiring a new chat to start the next Phase 5 workflow

@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import html as html_lib
 import re
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 
-from fpdf import FPDF
+from fpdf import FPDF, FontFace, TextStyle
 
 from app.skill_integrity import IntegrityResult, require_clean, stamp_markdown
 
@@ -17,6 +18,13 @@ DEFAULT_REPORT = REPO_ROOT / "docs" / "report.md"
 DEFAULT_PDF = REPO_ROOT / "docs" / "report.pdf"
 DEFAULT_JUDGE = REPO_ROOT / "docs" / "judge.md"
 COMPETENCY_HEADING = "## Competency (student-judge)"
+
+NAVY = (27, 54, 93)
+NAVY_HEX = "#1B365D"
+GOLD = (196, 163, 90)
+ZEBRA = "#F4F7FA"
+HIGHLIGHT = "#E7EEF6"
+MUTED = (90, 96, 110)
 
 _JUDGE_COMMENT_RE = re.compile(
     r"<!-- student-judge:competency(?:\n.*?)?-->\n?",
@@ -31,16 +39,64 @@ _FONT_CANDIDATES = (
     (
         Path(r"C:\Windows\Fonts\arial.ttf"),
         Path(r"C:\Windows\Fonts\arialbd.ttf"),
+        Path(r"C:\Windows\Fonts\ariali.ttf"),
+        Path(r"C:\Windows\Fonts\arialbi.ttf"),
     ),
     (
         Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
         Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Oblique.ttf"),
+        Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-BoldOblique.ttf"),
     ),
     (
         Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
         Path("/System/Library/Fonts/Supplemental/Arial Bold.ttf"),
+        Path("/System/Library/Fonts/Supplemental/Arial Italic.ttf"),
+        Path("/System/Library/Fonts/Supplemental/Arial Bold Italic.ttf"),
     ),
 )
+
+
+class ReportPDF(FPDF):
+    incomplete = False
+
+    def header(self) -> None:
+        if self.page_no() == 1:
+            self.set_fill_color(*NAVY)
+            self.rect(0, 0, self.w, 36, "F")
+            self.set_fill_color(*GOLD)
+            self.rect(0, 36, self.w, 2.2, "F")
+            self.set_text_color(255, 255, 255)
+            self.set_font("Body", "B", 20)
+            self.set_xy(self.l_margin, 9)
+            self.cell(self.epw, 10, "COMP 3613 Assignment 1")
+            self.set_font("Body", "", 11)
+            self.set_xy(self.l_margin, 20)
+            subtitle = "Individual report (incomplete)" if self.incomplete else "Individual report"
+            self.cell(self.epw, 8, subtitle)
+            self.set_text_color(0, 0, 0)
+            self.set_y(44)
+            return
+        self.set_font("Body", "", 10)
+        self.set_text_color(*NAVY)
+        self.cell(self.epw, 6, "COMP 3613 Assignment 1")
+        self.ln(2)
+        self.set_draw_color(*GOLD)
+        self.set_line_width(0.6)
+        self.line(self.l_margin, self.get_y(), self.w - self.r_margin, self.get_y())
+        self.ln(5)
+        self.set_text_color(0, 0, 0)
+
+    def footer(self) -> None:
+        self.set_y(-14)
+        self.set_draw_color(220, 224, 230)
+        self.set_line_width(0.3)
+        self.line(self.l_margin, self.get_y(), self.w - self.r_margin, self.get_y())
+        self.set_y(-12)
+        self.set_font("Body", "", 8)
+        self.set_text_color(*MUTED)
+        self.cell(self.epw, 8, f"{self.page_no()}/{{nb}}", align="C")
+        self.set_text_color(0, 0, 0)
 
 
 def export_report(
@@ -79,10 +135,11 @@ def export_report(
     app_url, logins, missing = _marker_access(markdown)
     dest.parent.mkdir(parents=True, exist_ok=True)
 
-    pdf = _new_pdf()
-    _cover(pdf, clean_name, clean_id, app_url, logins, integrity, missing)
+    pdf = _new_pdf(bool(missing))
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
-        _body(pdf, markdown, src.parent, Path(tmp))
+        cover = _cover_html(clean_name, clean_id, app_url, logins, integrity, missing)
+        body = _markdown_to_html(markdown, src.parent, Path(tmp))
+        _write_report_html(pdf, cover + body)
     pdf.output(dest)
     print(f"Wrote {dest}")
     if missing:
@@ -137,11 +194,13 @@ def replace_competency_section(markdown: str, judge_markdown: str) -> str:
     return text
 
 
-def _new_pdf() -> FPDF:
-    pdf = FPDF(format="A4")
+def _new_pdf(incomplete: bool) -> ReportPDF:
+    pdf = ReportPDF(format="A4")
+    pdf.incomplete = incomplete
+    pdf.alias_nb_pages()
     pdf.set_auto_page_break(auto=True, margin=18)
-    pdf.set_margins(18, 18, 18)
-    regular, bold = _fonts()
+    pdf.set_margins(16, 16, 16)
+    regular, bold, italic, bold_italic = _fonts()
     if regular is None:
         raise SystemExit(
             "No Unicode font found (looked for Arial or DejaVu). "
@@ -149,61 +208,104 @@ def _new_pdf() -> FPDF:
         )
     pdf.add_font("Body", "", str(regular))
     pdf.add_font("Body", "B", str(bold or regular))
+    if italic is not None:
+        pdf.add_font("Body", "I", str(italic))
+    if bold_italic is not None:
+        pdf.add_font("Body", "BI", str(bold_italic))
+    pdf.add_page()
     return pdf
 
 
-def _fonts() -> tuple[Path | None, Path | None]:
-    for regular, bold in _FONT_CANDIDATES:
+def _fonts() -> tuple[Path | None, Path | None, Path | None, Path | None]:
+    for regular, bold, italic, bold_italic in _FONT_CANDIDATES:
         if regular.is_file():
-            return regular, bold if bold.is_file() else regular
-    return None, None
+            return (
+                regular,
+                bold if bold.is_file() else regular,
+                italic if italic.is_file() else None,
+                bold_italic if bold_italic.is_file() else None,
+            )
+    return None, None, None, None
 
 
-def _write(pdf: FPDF, text: str, size: int, *, bold: bool = False, line: float = 7) -> None:
-    pdf.set_font("Body", "B" if bold else "", size)
-    pdf.set_x(pdf.l_margin)
-    pdf.multi_cell(pdf.epw, line, text, new_x="LMARGIN", new_y="NEXT")
+def _write_report_html(pdf: ReportPDF, markup: str) -> None:
+    pdf.write_html(
+        markup,
+        font_family="Body",
+        table_line_separators=True,
+        warn_on_tags_not_matching=False,
+        tag_styles={
+            "h1": FontFace(family="Body", color=NAVY_HEX, size_pt=16),
+            "h2": FontFace(family="Body", color=NAVY_HEX, size_pt=13),
+            "h3": FontFace(family="Body", color=NAVY_HEX, size_pt=11),
+            "p": FontFace(family="Body", size_pt=10.5),
+            "pre": TextStyle(font_family="Body", font_size_pt=8.5, color="#333333"),
+            "blockquote": TextStyle(
+                font_family="Body",
+                font_size_pt=10,
+                color="#4B5563",
+                l_margin=8,
+                t_margin=2,
+                b_margin=2,
+            ),
+        },
+    )
 
 
-def _cover(
-    pdf: FPDF,
+def _cover_html(
     name: str,
     student_id: str,
     app_url: str,
     logins: str,
     integrity: IntegrityResult,
     missing: list[str],
-) -> None:
-    pdf.add_page()
-    _write(pdf, "COMP 3613 Assignment 1", 20, bold=True, line=12)
-    pdf.ln(4)
-    _write(pdf, "Individual report (incomplete)" if missing else "Individual report", 12)
-    pdf.ln(6)
-    _write(pdf, "Student name", 12, bold=True)
-    _write(pdf, name, 12)
-    pdf.ln(2)
-    _write(pdf, "Student ID", 12, bold=True)
-    _write(pdf, student_id, 12)
-    pdf.ln(2)
-    _write(pdf, "Deployed app", 12, bold=True)
-    _write(pdf, app_url, 11, line=6)
-    pdf.ln(2)
-    _write(pdf, "Logins", 12, bold=True)
-    for line in logins.splitlines():
-        if line.strip():
-            _write(pdf, line.strip(), 11, line=6)
-    pdf.ln(4)
-    _write(pdf, "Skill integrity", 12, bold=True)
-    _write(pdf, integrity.status.upper(), 12)
-    _write(pdf, f"Root {integrity.root}", 9, line=5)
-    pdf.ln(4)
-    _write(
-        pdf,
-        "The YouTube video must show this name and must not show or say this ID. "
-        "Do not put the student ID in the video. App logins belong in this report, not database passwords.",
-        10,
-        line=6,
-    )
+) -> str:
+    login_html = " · ".join(
+        html_lib.escape(line.strip()) for line in logins.splitlines() if line.strip()
+    ) or "Not yet"
+    root = integrity.root
+    if len(root) > 28:
+        root = f"{root[:12]}…{root[-10:]}"
+    integrity_value = html_lib.escape(f"{integrity.status.upper()}. Root {root}")
+    rows = [
+        ("Student name", html_lib.escape(name), False),
+        ("Student ID", html_lib.escape(student_id), False),
+        ("Deployed app", html_lib.escape(app_url), False),
+        ("Logins", login_html, False),
+        ("Skill integrity", integrity_value, not integrity.ok),
+    ]
+    cells = []
+    for index, (label, value, fail) in enumerate(rows):
+        if fail:
+            bg = "#FDECEC"
+        elif index % 2 == 0:
+            bg = ZEBRA
+        else:
+            bg = "#FFFFFF"
+        cells.append(
+            f'<tr bgcolor="{bg}">'
+            f'<td align="left">{html_lib.escape(label)}</td>'
+            f'<td align="left">{value}</td>'
+            f"</tr>"
+        )
+    missing_note = ""
+    if missing:
+        missing_note = (
+            '<p><font color="#9A3412"><b>Incomplete draft.</b> Missing: '
+            + html_lib.escape("; ".join(missing))
+            + "</font></p>"
+        )
+    return f"""
+<table width="100%" border="1" cellpadding="5">
+<thead><tr bgcolor="{NAVY_HEX}">
+<th width="28%" align="left"><font color="#FFFFFF"><b>Field</b></font></th>
+<th width="72%" align="left"><font color="#FFFFFF"><b>Value</b></font></th>
+</tr></thead>
+<tbody>{"".join(cells)}</tbody>
+</table>
+{missing_note}
+<p><font size="2" color="#5A6070">The YouTube video must show this name and must not show or say this ID. App logins belong in this report. Database passwords do not.</font></p>
+"""
 
 
 def _section(markdown: str, *titles: str) -> str:
@@ -232,13 +334,16 @@ def _marker_access(markdown: str) -> tuple[str, str, list[str]]:
         missing.append("public Render URL")
 
     logins = _section(markdown, "logins", "user logins")
-    login_lines = [
-        line.strip()
-        for line in logins.splitlines()
-        if line.strip() and not line.strip().startswith("Markers ")
-        and not line.strip().startswith("Every ")
-        and not line.strip().startswith("Starter ")
-    ]
+    login_lines: list[str] = []
+    for line in logins.splitlines():
+        cleaned = re.sub(r"^[-*]\s+", "", line.strip())
+        if (
+            cleaned
+            and not cleaned.startswith("Markers ")
+            and not cleaned.startswith("Every ")
+            and not cleaned.startswith("Starter ")
+        ):
+            login_lines.append(cleaned)
     if len(login_lines) < 2:
         login_text = "\n".join(login_lines) if login_lines else "Not yet"
         missing.append("marker logins (at least two accounts)")
@@ -247,54 +352,169 @@ def _marker_access(markdown: str) -> tuple[str, str, list[str]]:
     return app_url, login_text, missing
 
 
-def _body(pdf: FPDF, markdown: str, base: Path, tmp: Path) -> None:
-    pdf.add_page()
+def _markdown_to_html(markdown: str, base: Path, tmp: Path) -> str:
+    parts: list[str] = []
+    blocks = _blocks(markdown)
+    i = 0
     diagram_n = 0
-    for block in _blocks(markdown):
-        kind = block[0]
+    skip_first_h1 = True
+    while i < len(blocks):
+        kind = blocks[i][0]
         if kind == "heading":
-            level, text = block[1], block[2]
-            size = {1: 16, 2: 14, 3: 12}.get(level, 12)
-            pdf.ln(3)
-            _write(pdf, text, size, bold=True)
-            pdf.ln(1)
+            level, text = blocks[i][1], blocks[i][2]
+            if skip_first_h1 and level == 1:
+                skip_first_h1 = False
+                i += 1
+                continue
+            skip_first_h1 = False
+            tag = f"h{min(level, 3)}"
+            lower = text.lower()
+            if "competency" in lower:
+                parts.append('<p style="break-before: page"></p>')
+            parts.append(f"<{tag}>{_inline_html(text)}</{tag}>")
         elif kind == "paragraph":
-            _write(pdf, _inline(block[1]), 11, line=6)
-            pdf.ln(2)
+            parts.append(f"<p>{_inline_html(blocks[i][1])}</p>")
         elif kind == "list":
-            _write(pdf, "- " + _inline(block[1]), 11, line=6)
+            items: list[str] = []
+            while i < len(blocks) and blocks[i][0] == "list":
+                items.append(f"<li>{_inline_html(blocks[i][1])}</li>")
+                i += 1
+            parts.append("<ul>" + "".join(items) + "</ul>")
+            continue
         elif kind == "ordered":
-            _write(pdf, f"{block[1]}. " + _inline(block[2]), 11, line=6)
+            items = []
+            start = blocks[i][1]
+            while i < len(blocks) and blocks[i][0] == "ordered":
+                items.append(f"<li>{_inline_html(blocks[i][2])}</li>")
+                i += 1
+            parts.append(f'<ol start="{html_lib.escape(start)}">' + "".join(items) + "</ol>")
+            continue
         elif kind == "table":
-            _table(pdf, block[1])
+            parts.append(_table_html(blocks[i][1]))
         elif kind == "image":
-            path = _resolve(block[1], base)
+            path = _resolve(blocks[i][1], base)
             if path is None:
-                _write(pdf, f"Image not in workspace yet: {block[1]}", 10, line=6)
-                pdf.ln(2)
+                parts.append(
+                    "<p><i>Image not in workspace yet: "
+                    + _inline_html(blocks[i][1])
+                    + "</i></p>"
+                )
             else:
-                _image(pdf, path)
+                parts.append(f'<img src="{html_lib.escape(str(path))}" width="178">')
         elif kind == "mermaid":
             diagram_n += 1
             png = tmp / f"diagram-{diagram_n}.png"
-            if _render_mermaid(block[1], png):
-                _image(pdf, png)
+            if _render_mermaid(blocks[i][1], png):
+                parts.append(f'<img src="{html_lib.escape(str(png))}" width="178">')
             else:
-                _write(
-                    pdf,
-                    "Mermaid source (install Node.js and re-run export to render the image):\n"
-                    + block[1],
-                    9,
-                    line=5,
+                parts.append(
+                    "<p><i>Mermaid source (install Node.js and re-run export to render the image):</i></p>"
+                    f"<pre>{html_lib.escape(blocks[i][1])}</pre>"
                 )
-                pdf.ln(2)
                 print(
                     "warning: Mermaid diagram left as source. "
                     "Install Node.js, then re-run so npx @mermaid-js/mermaid-cli can render it."
                 )
         elif kind == "code":
-            _write(pdf, block[1], 9, line=5)
-            pdf.ln(2)
+            parts.append(f"<pre>{html_lib.escape(blocks[i][1])}</pre>")
+        i += 1
+    return "\n".join(parts)
+
+
+def _table_html(rows: list[list[str]]) -> str:
+    if not rows:
+        return ""
+    widths = _col_widths(rows[0])
+    header = [cell.strip() or "Item" for cell in rows[0]]
+    header = [_display_header(cell) for cell in header]
+    body = rows[1:]
+    head_cells = []
+    for index, cell in enumerate(header):
+        width = widths[index] if index < len(widths) else None
+        width_attr = f' width="{width}%"' if width else ""
+        head_cells.append(
+            f'<th{width_attr} align="left">'
+            f'<font color="#FFFFFF"><b>{_cell_html(cell)}</b></font></th>'
+        )
+    body_rows = []
+    for row_i, row in enumerate(body):
+        key = row[0].lower() if row else ""
+        if "overall" in key or "impression" in key:
+            bg = HIGHLIGHT
+        elif row_i % 2 == 1:
+            bg = ZEBRA
+        else:
+            bg = "#FFFFFF"
+        tds = "".join(f'<td align="left">{_cell_html(cell)}</td>' for cell in row)
+        body_rows.append(f'<tr bgcolor="{bg}">{tds}</tr>')
+    return (
+        '<table width="100%" border="1" cellpadding="3">'
+        f'<thead><tr bgcolor="{NAVY_HEX}">{"".join(head_cells)}</tr></thead>'
+        f"<tbody>{''.join(body_rows)}</tbody>"
+        "</table>"
+    )
+
+
+def _display_header(cell: str) -> str:
+    aliases = {
+        "in avg": "Avg",
+        "scoreable max": "Max points",
+        "awarded total": "Awarded",
+        "overall (avg of scored)": "Overall",
+        "impression mark": "Impression",
+        "metrics on rubric": "Metrics",
+        "n/a (excluded)": "N/A",
+        "metrics scored": "Scored",
+    }
+    return aliases.get(cell.strip().lower(), cell)
+
+
+def _col_widths(header: list[str]) -> list[int]:
+    labels = [cell.strip().lower() for cell in header]
+    count = len(labels)
+    if count == 2:
+        return [38, 62]
+    joined = " ".join(labels)
+    if count == 3 and "phase" in joined:
+        return [12, 16, 72]
+    if count >= 6 and "evidence" in joined:
+        widths = [7, 22, 12, 10, 9, 40]
+        return _fit_widths(widths, count)
+    share = 100 // max(count, 1)
+    widths = [share] * count
+    widths[-1] = 100 - share * (count - 1)
+    return widths
+
+
+def _fit_widths(widths: list[int], count: int) -> list[int]:
+    if len(widths) == count:
+        return widths
+    if len(widths) > count:
+        kept = widths[: count - 1]
+        kept.append(100 - sum(kept))
+        return kept
+    extra = count - len(widths)
+    share = max(widths[-1] // (extra + 1), 8)
+    tail = [share] * extra
+    widths[-1] = 100 - sum(widths[:-1]) - sum(tail)
+    return widths + tail
+
+
+def _cell_html(text: str) -> str:
+    """Table cells cannot mix nested tags with trailing text in fpdf2."""
+    escaped = html_lib.escape(text)
+    escaped = re.sub(r"\*\*(.+?)\*\*", r"\1", escaped)
+    escaped = re.sub(r"`([^`]+)`", r"\1", escaped)
+    escaped = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"\1", escaped)
+    return escaped or " "
+
+
+def _inline_html(text: str) -> str:
+    escaped = html_lib.escape(text)
+    escaped = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", escaped)
+    escaped = re.sub(r"`([^`]+)`", r"<font face='Courier'>\1</font>", escaped)
+    escaped = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', escaped)
+    return escaped
 
 
 def _blocks(markdown: str) -> list[tuple]:
@@ -374,20 +594,6 @@ def _blocks(markdown: str) -> list[tuple]:
     return blocks
 
 
-def _table(pdf: FPDF, rows: list[list[str]]) -> None:
-    if not rows:
-        return
-    pdf.ln(1)
-    for index, row in enumerate(rows):
-        line = " | ".join(_inline(cell) for cell in row)
-        _write(pdf, line, 8, bold=index == 0, line=5)
-    pdf.ln(2)
-
-
-def _inline(text: str) -> str:
-    return re.sub(r"[*_`]", "", text).strip()
-
-
 def _resolve(raw: str, base: Path) -> Path | None:
     path = Path(raw)
     if path.is_file():
@@ -399,16 +605,6 @@ def _resolve(raw: str, base: Path) -> Path | None:
     if from_root.is_file():
         return from_root
     return None
-
-
-def _image(pdf: FPDF, path: Path) -> None:
-    if path.suffix.lower() not in {".png", ".jpg", ".jpeg"}:
-        _write(pdf, f"Skipped image (use PNG or JPG): {path.name}", 10, line=6)
-        pdf.ln(2)
-        return
-    pdf.ln(2)
-    pdf.image(str(path), w=pdf.epw)
-    pdf.ln(3)
 
 
 def _render_mermaid(source: str, png: Path) -> bool:

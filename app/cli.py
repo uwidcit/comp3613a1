@@ -8,6 +8,7 @@ From the project root (venv active, deps installed, ``.env`` present):
     python manage.py run
     python manage.py users
     python manage.py report --name "Student Name" --id "816000000"
+    python manage.py usecase
     python manage.py skills-verify
 """
 
@@ -128,6 +129,17 @@ def cmd_skills_verify(args: argparse.Namespace) -> None:
         raise SystemExit(1)
 
 
+def cmd_usecase(args: argparse.Namespace) -> None:
+    """Render docs/diagrams/use-case.json to a UML use-case PNG."""
+    from app.usecase_diagram import render_usecase_png
+
+    dest = render_usecase_png(
+        spec_path=None if args.spec is None else Path(args.spec),
+        output=None if args.output is None else Path(args.output),
+    )
+    print(f"Wrote {dest}")
+
+
 def cmd_skills_lock(args: argparse.Namespace) -> None:
     """Rewrite the skill lockfile (course authors only)."""
     from app.skill_integrity import write_lock
@@ -204,6 +216,14 @@ def build_parser() -> argparse.ArgumentParser:
     p_report.add_argument("--src", default=None, help="Markdown path (default: docs/report.md)")
     p_report.add_argument("--output", default=None, help="PDF path (default: docs/report.pdf)")
     p_report.set_defaults(func=cmd_report)
+
+    p_usecase = sub.add_parser(
+        "usecase",
+        help="Render docs/diagrams/use-case.json to a UML use-case PNG",
+    )
+    p_usecase.add_argument("--spec", default=None, help="JSON spec (default: docs/diagrams/use-case.json)")
+    p_usecase.add_argument("--output", default=None, help="PNG path (default: docs/diagrams/use-case.png)")
+    p_usecase.set_defaults(func=cmd_usecase)
 
     p_skills_verify = sub.add_parser(
         "skills-verify",

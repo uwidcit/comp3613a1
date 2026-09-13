@@ -69,7 +69,7 @@ You pick the assigned project. The agent does not. Name **at least three** workf
 
 ### Phase 2 — Use-case diagram (agent drafts)
 
-The agent drafts the Mermaid use-case diagram in `docs/report.md` from your Phase 1 prompt. You do not draw it. It will assume actors and use cases the prompt implies.
+The agent writes a UML use-case PNG (`docs/diagrams/use-case.png`) from your Phase 1 prompt and inserts it into `docs/report.md`. You do not draw it. Mermaid is not used for this diagram. It will assume actors and use cases the prompt implies.
 
 ### Phase 3 — Model diagram (agent drafts)
 
@@ -89,7 +89,7 @@ Markers will exercise **your** named workflows on the deployed app. If a named w
 
 ## Report
 
-Draft the report **with** the agent as Markdown (`docs/report.md`). Diagrams in that file are Mermaid. Wireframes are image links to `docs/wireframes/`. The report must include the **deployed app link** and the **user logins** a marker needs (username, password, and role for every account, including any you added beyond bob and admin). When you ask the agent to build or export the report, it runs **student-judge**, writes `docs/judge.md`, and appends that scorecard to the report. After you have reviewed the Markdown, export a PDF. The cover includes your **name**, **student ID**, the **deployed app link**, and those **logins**:
+Draft the report **with** the agent as Markdown (`docs/report.md`). The use-case diagram is a UML image (`docs/diagrams/use-case.png`). The model diagram is Mermaid. Wireframes are image links to `docs/wireframes/`. The report must include the **deployed app link** and the **user logins** a marker needs (username, password, and role for every account, including any you added beyond bob and admin). When you ask the agent to build or export the report, it runs **student-judge**, writes `docs/judge.md`, and appends that scorecard to the report. After you have reviewed the Markdown, export a PDF. The cover includes your **name**, **student ID**, the **deployed app link**, and those **logins**:
 
 ```bash
 python manage.py report --name "Your Name" --id "816000000"
@@ -162,7 +162,7 @@ Actors, primary job, assumptions, out-of-scope items, edge cases, and **at least
 
 ### B. Modelling and design (PDF)
 
-Mermaid use-case diagram, Mermaid model diagram (including revisions from implementation), and the wireframe images for those workflows.
+UML use-case diagram (PNG), Mermaid model diagram (including revisions from implementation), and the wireframe images for those workflows.
 
 ### C. Implementation and deployment (GitHub + Render)
 
@@ -201,7 +201,7 @@ One PDF via myeLearning, plus the unlisted YouTube link **inside that PDF**:
 1. Cover page — Name, ID, **deployed app link**, **user logins** (username / password / role), GitHub, YouTube URL, agent used, account email
 2. Problem interpretation
 3. The named workflows (at least three)
-4. Use case diagram (Mermaid)
+4. Use case diagram (UML PNG)
 5. Model diagram (Mermaid; note revisions)
 6. Wireframe images for the named workflows
 7. Implementation and deployment notes (public URL, what is seeded)
@@ -215,7 +215,7 @@ The PDF may include your student ID on the cover page. The **video must not**.
 | --- | --- | --- |
 | Problem interpretation | In-depth reading of the brief; clear MVP boundary | 10 |
 | Workflows | At least three; concrete, role-aware, drive model and UI | 10 |
-| Use case diagram | Mermaid; actors and use cases for the named workflows | 10 |
+| Use case diagram | UML image; actors and use cases for the named workflows | 10 |
 | Model diagram | Mermaid; first draft revised as the features are built | 10 |
 | UI design | External wireframes for the named workflows; every use case covered | 10 |
 | Implementation and deployment | FastMVC; named workflows end-to-end; seed data; Render Postgres and public web URL | 30 |
@@ -238,7 +238,7 @@ Example: confidence 0.74 → 7/10. No transcript, or a web-chatbot-only session,
 - Individual work. FastMVC boilerplate may be used and cited.
 - LLMs only under Guide in Cursor, Copilot Agent, or OpenCode.
 - Prefer deep workflows over many shallow ones. Three is the minimum; more is allowed.
-- Use-case and model diagrams are Mermaid in `docs/report.md`. Wireframes are images you make elsewhere and drop into `docs/wireframes/`.
+- The use-case diagram is a UML PNG in `docs/diagrams/` (agent-generated; embedded in `docs/report.md`). The model diagram is Mermaid. Wireframes are images you make elsewhere and drop into `docs/wireframes/`.
 - Do not edit the course skills or the skill lockfile. Report export checks their hashes.
 - Only `main` is graded unless stated otherwise.
 - Video must be **unlisted** (or public). Unlisted is preferred. Do not submit a private video or a Drive file instead of YouTube.

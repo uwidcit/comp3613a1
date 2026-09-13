@@ -130,6 +130,7 @@ Commands are implemented in `app/cli.py` (stdlib `argparse`) and invoked via `ma
 | `python manage.py run` | Start Uvicorn (reload unless `ENV=production`) |
 | `python manage.py users` | Print users in the DB |
 | `python manage.py report --name "..." --id "..."` | Merge `docs/judge.md` into the report if present, export `docs/report.pdf`. Incomplete drafts allowed. Cover has name, ID, and skill-integrity hash. Fails only if course skills were edited |
+| `python manage.py usecase` | Render `docs/diagrams/use-case.json` to a UML use-case PNG (`docs/diagrams/use-case.png`) |
 | `python manage.py skills-verify` | Check course skills against `.agents/skills.lock.json` |
 | `python manage.py --help` | Show all commands |
 

@@ -94,7 +94,7 @@ Tell them progress is in that artefact, not only in this chat. For phases 1–4 
 ## Hard rules
 
 1. **No app code before Phase 5**, and not until wireframe images are in `docs/wireframes/` and cover the use cases.
-2. **Draft** the use-case diagram and the model diagram from the prompt they gave. Only the wireframe is user crafted. Do not draw wireframes.
+2. **Draft** the use-case diagram as a UML PNG (`docs/diagrams/use-case.json`, then `python manage.py usecase`) and the model as a Mermaid `erDiagram`. Only the wireframe is user crafted. Do not draw wireframes. Do not fake the use-case diagram as a Mermaid flowchart. Do not use GenerateImage for it.
 3. **Do not send them back to update the wireframe** for tweaks, missing fields, or mild layout issues. Update the model and the code. A new wireframe is only when a use case has no image, the images are unreadable, or a named workflow cannot be completed from the set. That is **really bad**. Incomplete-but-fixable and unoptimized flows are raised as notes, not a redraw.
 4. **Phase 2: assume** actors and use cases from the `Feature (user)` lines. Draft. Do not withhold it pending a pick. **Phase 3: the student names entities and properties.** Do not invent that list. Bring up relationships, bridge tables, and important edge cases as questions before you draft. Phase 1 is different: do not assume the project or the workflow names.
 5. **One workflow at a time** in Phase 5, in the **same** implement chat. After they verify, continue with the next named workflow here. Refuse “build the whole app” in one shot. Do not require a new chat per workflow.
@@ -133,7 +133,26 @@ Use the student-build skill. Phase 2. Here is my Phase 1 artefact in docs/report
 
 Draft the use-case diagram now from the Phase 1 `Feature (user)` lines. Cover every named workflow. Each `(user)` is an actor. Each Feature is one use case unless the name clearly lists more than one. Do not ask them to list actors or use cases. Do not withhold the draft pending a pick. Do not say the skill requires an answer before you draft.
 
-Write a Mermaid flowchart in `docs/report.md` (actors as stadium/circle nodes, use cases as rectangles). Note assumed actors or use cases in one line. Then pause. New chat:
+Mermaid has no UML use-case notation (stick-figure actors, system boundary, ellipses). Do **not** write a Mermaid flowchart. Do **not** use GenerateImage. Write `docs/diagrams/use-case.json`, run `python manage.py usecase`, and embed the PNG in `docs/report.md`:
+
+```markdown
+![Use case diagram](docs/diagrams/use-case.png)
+```
+
+JSON shape (actor names on each use case must match the `actors` list):
+
+```json
+{
+  "system": "Research App",
+  "actors": ["Public", "Author"],
+  "use_cases": [
+    {"name": "Explore/Search Publications", "actors": ["Public"]},
+    {"name": "Add publication", "actors": ["Author"]}
+  ]
+}
+```
+
+Note assumed actors or use cases in one line. Then pause. New chat:
 
 ```text
 Use the student-build skill. Phase 3. Here are my entities and properties. Draft the model diagram from docs/report.md.

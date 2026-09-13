@@ -117,7 +117,7 @@ Use the student-judge skill on this session.
 ## Notes
 
 - Course briefs are short on purpose — **you** choose at least three workflows (more is allowed). Drive the next phase with one complete prompt. The agent does not interview you.
-- No app code until wireframe images in `docs/wireframes/` cover every use case. Diagrams are Mermaid in `docs/report.md`.
+- No app code until wireframe images in `docs/wireframes/` cover every use case. Use-case diagram is a UML PNG; model is Mermaid in `docs/report.md`.
 - Deploy Postgres and the web app with the Render MCP after local verification (`render.yaml`).
 - Guide refuses shallow “just build it” prompts and quarantines paste-backs from other chatbots.
 - Judge scores COMP 3613 process and integrity on phases 1–5. Building the report runs Judge and appends the scorecard. Working code alone is not a high score. Do not penalize missing explore reports or starter-kit auth lectures. The scorecard shows awarded total / scoreable max, then overall / 4.

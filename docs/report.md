@@ -1,6 +1,6 @@
 # COMP 3613 Assignment 1
 
-Draft this file with the Guide. Diagrams below must be Mermaid. Link wireframe images from `docs/wireframes/`.
+Draft this file with the Guide. The use-case diagram is a UML PNG (`docs/diagrams/use-case.png`). The model diagram is Mermaid. Link wireframe images from `docs/wireframes/`.
 
 Do not put your student ID in this file if you will commit it. The PDF cover adds your name and ID at export time.
 
@@ -18,10 +18,7 @@ Do not put your student ID in this file if you will commit it. The PDF cover add
 
 ## Use case diagram
 
-```mermaid
-flowchart LR
-  Actor((Actor)) --> UC1[Use case]
-```
+![Use case diagram](docs/diagrams/use-case.png)
 
 ## Model diagram
 

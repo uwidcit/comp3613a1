@@ -46,7 +46,7 @@ When you change a skill, update **both** `.agents/skills/` and `.cursor/skills/`
 Use **student-build**. One phase per design chat. Ask only unanswered gaps (at most 8). Do not re-ask the prompt or collect wireframe steps. The student picks the project in Phase 1. Write the artefact, pause, and tell them to open a new chat for the next *phase*. Phase 5 implement may build every workflow in the same conversation. The student may **skip** up to 3 needless questions. A skip cannot assign the project or replace a workflow. Report `Skips: n/3 used`.
 
 1. Select the project and name **at least three** workflows. More is allowed.
-2. Agent drafts the use-case diagram from that prompt.
+2. Agent drafts the UML use-case PNG from that prompt and embeds it in `docs/report.md`.
 3. Student names entities and properties. Agent asks about relationships, bridge tables, and edge cases, then drafts the model.
 4. Wait for student-crafted wireframe images in `docs/wireframes/`. Suggest model edits. Flag broken or incomplete flows. Redesign only if really bad.
 5. Ask for theming and branding preferences, then implement. Deploy after local verification.
