@@ -105,7 +105,7 @@ def cmd_run(args: argparse.Namespace) -> None:
 
 
 def cmd_report(args: argparse.Namespace) -> None:
-    """Export docs/report.md to PDF with the student name and ID on the cover."""
+    """Export docs/report.md to PDF. Merges docs/judge.md into Competency when present."""
     from app.report_pdf import export_report
     from app.skill_integrity import format_report, verify
 
@@ -197,7 +197,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_report = sub.add_parser(
         "report",
-        help="Export docs/report.md to PDF (allowed incomplete; cover has name and ID)",
+        help="Export docs/report.md to PDF; merges docs/judge.md (incomplete drafts allowed)",
     )
     p_report.add_argument("--name", required=True, help="Student name (printed on the PDF cover)")
     p_report.add_argument("--id", dest="student_id", required=True, help="Student ID (PDF only)")

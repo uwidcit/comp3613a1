@@ -15,6 +15,17 @@ from app.skill_integrity import IntegrityResult, require_clean, stamp_markdown
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REPORT = REPO_ROOT / "docs" / "report.md"
 DEFAULT_PDF = REPO_ROOT / "docs" / "report.pdf"
+DEFAULT_JUDGE = REPO_ROOT / "docs" / "judge.md"
+COMPETENCY_HEADING = "## Competency (student-judge)"
+
+_JUDGE_COMMENT_RE = re.compile(
+    r"<!-- student-judge:competency(?:\n.*?)?-->\n?",
+    re.DOTALL,
+)
+_JUDGE_SECTION_RE = re.compile(
+    r"^## Competency \(student-judge\)\n.*?(?=^## Skill integrity|\Z)",
+    re.MULTILINE | re.DOTALL,
+)
 
 _FONT_CANDIDATES = (
     (
@@ -57,8 +68,14 @@ def export_report(
         print(f"Created {src} (empty draft).")
 
     integrity = require_clean()
-    markdown = stamp_markdown(src.read_text(encoding="utf-8"), integrity)
+    markdown = merge_judge_section(src.read_text(encoding="utf-8"))
+    markdown = stamp_markdown(markdown, integrity)
     src.write_text(markdown, encoding="utf-8")
+    if COMPETENCY_HEADING not in markdown:
+        print(
+            "No judge report yet. Ask the Guide to build or export the report "
+            "so it runs student-judge and writes docs/judge.md."
+        )
     app_url, logins, missing = _marker_access(markdown)
     dest.parent.mkdir(parents=True, exist_ok=True)
 
@@ -72,6 +89,52 @@ def export_report(
         print("Incomplete draft. Missing: " + "; ".join(missing))
         print("Re-export later when those sections are filled. Full marks still need a live URL.")
     return dest
+
+
+def merge_judge_section(markdown: str, judge_path: Path | None = None) -> str:
+    """Replace or insert the competency section from docs/judge.md when present."""
+    sidecar = judge_path or DEFAULT_JUDGE
+    if sidecar.is_file():
+        body = sidecar.read_text(encoding="utf-8").strip()
+        if body:
+            print(f"Appended judge report from {sidecar}")
+            return replace_competency_section(markdown, body)
+    return markdown.replace("\r\n", "\n").replace("\r", "\n")
+
+
+def replace_competency_section(markdown: str, judge_markdown: str) -> str:
+    """Write the judge scorecard under Competency, before Skill integrity."""
+    body = judge_markdown.replace("\r\n", "\n").replace("\r", "\n").strip()
+    body = re.sub(
+        r"^#\s+student-judge competency report\s*",
+        "",
+        body,
+        count=1,
+        flags=re.IGNORECASE,
+    ).strip()
+    section = (
+        "<!-- student-judge:competency -->\n"
+        f"{COMPETENCY_HEADING}\n\n"
+        "Filled by Guide from the student-judge run when this report was built.\n\n"
+        f"{body}\n"
+    )
+    text = markdown.replace("\r\n", "\n").replace("\r", "\n")
+    text = _JUDGE_COMMENT_RE.sub("", text, count=1)
+    if _JUDGE_SECTION_RE.search(text):
+        text = _JUDGE_SECTION_RE.sub(section.rstrip() + "\n\n", text, count=1)
+    elif re.search(r"^## Skill integrity\s*$", text, re.MULTILINE):
+        text = re.sub(
+            r"^## Skill integrity\s*$",
+            section + "\n## Skill integrity",
+            text,
+            count=1,
+            flags=re.MULTILINE,
+        )
+    else:
+        text = text.rstrip() + "\n\n" + section
+    if not text.endswith("\n"):
+        text += "\n"
+    return text
 
 
 def _new_pdf() -> FPDF:
@@ -200,6 +263,10 @@ def _body(pdf: FPDF, markdown: str, base: Path, tmp: Path) -> None:
             pdf.ln(2)
         elif kind == "list":
             _write(pdf, "- " + _inline(block[1]), 11, line=6)
+        elif kind == "ordered":
+            _write(pdf, f"{block[1]}. " + _inline(block[2]), 11, line=6)
+        elif kind == "table":
+            _table(pdf, block[1])
         elif kind == "image":
             path = _resolve(block[1], base)
             if path is None:
@@ -244,6 +311,12 @@ def _blocks(markdown: str) -> list[tuple]:
 
     while i < len(lines):
         line = lines[i]
+        if "<!--" in line:
+            flush()
+            while i < len(lines) and "-->" not in lines[i]:
+                i += 1
+            i += 1
+            continue
         if line.startswith("```"):
             flush()
             lang = line[3:].strip().lower()
@@ -268,9 +341,27 @@ def _blocks(markdown: str) -> list[tuple]:
             blocks.append(("heading", len(heading.group(1)), heading.group(2).strip()))
             i += 1
             continue
+        if line.strip().startswith("|"):
+            flush()
+            rows: list[list[str]] = []
+            while i < len(lines) and lines[i].strip().startswith("|"):
+                raw = lines[i].strip()
+                if not re.match(r"^\|[\s:|-]+\|$", raw):
+                    cells = [cell.strip() for cell in raw.strip("|").split("|")]
+                    rows.append(cells)
+                i += 1
+            if rows:
+                blocks.append(("table", rows))
+            continue
         if re.match(r"^\s*[-*]\s+", line):
             flush()
             blocks.append(("list", re.sub(r"^\s*[-*]\s+", "", line)))
+            i += 1
+            continue
+        ordered = re.match(r"^\s*(\d+)\.\s+(.*)$", line)
+        if ordered:
+            flush()
+            blocks.append(("ordered", ordered.group(1), ordered.group(2)))
             i += 1
             continue
         if not line.strip():
@@ -281,6 +372,16 @@ def _blocks(markdown: str) -> list[tuple]:
         i += 1
     flush()
     return blocks
+
+
+def _table(pdf: FPDF, rows: list[list[str]]) -> None:
+    if not rows:
+        return
+    pdf.ln(1)
+    for index, row in enumerate(rows):
+        line = " | ".join(_inline(cell) for cell in row)
+        _write(pdf, line, 8, bold=index == 0, line=5)
+    pdf.ln(2)
 
 
 def _inline(text: str) -> str:

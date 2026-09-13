@@ -50,7 +50,13 @@ covered: yes|no
 
 ## Phase 5
 
-Ask only for theming and branding preferences. Then implement one workflow at a time from the model and the wireframes, in the same conversation. After they verify, continue here. Do not require a new chat per workflow. Do not re-ask layout, fields, or flows the images already show. Do not send the student to update the wireframe when tweaks are being fleshed out. Deploy with the Render MCP after all named workflows work locally (`README.md`, `render.yaml`).
+Ask only for theming and branding preferences. Then implement one workflow at a time from the model and the wireframes, in the same conversation.
+
+Before writing code, read `docs/report.md`, the matching wireframe, and existing FastMVC routes/auth. Reuse starter login, sessions, and roles. Do not ask the student to explain starter auth. Do not ask them to produce an explore report — you read the repo.
+
+After each workflow, stop and ask them to check the running app against the wireframe and say what they saw. A short “now do the next workflow” is enough to continue. Their mismatch notes steer the next edit. Do not require a new chat per workflow. Do not re-ask layout, fields, or flows the images already show. Do not send the student to update the wireframe when tweaks are being fleshed out. Deploy with the Render MCP after all named workflows work locally (`README.md`, `render.yaml`).
+
+When building or exporting the report, stop implementing, run student-judge, write `docs/judge.md`, and let `python manage.py report` append that scorecard under Competency.
 
 ## Anti-patterns
 
@@ -73,4 +79,8 @@ Ask only for theming and branding preferences. Then implement one workflow at a 
 - Starting the next *phase* in the same chat
 - Requiring a new chat to start the next Phase 5 workflow
 - Using generic Buildmine phases 0–5 for this assignment
+- Exporting the report PDF without running student-judge and writing `docs/judge.md`
+- Quizzing the student on starter-kit login, sessions, cookies, or password hashing
+- Requiring the student to request an explore report before you implement
+- Treating a short “now do the next workflow” or a wireframe mismatch note as a weak prompt
 - Editing `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`

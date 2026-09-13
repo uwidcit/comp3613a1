@@ -129,7 +129,7 @@ Commands are implemented in `app/cli.py` (stdlib `argparse`) and invoked via `ma
 | `python manage.py seed` | Insert demo users |
 | `python manage.py run` | Start Uvicorn (reload unless `ENV=production`) |
 | `python manage.py users` | Print users in the DB |
-| `python manage.py report --name "..." --id "..."` | Export `docs/report.md` to `docs/report.pdf` at any stage (incomplete drafts allowed). Cover has name, ID, and skill-integrity hash. Fails only if course skills were edited |
+| `python manage.py report --name "..." --id "..."` | Merge `docs/judge.md` into the report if present, export `docs/report.pdf`. Incomplete drafts allowed. Cover has name, ID, and skill-integrity hash. Fails only if course skills were edited |
 | `python manage.py skills-verify` | Check course skills against `.agents/skills.lock.json` |
 | `python manage.py --help` | Show all commands |
 
@@ -187,7 +187,7 @@ Workflows (at least three; format Feature (user); steps go in the wireframe):
 - …
 ```
 
-When finished: `Use the student-judge skill on this session.`
+When finished: ask the Guide to **build the report**. That run includes student-judge (`docs/judge.md` is appended to the PDF).
 
 ### GitHub Education (student license)
 

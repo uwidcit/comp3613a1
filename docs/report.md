@@ -51,6 +51,10 @@ Every account a marker needs, including extra users you added. Starter accounts:
 
 ## YouTube URL
 
+## Competency (student-judge)
+
+Filled when the report is built. Guide runs student-judge, writes `docs/judge.md`, and export appends the scorecard here.
+
 ## Skill integrity
 
 Filled by `python manage.py report`. Do not edit the course skills.

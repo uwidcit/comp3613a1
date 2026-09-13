@@ -89,7 +89,7 @@ Markers will exercise **your** named workflows on the deployed app. If a named w
 
 ## Report
 
-Draft the report **with** the agent as Markdown (`docs/report.md`). Diagrams in that file are Mermaid. Wireframes are image links to `docs/wireframes/`. The report must include the **deployed app link** and the **user logins** a marker needs (username, password, and role for every account, including any you added beyond bob and admin). After you have reviewed the Markdown, export a PDF. The cover includes your **name**, **student ID**, the **deployed app link**, and those **logins**:
+Draft the report **with** the agent as Markdown (`docs/report.md`). Diagrams in that file are Mermaid. Wireframes are image links to `docs/wireframes/`. The report must include the **deployed app link** and the **user logins** a marker needs (username, password, and role for every account, including any you added beyond bob and admin). When you ask the agent to build or export the report, it runs **student-judge**, writes `docs/judge.md`, and appends that scorecard to the report. After you have reviewed the Markdown, export a PDF. The cover includes your **name**, **student ID**, the **deployed app link**, and those **logins**:
 
 ```bash
 python manage.py report --name "Your Name" --id "816000000"
@@ -145,7 +145,7 @@ curl -fsSL https://opencode.ai/install | bash
 
 Then `cd` to this repo, run `opencode`, and `/connect` a model. **Do not run `/init`** — it overwrites `AGENTS.md`.
 
-App commands and the Guide start prompt are in [README.md](README.md). One slice at a time. When finished: `Use the student-judge skill on this session.`
+App commands and the Guide start prompt are in [README.md](README.md). One slice at a time. When finished: ask the Guide to **build the report** (that run includes student-judge).
 
 ### Allowed / not allowed
 
@@ -205,7 +205,7 @@ One PDF via myeLearning, plus the unlisted YouTube link **inside that PDF**:
 5. Model diagram (Mermaid; note revisions)
 6. Wireframe images for the named workflows
 7. Implementation and deployment notes (public URL, what is seeded)
-8. Judge impression block (confidence and mark out of 10)
+8. Judge impression block (student-judge scorecard appended when the report is built)
 
 The PDF may include your student ID on the cover page. The **video must not**.
 
@@ -227,7 +227,7 @@ A local-only app can score at most **20/30** on implementation and deployment. T
 
 ### Impression conversion
 
-After the build, run the Judge skill on the session. It reports an **impression confidence** from 0.00 to 1.00. That converts to the impression mark:
+After the build, ask the Guide to build or export the report. That run includes the Judge skill. It reports an **impression confidence** from 0.00 to 1.00. That converts to the impression mark:
 
 **impression marks = round(confidence × 10)** (integer 0–10).
 

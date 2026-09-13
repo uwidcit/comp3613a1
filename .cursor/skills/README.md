@@ -24,7 +24,7 @@ Two project skills for coursework. Canonical copies: `.agents/skills/` (also und
 2. **File → Open Folder** on this project root.
 3. Confirm `.agents/skills/student-build/SKILL.md`.
 4. New Agent chat → `Use student-build`.
-5. End with `Use student-judge on this session.`
+5. End with `Build the report` (runs student-judge and export).
 
 ## GitHub Education (student license)
 
@@ -65,7 +65,7 @@ Skills under `.cursor/skills/` are **already included** when you clone or fork t
 2. Confirm the skills exist (paths above).
 3. Start an Agent chat in the project. Cursor discovers project skills automatically from `.cursor/skills/`.
 4. For the build: `@student-build` / ask the agent to follow the student-build skill.
-5. When finished (or for marking): ask for **Judge** / `@student-judge` on the same chat or a saved agent transcript.
+5. When finished: ask the Guide to **build the report**. That run includes Judge and appends the scorecard.
 
 ### If skills are missing (older fork / incomplete copy)
 
@@ -100,7 +100,15 @@ Workflows (at least three; format Feature (user); steps go in the wireframe):
 - …
 ```
 
-**Judge (end of session):**
+**Judge / report export:**
+
+```text
+Use student-build. Build the report and export the PDF. Name: … ID: …
+```
+
+That run includes student-judge. The scorecard is written to `docs/judge.md` and appended to the PDF.
+
+Or judge only:
 
 ```text
 Use the student-judge skill on this session.
@@ -112,7 +120,7 @@ Use the student-judge skill on this session.
 - No app code until wireframe images in `docs/wireframes/` cover every use case. Diagrams are Mermaid in `docs/report.md`.
 - Deploy Postgres and the web app with the Render MCP after local verification (`render.yaml`).
 - Guide refuses shallow “just build it” prompts and quarantines paste-backs from other chatbots.
-- Judge scores process and integrity; working code alone is not a high score.
+- Judge scores COMP 3613 process and integrity on phases 1–5. Building the report runs Judge and appends the scorecard. Working code alone is not a high score. Do not penalize missing explore reports or starter-kit auth lectures. The scorecard shows awarded total / scoreable max, then overall / 4.
 - Keep `framework-phases.md` next to each `SKILL.md` (both skills link to it).
 - Do not edit these skill files. Report export hashes them against `.agents/skills.lock.json`.
 - Free Hobby quotas last longer if you stay in-phase and verify each workflow yourself.
