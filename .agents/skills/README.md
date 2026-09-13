@@ -51,6 +51,6 @@ Use **student-build**. One phase per design chat. Ask only unanswered gaps (at m
 4. Wait for student-crafted wireframe images in `docs/wireframes/`. Suggest model edits. Flag broken or incomplete flows. Redesign only if really bad.
 5. Ask for theming and branding preferences, then implement. Deploy after local verification.
 
-Judge scores COMP 3613 phases 1–5 (not generic Buildmine). Do not penalize missing explore reports or starter-kit auth lectures. Terse steering after artefacts exist is high-quality. The scorecard must show awarded total / scoreable max, then overall / 4. Impression mark: `round(confidence × 10)` out of 10. Building or exporting the report runs Judge and writes `docs/judge.md`.
+Judge scores COMP 3613 phases 1–5 (not generic Buildmine). Read all native agent chats for this project (phases start in new chats). Students never put transcripts in the repo. Do not penalize missing explore reports or starter-kit auth lectures. Terse steering after artefacts exist is high-quality. The scorecard must show awarded total / scoreable max, then overall / 4. Impression mark: `round(confidence × 10)` out of 10. Building or exporting the report runs Judge and writes `docs/judge.md`.
 
 Export the report with `python manage.py report --name "..." --id "..."`. That command merges `docs/judge.md` into `docs/report.md`, hashes the course skills against `.agents/skills.lock.json`, and stamps the result on the PDF. Do not edit the skills or the lock. Course authors refresh the lock with `FASTMVC_SKILLS_LOCK=1 python manage.py skills-lock`.

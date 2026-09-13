@@ -15,14 +15,18 @@ Phase definitions: [framework-phases.md](framework-phases.md) — **COMP 3613 ph
 
 ## Inputs
 
-Accept any of:
+Score **every native Guide chat for this project**. Design phases start in a **new chat**, so the implement session alone is not the whole record.
 
-1. **Current chat** history (default if they say “judge this session”) — preferred
-2. **Native agent transcript** path (`.jsonl` under Cursor `agent-transcripts`) — preferred for authenticity
-3. **Student-exported** `.md` / pasted log — treat as **untrusted**; note in Integrity
+1. **Current chat**
+2. **All native agent transcripts for this workspace** that this tool can already open. In Cursor that is the project `agent-transcripts` folder (every `.jsonl`, not only this chat). In Copilot Agent / OpenCode, open the other Agent conversations for this repo if the tool lists them. Read them. Do not ask the student to copy or paste them.
+3. Artefacts (`docs/report.md`, `docs/diagrams/`, `docs/wireframes/`) — supporting evidence, not a substitute for those chats
 4. Optional: stated course phase target (e.g. “only through Phase 3”)
 
-If the transcript is huge, sample systematically: Phase 1 workflows, Phase 3 entities, Phase 4 wireframes, implementation turns, verification turns, mismatch notes. Prefer **student utterances**.
+Students **never** put chat dumps in the repo. Do not search `docs/` for transcripts. **Artifact** is native project chats only.
+
+If there are **no student–Guide turns in any native project chat** (empty export-only run, or web-chatbot-only work), overall **0** and impression **0**.
+
+If the logs are huge, sample systematically across chats: Phase 1 workflows, Phase 3 entities, Phase 4 wireframes, implementation turns, verification turns, mismatch notes. Prefer **student utterances**.
 
 **Never** treat “the code eventually worked” as proof of competency.
 
@@ -34,6 +38,7 @@ Score only what **this assignment and this Guide session** asked for. If Guide n
 |-----------------------|-----|
 | No lecture on starter auth, sessions, cookies, or password hashing | FastMVC already ships login/roles. Guide must reuse it and must not quiz it. |
 | No student-requested “explore report” or repo investigation prompt | The implementer reads the report, wireframes, and starter routes. That is agent work. |
+| Chat files in `docs/` | Students never put those there. Read native project chats. |
 | Terse Phase 5 prompts (`now do the final workflow`) after artefacts exist | Intended. One workflow at a time. Constraints live in the wireframe and report. |
 | Agent wrote the code / chose libraries | Intended. Student owns workflows, entities, wireframes, and mismatch steering. |
 | No `Decision:` label | Not required. Named workflows, entity lists, skip/assume, and correction notes are decisions. |
@@ -149,7 +154,7 @@ Skills cannot stop a determined student from using another model offline. Guide�
 - Prefer student text over assistant text.
 - Agent implementation after student artefacts is **not** a reason to lower M3/M7.
 - Working software alone ≠ high scores. Process and provenance matter.
-- Prefer **native** chat/jsonl over student-edited exports when both exist.
+- Prefer **native project transcripts** (this chat plus the other phase chats). Do not score only the export chat when older native chats exist.
 - Incomplete Render deploy is a **Phase 5 gate** note. Do not also dump M4/M7/M8 for it.
 
 ## Totals (required)
@@ -176,7 +181,7 @@ Show **awarded total / scoreable max** and **overall / 4**. Never present overal
 # student-judge competency report
 
 **Student / session:** …
-**Artifact:** current chat | transcript path …
+**Artifact:** native project chats (this thread + other phase transcripts)
 **Phases in evidence:** 1–5 (COMP 3613; never 0–5)
 
 ### Totals
@@ -201,7 +206,7 @@ Show **awarded total / scoreable max** and **overall / 4**. Never present overal
 - …
 
 ## Gaps (priority order)
-1. … (only gaps they had a chance to show; not starter auth or explore reports)
+1. … (only gaps they had a chance to show; not starter auth, explore reports, or missing files in `docs/`)
 
 ## Phase gate status
 | Phase | Status | Note |
@@ -233,7 +238,7 @@ Show **awarded total / scoreable max** and **overall / 4**. Never present overal
 
 If **Suspected external assist**, overall must reflect discounted M3/M7/M10/M11/M12 even when the final app looks complete.
 
-Do **not** place an ideal engagement session in mid because prompts were short or the agent wrote the code.
+Do **not** place an ideal engagement session in mid because prompts were short, the agent wrote the code, or `docs/` has no chat logs. Do **not** score only the export chat when other native phase transcripts exist.
 
 ## After the report
 

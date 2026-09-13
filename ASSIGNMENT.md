@@ -170,7 +170,7 @@ FastMVC web UI (not CLI-only), models matching the current diagram, all named wo
 
 ### D. Impression evidence (PDF)
 
-Which agent you used, and a transcript the Judge can score. The impression mark comes from that conversation, not from a self-written process essay.
+Which agent you used. The Judge reads your Guide chats in Cursor, Copilot Agent, or OpenCode when you ask to build the report. Chat logs are not a repo deliverable. The impression mark comes from that conversation, not from a self-written process essay.
 
 ### E. 5-minute presentation (unlisted YouTube)
 
@@ -231,7 +231,7 @@ After the build, ask the Guide to build or export the report. That run includes 
 
 **impression marks = round(confidence × 10)** (integer 0–10).
 
-Example: confidence 0.74 → 7/10. No transcript, or a web-chatbot-only session, scores 0. Suspected external-LLM laundering that is not cleared caps confidence at 0.40 (at most 4/10), even if the app works. This mark is about the conversation, not a second score of the deployed app.
+Example: confidence 0.74 → 7/10. No Guide conversation to score, or a web-chatbot-only session, scores 0. Chat logs are not submitted in the repo. Suspected external-LLM laundering that is not cleared caps confidence at 0.40 (at most 4/10), even if the app works. This mark is about the conversation, not a second score of the deployed app.
 
 ## Notes
 

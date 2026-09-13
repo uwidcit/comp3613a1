@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from fpdf import FPDF, FontFace, TextStyle
+from fpdf import FPDF, TextStyle
 
 from app.skill_integrity import IntegrityResult, require_clean, stamp_markdown
 
@@ -75,17 +75,19 @@ class ReportPDF(FPDF):
             subtitle = "Individual report (incomplete)" if self.incomplete else "Individual report"
             self.cell(self.epw, 8, subtitle)
             self.set_text_color(0, 0, 0)
-            self.set_y(44)
+            self.set_y(48)
             return
-        self.set_font("Body", "", 10)
+        # Draw in the top margin so body text (t_margin) starts below the rule.
+        self.set_y(10)
+        self.set_font("Body", "", 9)
         self.set_text_color(*NAVY)
-        self.cell(self.epw, 6, "COMP 3613 Assignment 1")
-        self.ln(2)
+        self.cell(self.epw, 6, "COMP 3613 Assignment 1", new_x="LMARGIN", new_y="NEXT")
+        self.ln(1.5)
         self.set_draw_color(*GOLD)
-        self.set_line_width(0.6)
+        self.set_line_width(0.5)
         self.line(self.l_margin, self.get_y(), self.w - self.r_margin, self.get_y())
-        self.ln(5)
         self.set_text_color(0, 0, 0)
+        self.set_y(self.t_margin)
 
     def footer(self) -> None:
         self.set_y(-14)
@@ -198,8 +200,8 @@ def _new_pdf(incomplete: bool) -> ReportPDF:
     pdf = ReportPDF(format="A4")
     pdf.incomplete = incomplete
     pdf.alias_nb_pages()
-    pdf.set_auto_page_break(auto=True, margin=18)
-    pdf.set_margins(16, 16, 16)
+    pdf.set_auto_page_break(auto=True, margin=20)
+    pdf.set_margins(16, 28, 16)
     regular, bold, italic, bold_italic = _fonts()
     if regular is None:
         raise SystemExit(
@@ -235,18 +237,54 @@ def _write_report_html(pdf: ReportPDF, markup: str) -> None:
         table_line_separators=True,
         warn_on_tags_not_matching=False,
         tag_styles={
-            "h1": FontFace(family="Body", color=NAVY_HEX, size_pt=16),
-            "h2": FontFace(family="Body", color=NAVY_HEX, size_pt=13),
-            "h3": FontFace(family="Body", color=NAVY_HEX, size_pt=11),
-            "p": FontFace(family="Body", size_pt=10.5),
-            "pre": TextStyle(font_family="Body", font_size_pt=8.5, color="#333333"),
+            "h1": TextStyle(
+                font_family="Body",
+                font_style="B",
+                color=NAVY_HEX,
+                font_size_pt=16,
+                t_margin=5,
+                b_margin=4,
+            ),
+            "h2": TextStyle(
+                font_family="Body",
+                font_style="B",
+                color=NAVY_HEX,
+                font_size_pt=13,
+                t_margin=7,
+                b_margin=3.5,
+            ),
+            "h3": TextStyle(
+                font_family="Body",
+                font_style="B",
+                color=NAVY_HEX,
+                font_size_pt=11,
+                t_margin=5.5,
+                b_margin=2.5,
+            ),
+            "p": TextStyle(font_family="Body", font_size_pt=10.5, t_margin=2, b_margin=3.5),
+            "li": TextStyle(
+                font_family="Body",
+                font_size_pt=10.5,
+                l_margin=5,
+                t_margin=1.8,
+                b_margin=1.2,
+            ),
+            "ul": TextStyle(t_margin=2.5, b_margin=3),
+            "ol": TextStyle(t_margin=2.5, b_margin=3),
+            "pre": TextStyle(
+                font_family="Body",
+                font_size_pt=8.5,
+                color="#333333",
+                t_margin=3,
+                b_margin=3,
+            ),
             "blockquote": TextStyle(
                 font_family="Body",
                 font_size_pt=10,
                 color="#4B5563",
                 l_margin=8,
-                t_margin=2,
-                b_margin=2,
+                t_margin=3,
+                b_margin=3,
             ),
         },
     )
@@ -371,13 +409,13 @@ def _markdown_to_html(markdown: str, base: Path, tmp: Path) -> str:
             lower = text.lower()
             if "competency" in lower:
                 parts.append('<p style="break-before: page"></p>')
-            parts.append(f"<{tag}>{_inline_html(text)}</{tag}>")
+            parts.append(f'<{tag} style="line-height: 1.35">{_inline_html(text)}</{tag}>')
         elif kind == "paragraph":
-            parts.append(f"<p>{_inline_html(blocks[i][1])}</p>")
+            parts.append(f'<p style="line-height: 1.45">{_inline_html(blocks[i][1])}</p>')
         elif kind == "list":
             items: list[str] = []
             while i < len(blocks) and blocks[i][0] == "list":
-                items.append(f"<li>{_inline_html(blocks[i][1])}</li>")
+                items.append(f'<li style="line-height: 1.45">{_inline_html(blocks[i][1])}</li>')
                 i += 1
             parts.append("<ul>" + "".join(items) + "</ul>")
             continue
@@ -385,7 +423,7 @@ def _markdown_to_html(markdown: str, base: Path, tmp: Path) -> str:
             items = []
             start = blocks[i][1]
             while i < len(blocks) and blocks[i][0] == "ordered":
-                items.append(f"<li>{_inline_html(blocks[i][2])}</li>")
+                items.append(f'<li style="line-height: 1.45">{_inline_html(blocks[i][2])}</li>')
                 i += 1
             parts.append(f'<ol start="{html_lib.escape(start)}">' + "".join(items) + "</ol>")
             continue

@@ -85,4 +85,5 @@ When building or exporting the report, stop implementing, run student-judge, wri
 - Quizzing the student on starter-kit login, sessions, cookies, or password hashing
 - Requiring the student to request an explore report before you implement
 - Treating a short “now do the next workflow” or a wireframe mismatch note as a weak prompt
+- Looking in `docs/` for chat transcripts, or asking the student to dump chats there
 - Editing `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`

@@ -120,7 +120,7 @@ Use the student-judge skill on this session.
 - No app code until wireframe images in `docs/wireframes/` cover every use case. Use-case diagram is a UML PNG; model is Mermaid in `docs/report.md`.
 - Deploy Postgres and the web app with the Render MCP after local verification (`render.yaml`).
 - Guide refuses shallow “just build it” prompts and quarantines paste-backs from other chatbots.
-- Judge scores COMP 3613 process and integrity on phases 1–5. Building the report runs Judge and appends the scorecard. Working code alone is not a high score. Do not penalize missing explore reports or starter-kit auth lectures. The scorecard shows awarded total / scoreable max, then overall / 4.
+- Judge scores COMP 3613 process and integrity on phases 1–5. Building the report runs Judge and appends the scorecard. Working code alone is not a high score. Read all native agent chats for this project; students never put transcripts in the repo. Do not penalize missing explore reports or starter-kit auth lectures. The scorecard shows awarded total / scoreable max, then overall / 4.
 - Keep `framework-phases.md` next to each `SKILL.md` (both skills link to it).
 - Do not edit these skill files. Report export hashes them against `.agents/skills.lock.json`.
 - Free Hobby quotas last longer if you stay in-phase and verify each workflow yourself.

@@ -263,16 +263,16 @@ When all named workflows work locally (at least three), deploy with the Render M
 
 Co-draft `docs/report.md` from decisions already in the session.
 
-When they ask to **build, update, or export** the report: **stop implementing**. Run **student-judge** on this session (current chat, plus native transcripts or `docs/copilot-chat-transcripts` if present). Write the full scorecard to `docs/judge.md` (replace the file). Then export if they asked — the PDF command merges that file into `## Competency (student-judge)` in `docs/report.md`:
+When they ask to **build, update, or export** the report: **stop implementing**. Run **student-judge** on this chat **and** every other native agent transcript for this project (each design phase is a new chat). Students never dump chats into `docs/`. Do not ask them to. Write the full scorecard to `docs/judge.md` (replace the file). Then export if they asked — the PDF command merges that file into `## Competency (student-judge)` in `docs/report.md`:
 
 ```bash
 python manage.py report --name "Student Name" --id "816000000"
 ```
 
-They may export an incomplete PDF at any phase. Do not refuse the export because a URL, login, diagram, wireframe, or transcript is missing. A missing transcript still gets a judge section with overall 0 and impression 0. A final submission still needs the deployed app link and marker logins for full marks. Do not put the student ID in the video. Export fails only if the course skills do not match `.agents/skills.lock.json`. Do not “fix” a mismatch by editing the lock or the skills.
+They may export an incomplete PDF at any phase. Do not refuse the export because a URL, login, diagram, or wireframe is missing. If this tool can see no student–Guide conversation in native project chats, the judge section is overall 0 and impression 0. A final submission still needs the deployed app link and marker logins for full marks. Do not put the student ID in the video. Export fails only if the course skills do not match `.agents/skills.lock.json`. Do not “fix” a mismatch by editing the lock or the skills.
 
 ## Judge
 
-When they ask to judge **or** when building/exporting the report, stop implementing. Use `student-judge` for the rubric method, but score **these** phases (1–5), not generic Buildmine phases 0–5. Do not penalize missing explore reports or starter-kit auth lectures. Terse steering and wireframe mismatch notes are high-quality. Report **awarded total / scoreable max**, then **overall (avg of scored) / 4**. Impression mark = `round(confidence × 10)` out of 10. No transcript = 0. Uncleared paste-back caps confidence at 0.40.
+When they ask to judge **or** when building/exporting the report, stop implementing. Use `student-judge` for the rubric method, but score **these** phases (1–5), not generic Buildmine phases 0–5. Read all native project chats; students never dump transcripts into `docs/`. Do not penalize missing explore reports or starter-kit auth lectures. Terse steering and wireframe mismatch notes are high-quality. Report **awarded total / scoreable max**, then **overall (avg of scored) / 4**. Impression mark = `round(confidence × 10)` out of 10. No student–Guide conversation in native project chats = 0. Uncleared paste-back caps confidence at 0.40.
 
 Always include the skip report (`Skips: n/3 used` and what was assumed). Skips are not an integrity failure by themselves. After the scorecard, write it to `docs/judge.md` and keep it in chat.
