@@ -61,11 +61,11 @@ You may add minimal supporting behaviour (login, roles, seed data, navigation) r
 
 ## How you build (phases)
 
-The brief does **not** list features for you. Work in this order. Use the **student-build** skill. **One phase per chat.** When a phase is done, the agent writes an artefact you can open, then stops. Start the next phase in a **new chat**. It asks a few questions based on how complete your prompt is, at most six, then writes the artefact. It will not pick your project for you. A pasted answer that looks like another chatbot’s will not stay inside that cap. If a question is too arduous or needless, say **skip**. You have **3 skips**. A skip does not replace your workflows or your wireframes. **No app code before Phase 5.**
+The brief does **not** list features for you. Work in this order. Use the **student-build** skill. **One phase per chat** for design (1–4 and theming). When a phase is done, the agent writes an artefact you can open, then stops. Start the next *phase* in a **new chat**. Phase 5 implement may build every named workflow in the **same** conversation, one at a time after you verify. It asks a few questions based on how complete your prompt is, at most eight, then writes the artefact. It will not pick your project for you. A pasted answer that looks like another chatbot’s will not stay inside that cap. If a question is too arduous or needless, say **skip**. You have **3 skips**. A skip does not replace your workflows or your wireframes. **No app code before Phase 5.**
 
 ### Phase 1 — Select the project and name at least three workflows
 
-You pick the assigned project. The agent does not. Name **at least three** workflows. Three is the minimum; more is allowed. For each: who acts, the step sequence, and what “done” looks like. If you have not said those yet, it will ask. It will not invent them, and it will not refuse extras you named.
+You pick the assigned project. The agent does not. Name **at least three** workflows as `Feature (user)` — for example `Explore/Search Publications (Public)`. Three is the minimum; more is allowed. Screen steps belong in the wireframe, not in this chat. If a name or `(user)` is missing, it will ask for that format. It will not invent names, interview each workflow for steps, or refuse extras you named.
 
 ### Phase 2 — Use-case diagram (agent drafts)
 
@@ -73,15 +73,15 @@ The agent drafts the Mermaid use-case diagram in `docs/report.md` from your Phas
 
 ### Phase 3 — Model diagram (agent drafts)
 
-The agent drafts the first Mermaid model from that same prompt. You do not list every entity and property. It will assume sensible fields and note what it assumed.
+You name the entities and their properties. The agent asks about relationships (including bridge / join tables), and important edge cases, then drafts the first Mermaid model. It will not invent the entity list or give you a pick-list.
 
 ### Phase 4 — Wireframes (you, outside the agent)
 
-This is the only artifact you must draw. Draw wireframes for **your named workflows only**, outside the agent (paper, Figma, Excalidraw, draw.io, and so on). Export **PNG or JPG** and put the images in `docs/wireframes/`. The agent waits. **You cannot start Phase 5 until every use case has a wireframe image in the workspace.** Later tweaks do not mean a new wireframe.
+This is the only artifact you must draw. Draw wireframes for **your named workflows only**, outside the agent (paper, Figma, Excalidraw, draw.io, and so on). Export **PNG or JPG** and put the images in `docs/wireframes/`. The agent waits, then suggests model edits for fields and metadata the images show, and flags workflows that look incomplete or broken. You redesign only if a named workflow cannot be completed or an image is missing or unreadable. **You cannot start Phase 5 until every use case has a wireframe image in the workspace.** Later tweaks do not mean a new wireframe.
 
 ### Phase 5 — Theming, then implement and deploy
 
-State theming and branding preferences (colors, type, tone, logo or wordmark). Then the agent implements from the current model and the imported wireframes, one workflow at a time. If a detail is fleshed out in code, the agent updates the model. It will not send you back to redraw the wireframe. Verify each workflow locally.
+State theming and branding preferences (colors, type, tone, logo or wordmark). Then the agent implements from the current model and the imported wireframes, one workflow at a time in the same chat. If a detail is fleshed out in code, the agent updates the model. It will not send you back to redraw the wireframe. Verify each workflow locally, then continue here.
 
 When all named workflows work locally (at least three), deploy **both** a Render Postgres database and the web service with the **Render MCP**. Steps are in [README.md](README.md). Put the public URL in the report. A local-only app cannot earn full implementation marks.
 
@@ -95,7 +95,7 @@ Draft the report **with** the agent as Markdown (`docs/report.md`). Diagrams in 
 python manage.py report --name "Your Name" --id "816000000"
 ```
 
-That writes `docs/report.pdf`. The export fails if the deployed link or the logins are missing, or if the course skills were edited. Submit that PDF. The YouTube video must show your name and must **not** show or say your student ID. App logins belong in the report. Database passwords do not.
+That writes `docs/report.pdf`. You may export an incomplete draft at any phase. Missing URL, logins, diagrams, or wireframes do not block the export. The final submission still needs the public URL and marker logins for full marks. Export fails only if the course skills were edited. Submit the PDF you want marked. The YouTube video must show your name and must **not** show or say your student ID. App logins belong in the report. Database passwords do not.
 
 Do **not** edit `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`. Export hashes those files and stamps the result on the PDF cover. A mismatch is an integrity fail. Markers re-check with `python manage.py skills-verify`.
 
@@ -158,7 +158,7 @@ App commands and the Guide start prompt are in [README.md](README.md). One slice
 
 ### A. Interpretation and workflows (PDF)
 
-Actors, primary job, assumptions, out-of-scope items, edge cases, and **at least three** named workflows with step sequences.
+Actors, primary job, assumptions, out-of-scope items, edge cases, and **at least three** named workflows. Screen steps belong in the wireframes.
 
 ### B. Modelling and design (PDF)
 

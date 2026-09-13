@@ -43,12 +43,12 @@ When you change a skill, update **both** `.agents/skills/` and `.cursor/skills/`
 
 ## This assignment's phases
 
-Use **student-build**. One phase per chat. Ask the question cap (at most 6; do not ask zero). The student picks the project in Phase 1. Write the artefact, pause, and tell them to open a new chat for the next phase. The student may **skip** up to 3 needless questions. A skip cannot assign the project or replace a workflow. Report `Skips: n/3 used`.
+Use **student-build**. One phase per design chat. Ask only unanswered gaps (at most 8). Do not re-ask the prompt or collect wireframe steps. The student picks the project in Phase 1. Write the artefact, pause, and tell them to open a new chat for the next *phase*. Phase 5 implement may build every workflow in the same conversation. The student may **skip** up to 3 needless questions. A skip cannot assign the project or replace a workflow. Report `Skips: n/3 used`.
 
 1. Select the project and name **at least three** workflows. More is allowed.
 2. Agent drafts the use-case diagram from that prompt.
-3. Agent drafts the model diagram from that prompt. It assumes entities and properties.
-4. Wait for student-crafted wireframe images in `docs/wireframes/`. That is the only drawing the student must do. No code until every use case is covered. Do not send them back to redraw for a tweak.
+3. Student names entities and properties. Agent asks about relationships, bridge tables, and edge cases, then drafts the model.
+4. Wait for student-crafted wireframe images in `docs/wireframes/`. Suggest model edits. Flag broken or incomplete flows. Redesign only if really bad.
 5. Ask for theming and branding preferences, then implement. Deploy after local verification.
 
 Judge turns conversation confidence into the impression mark: `round(confidence × 10)` out of 10.

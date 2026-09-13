@@ -1,18 +1,18 @@
 {
   "algorithm": "sha256",
   "normalization": "utf-8-lf",
-  "root": "2d8cebb8f628c5eabb715254a13c62b4f3f4ca0739438bec880f560849e8ba6c",
+  "root": "1ba2bff780c181fa1b18bc898d8ac76cbc5153b4c56e64c030ea59edd23a032a",
   "files": {
-    ".agents/skills/README.md": "7ff33e42a89212a2cd961a71cb23299d12cd7b8dfd6b631cf08cdba14675037d",
-    ".agents/skills/student-build/SKILL.md": "eb229d4e9b11e49adea999651795c629b30e8999edee4ab1752c59d79341e7a7",
-    ".agents/skills/student-build/framework-phases.md": "bd5aebb4d7b4b1dfcaf5ee25f51dfda177f0dd869915afe440324f3da10d6f0e",
+    ".agents/skills/README.md": "8a13b0cba62a33b29b8d17558abd58f2c94eb8f476d500f1e0e2553f9366341e",
+    ".agents/skills/student-build/SKILL.md": "e367f33c943903e7fc744290c3c68460ed2dfbe1fa8b779f95cb6650def435e5",
+    ".agents/skills/student-build/framework-phases.md": "2bdbe880cd1b047b29fc8d800e87f166226d358815c05cdcd66b1ba0fd666b2c",
     ".agents/skills/student-judge/SKILL.md": "2e3c0d09fa9c841b1879e3b26dd3859d959856251ae63bc04deb65fc78a38828",
     ".agents/skills/student-judge/framework-phases.md": "611df10f921c4b26a26d9d2774612aad7a1207f7676a0ecd665adc475da160d0",
-    ".cursor/skills/README.md": "554ae25d081dcbc8b2acbb4e248f84fedc2bed53da977a41e2b951b12a47b083",
-    ".cursor/skills/student-build/SKILL.md": "eb229d4e9b11e49adea999651795c629b30e8999edee4ab1752c59d79341e7a7",
-    ".cursor/skills/student-build/framework-phases.md": "bd5aebb4d7b4b1dfcaf5ee25f51dfda177f0dd869915afe440324f3da10d6f0e",
+    ".cursor/skills/README.md": "b4082f904c8e17db594a3271f6d9172ca07094ba22778da11466d0b0ad26704b",
+    ".cursor/skills/student-build/SKILL.md": "e367f33c943903e7fc744290c3c68460ed2dfbe1fa8b779f95cb6650def435e5",
+    ".cursor/skills/student-build/framework-phases.md": "2bdbe880cd1b047b29fc8d800e87f166226d358815c05cdcd66b1ba0fd666b2c",
     ".cursor/skills/student-judge/SKILL.md": "2e3c0d09fa9c841b1879e3b26dd3859d959856251ae63bc04deb65fc78a38828",
     ".cursor/skills/student-judge/framework-phases.md": "611df10f921c4b26a26d9d2774612aad7a1207f7676a0ecd665adc475da160d0",
-    "AGENTS.md": "00b132dcfdef62caff7a1544fb46343672b0ed95a389501c7da220847edba225"
+    "AGENTS.md": "cf1dfcaf4cb058217799f5d51800496eebac3a3b6bad24fe3ede0edc67a8198c"
   }
 }

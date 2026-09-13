@@ -197,7 +197,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_report = sub.add_parser(
         "report",
-        help="Export docs/report.md to PDF (cover includes student name and ID)",
+        help="Export docs/report.md to PDF (allowed incomplete; cover has name and ID)",
     )
     p_report.add_argument("--name", required=True, help="Student name (printed on the PDF cover)")
     p_report.add_argument("--id", dest="student_id", required=True, help="Student ID (PDF only)")

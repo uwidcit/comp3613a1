@@ -129,7 +129,7 @@ Commands are implemented in `app/cli.py` (stdlib `argparse`) and invoked via `ma
 | `python manage.py seed` | Insert demo users |
 | `python manage.py run` | Start Uvicorn (reload unless `ENV=production`) |
 | `python manage.py users` | Print users in the DB |
-| `python manage.py report --name "..." --id "..."` | Export `docs/report.md` to `docs/report.pdf` (cover has name, ID, deployed app link, logins, and skill-integrity hash). Fails if course skills were edited |
+| `python manage.py report --name "..." --id "..."` | Export `docs/report.md` to `docs/report.pdf` at any stage (incomplete drafts allowed). Cover has name, ID, and skill-integrity hash. Fails only if course skills were edited |
 | `python manage.py skills-verify` | Check course skills against `.agents/skills.lock.json` |
 | `python manage.py --help` | Show all commands |
 
@@ -181,9 +181,10 @@ Start every build session with:
 Use the student-build skill.
 
 Phase 1. Assigned project: …
-Workflow 1 — name, who acts, steps, done when: …
-Workflow 2 — name, who acts, steps, done when: …
-Workflow 3 — name, who acts, steps, done when: …
+Workflows (at least three; format Feature (user); steps go in the wireframe):
+- Explore/Search Publications (Public)
+- …
+- …
 ```
 
 When finished: `Use the student-judge skill on this session.`

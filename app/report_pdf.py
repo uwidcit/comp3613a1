@@ -42,28 +42,35 @@ def export_report(
     """Write a PDF from the markdown report. Returns the output path."""
     src = source or DEFAULT_REPORT
     dest = output or DEFAULT_PDF
-    if not src.is_file():
-        raise SystemExit(
-            f"Missing {src}. Co-draft docs/report.md first (Mermaid diagrams, "
-            "wireframe image links), then re-run this command."
-        )
     clean_name = name.strip()
     clean_id = student_id.strip()
     if not clean_name or not clean_id:
         raise SystemExit("Report export needs both --name and --id.")
 
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if not src.is_file():
+        src.parent.mkdir(parents=True, exist_ok=True)
+        src.write_text(
+            "# COMP 3613 Assignment 1\n\nDraft. Export is allowed at any stage.\n",
+            encoding="utf-8",
+        )
+        print(f"Created {src} (empty draft).")
+
     integrity = require_clean()
     markdown = stamp_markdown(src.read_text(encoding="utf-8"), integrity)
     src.write_text(markdown, encoding="utf-8")
-    app_url, logins = _require_marker_access(markdown)
+    app_url, logins, missing = _marker_access(markdown)
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     pdf = _new_pdf()
-    _cover(pdf, clean_name, clean_id, app_url, logins, integrity)
+    _cover(pdf, clean_name, clean_id, app_url, logins, integrity, missing)
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         _body(pdf, markdown, src.parent, Path(tmp))
     pdf.output(dest)
     print(f"Wrote {dest}")
+    if missing:
+        print("Incomplete draft. Missing: " + "; ".join(missing))
+        print("Re-export later when those sections are filled. Full marks still need a live URL.")
     return dest
 
 
@@ -102,11 +109,12 @@ def _cover(
     app_url: str,
     logins: str,
     integrity: IntegrityResult,
+    missing: list[str],
 ) -> None:
     pdf.add_page()
     _write(pdf, "COMP 3613 Assignment 1", 20, bold=True, line=12)
     pdf.ln(4)
-    _write(pdf, "Individual report", 12)
+    _write(pdf, "Individual report (incomplete)" if missing else "Individual report", 12)
     pdf.ln(6)
     _write(pdf, "Student name", 12, bold=True)
     _write(pdf, name, 12)
@@ -151,15 +159,14 @@ def _section(markdown: str, *titles: str) -> str:
     return "\n".join(lines).strip()
 
 
-def _require_marker_access(markdown: str) -> tuple[str, str]:
+def _marker_access(markdown: str) -> tuple[str, str, list[str]]:
+    missing: list[str] = []
     deployed = _section(markdown, "deployed app", "deployed app link", "deploy url")
     urls = re.findall(r"https?://[^\s)]+", deployed)
     app_url = next((url for url in urls if "localhost" not in url and "127.0.0.1" not in url), "")
     if not app_url:
-        raise SystemExit(
-            "docs/report.md needs a Deployed app section with the public Render URL "
-            "(not localhost)."
-        )
+        app_url = "Not yet"
+        missing.append("public Render URL")
 
     logins = _section(markdown, "logins", "user logins")
     login_lines = [
@@ -170,11 +177,11 @@ def _require_marker_access(markdown: str) -> tuple[str, str]:
         and not line.strip().startswith("Starter ")
     ]
     if len(login_lines) < 2:
-        raise SystemExit(
-            "docs/report.md needs a Logins section with at least two accounts "
-            "(username / password — role), including every user a marker must use."
-        )
-    return app_url, "\n".join(login_lines)
+        login_text = "\n".join(login_lines) if login_lines else "Not yet"
+        missing.append("marker logins (at least two accounts)")
+    else:
+        login_text = "\n".join(login_lines)
+    return app_url, login_text, missing
 
 
 def _body(pdf: FPDF, markdown: str, base: Path, tmp: Path) -> None:
@@ -194,7 +201,12 @@ def _body(pdf: FPDF, markdown: str, base: Path, tmp: Path) -> None:
         elif kind == "list":
             _write(pdf, "- " + _inline(block[1]), 11, line=6)
         elif kind == "image":
-            _image(pdf, _resolve(block[1], base))
+            path = _resolve(block[1], base)
+            if path is None:
+                _write(pdf, f"Image not in workspace yet: {block[1]}", 10, line=6)
+                pdf.ln(2)
+            else:
+                _image(pdf, path)
         elif kind == "mermaid":
             diagram_n += 1
             png = tmp / f"diagram-{diagram_n}.png"
@@ -275,7 +287,7 @@ def _inline(text: str) -> str:
     return re.sub(r"[*_`]", "", text).strip()
 
 
-def _resolve(raw: str, base: Path) -> Path:
+def _resolve(raw: str, base: Path) -> Path | None:
     path = Path(raw)
     if path.is_file():
         return path
@@ -285,12 +297,14 @@ def _resolve(raw: str, base: Path) -> Path:
     from_root = (REPO_ROOT / path).resolve()
     if from_root.is_file():
         return from_root
-    raise SystemExit(f"Image not found: {raw} (looked next to the report and at the repo root)")
+    return None
 
 
 def _image(pdf: FPDF, path: Path) -> None:
     if path.suffix.lower() not in {".png", ".jpg", ".jpeg"}:
-        raise SystemExit(f"Wireframe images must be PNG or JPG: {path}")
+        _write(pdf, f"Skipped image (use PNG or JPG): {path.name}", 10, line=6)
+        pdf.ln(2)
+        return
     pdf.ln(2)
     pdf.image(str(path), w=pdf.epw)
     pdf.ln(3)
