@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""FastMVC project CLI — stdlib argparse (no extra CLI library).
+"""FastStarter project CLI — stdlib argparse (no extra CLI library).
 
-From the project root (venv active, deps installed, ``.env`` present):
+From the project root (venv active, deps installed; ``.env`` optional — falls back to ``.env.example``):
 
     python manage.py init
-    python manage.py seed
     python manage.py run
     python manage.py users
     python manage.py report --name "Student Name" --id "816000000"
@@ -24,18 +23,26 @@ def _ensure_models_loaded() -> None:
 
 
 def cmd_init(args: argparse.Namespace) -> None:
-    """Create database tables (drops existing tables by default)."""
+    """Create database tables (drops existing by default) and seed demo users."""
     from app.config import get_settings
-    from app.database import create_db_and_tables, drop_all
+    from app.database import drop_all, ensure_db_and_tables
 
     _ensure_models_loaded()
     if args.drop:
         print("Dropping all tables…")
-        drop_all()
+        # Drop can fail on a brand-new empty DB; create path still retries.
+        try:
+            drop_all()
+        except Exception as exc:  # noqa: BLE001
+            from app.database import is_db_not_ready_error
+
+            if not is_db_not_ready_error(exc):
+                raise
+            print(f"Database not ready yet while dropping ({exc}); continuing…")
     print("Creating tables…")
-    create_db_and_tables()
+    ensure_db_and_tables()
     print(f"Database ready ({get_settings().database_uri}).")
-    if args.seed:
+    if getattr(args, "seed", True):
         cmd_seed(args)
 
 
@@ -45,13 +52,13 @@ def cmd_seed(args: argparse.Namespace) -> None:
     bob / bobpass       (regular_user)
     admin / adminpass   (admin)
     """
-    from app.database import create_db_and_tables, get_cli_session
+    from app.database import ensure_db_and_tables, get_cli_session
     from app.repositories.user import UserRepository
     from app.schemas.user import AdminCreate, RegularUserCreate
     from app.utilities.security import encrypt_password
 
     _ensure_models_loaded()
-    create_db_and_tables()
+    ensure_db_and_tables()
 
     demo_users = [
         ("bob", "bob@example.com", "bobpass", "regular_user"),
@@ -96,7 +103,7 @@ def cmd_run(args: argparse.Namespace) -> None:
         use_reload = settings.env.lower() != "production"
     else:
         use_reload = args.reload
-    print(f"Starting FastMVC on http://{bind_host}:{bind_port} (reload={use_reload})")
+    print(f"Starting FastStarter on http://{bind_host}:{bind_port} (reload={use_reload})")
     uvicorn.run(
         "app.main:app",
         host=bind_host,
@@ -127,7 +134,7 @@ def cmd_transcripts(args: argparse.Namespace) -> None:
     if result.found == 0:
         print(
             "Warning: no Guide transcripts found. "
-            "Set FASTMVC_TRANSCRIPTS_DIR if chats live outside Cursor's agent-transcripts folder."
+            "Set FASTSTARTER_TRANSCRIPTS_DIR if chats live outside Cursor's agent-transcripts folder."
         )
         raise SystemExit(2)
     print(f"Submission dump ready: {result.out_dir}")
@@ -175,7 +182,7 @@ def cmd_users(args: argparse.Namespace) -> None:
     with get_cli_session() as session:
         users = session.exec(select(User)).all()
         if not users:
-            print("No users found. Run: python manage.py seed")
+            print("No users found. Run: python manage.py init")
             return
         for user in users:
             print(
@@ -187,11 +194,14 @@ def cmd_users(args: argparse.Namespace) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="python manage.py",
-        description="FastMVC Python CLI — init database, seed demo data, run the app.",
+        description="FastStarter Python CLI — init database, seed demo data, run the app.",
     )
     sub = parser.add_subparsers(dest="command", required=True)
 
-    p_init = sub.add_parser("init", help="Create DB tables (drops existing by default)")
+    p_init = sub.add_parser(
+        "init",
+        help="Create DB tables and seed demo users (drops existing tables by default)",
+    )
     p_init.add_argument(
         "--no-drop",
         dest="drop",
@@ -199,13 +209,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Create tables without dropping existing ones",
     )
     p_init.add_argument(
-        "--seed",
-        action="store_true",
-        help="Load demo seed data after creating tables",
+        "--no-seed",
+        dest="seed",
+        action="store_false",
+        help="Skip demo user seed after creating tables",
     )
-    p_init.set_defaults(drop=True, func=cmd_init)
+    p_init.set_defaults(drop=True, seed=True, func=cmd_init)
 
-    p_seed = sub.add_parser("seed", help="Insert demo users (idempotent)")
+    p_seed = sub.add_parser(
+        "seed",
+        help="Insert demo users only (idempotent; also runs as part of init)",
+    )
     p_seed.set_defaults(func=cmd_seed)
 
     p_run = sub.add_parser("run", help="Start the web app (uvicorn)")
@@ -260,7 +274,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_skills_lock = sub.add_parser(
         "skills-lock",
-        help="Rewrite .agents/skills.lock.json (course authors; needs FASTMVC_SKILLS_LOCK=1)",
+        help="Rewrite .agents/skills.lock.json (course authors; needs FASTSTARTER_SKILLS_LOCK=1)",
     )
     p_skills_lock.set_defaults(func=cmd_skills_lock)
 

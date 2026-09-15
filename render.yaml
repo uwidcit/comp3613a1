@@ -6,12 +6,12 @@
 
 services:
   - type: web
-    name: fastmvc
+    name: faststarter
     runtime: python
     plan: free
     region: oregon
     buildCommand: pip install .
-    startCommand: python manage.py init --no-drop && python manage.py seed && python manage.py run --host 0.0.0.0 --port $PORT
+    startCommand: python manage.py init --no-drop && python manage.py run --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
@@ -20,14 +20,16 @@ services:
         value: production
       - key: DATABASE_URI
         fromDatabase:
-          name: fastmvc-db
+          name: faststarter-db
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
+      - key: CONFIG_PASSWORD
+        generateValue: true
 
 databases:
-  - name: fastmvc-db
-    databaseName: fastmvc
+  - name: faststarter-db
+    databaseName: faststarter
     plan: free
     region: oregon
     postgresMajorVersion: "16"

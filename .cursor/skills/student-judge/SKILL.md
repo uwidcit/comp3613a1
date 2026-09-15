@@ -1,7 +1,7 @@
 ---
 name: student-judge
 description: >-
-  Scores student competency on the COMP 3613 FastMVC assignment from a
+  Scores student competency on the COMP 3613 FastStarter assignment from a
   completed conversation or agent transcript. Outputs a structured rubric with
   evidence quotes. Use when the user says student-judge, judge the student,
   grade from transcript, assess competency, or after a guided build session ends.
@@ -40,7 +40,7 @@ Allowed agents: **Cursor**, **GitHub Copilot Agent / Copilot CLI**, and **OpenCo
 2. **All Guide chats for this workspace** this tool can open:
    - Cursor: project `agent-transcripts` (`.jsonl`) when present
    - Copilot Agent / OpenCode: other Agent conversations for this repo when the tool lists them
-   - **Submission dump:** `docs/transcripts/` and/or `docs/transcripts.zip` (and `FASTMVC_TRANSCRIPTS_DIR` / `.agents/transcripts/` / `docs/_native_transcripts/` if used)
+   - **Submission dump:** `docs/transcripts/` and/or `docs/transcripts.zip` (and `FASTSTARTER_TRANSCRIPTS_DIR` / `.agents/transcripts/` / `docs/_native_transcripts/` if used)
 3. Artefacts (`docs/report.md`, `docs/diagrams/`, `docs/wireframes/`) — supporting evidence, not a substitute for chats when chats exist
 4. Optional: stated course phase target (e.g. “only through Phase 3”)
 
@@ -58,7 +58,7 @@ Score only what **this assignment and this Guide session** asked for. If Guide n
 
 | Do not treat as a gap | Why |
 |-----------------------|-----|
-| No lecture on starter auth, sessions, cookies, or password hashing | FastMVC already ships login/roles. Guide must reuse it and must not quiz it. |
+| No lecture on starter auth, sessions, cookies, or password hashing | FastStarter already ships login/roles. Guide must reuse it and must not quiz it. |
 | No student-requested “explore report” or repo investigation prompt | The implementer reads the report, wireframes, and starter routes. That is agent work. |
 | Chat files hand-pasted mid-build | Students do not dump chats during phases. Report build dumps to `docs/transcripts/`. |
 | No Cursor `.jsonl` when the student used Copilot/OpenCode | Cursor folders are optional. Accept Copilot/OpenCode chats and/or `docs/transcripts.zip`. |
@@ -94,9 +94,9 @@ Score each metric **0–4**:
 | M1 | **Phase discipline** | One design phase per chat; no app code before wireframe coverage; implement one named workflow at a time; deploy is a Phase 5 gate note, not an automatic M1=2 |
 | M2 | **Problem framing** | Project + `Feature (user)` lines, include/extend or shared-use-case answers, engagement with obvious-gap reconsider questions, entity/property lists, relationship choices, and report interpretation in the student’s words. Do **not** require a who/steps/done interview. Soft on gaps: engaging the question or keeping a gap on purpose with a reason still scores solid. Terse implement prompts are fine once those exist. |
 | M3 | **Decision ownership** | Student chose project, workflows, include/extend sharing, whether to add an obvious companion use case, entities, relationships (including reconsidering a poor fit), wireframe fidelity, public vs protected, create-if-missing, and corrections. Agent implementing most of the how is expected. Cap only if the agent invented the product. Mild ding only if they ignore a gap that breaks a named workflow after Guide asked. |
-| M4 | **Artefact-before-code** | Used the report, **ERD**, and wireframes (and existing FastMVC routes) as the spec and **implemented those**, not a substitute design. Credit mismatch hunting and “why is this behind login?” Agent file reads count. **Do not** require an explore report. Score 1 only if they demanded code with no model/wireframe when those were supposed to exist, or the agent shipped an unrelated schema/UI while artefacts existed. |
+| M4 | **Artefact-before-code** | Used the report, **ERD**, and wireframes (and existing FastStarter routes) as the spec and **implemented those**, not a substitute design. Credit mismatch hunting and “why is this behind login?” Agent file reads count. **Do not** require an explore report. Score 1 only if they demanded code with no model/wireframe when those were supposed to exist, or the agent shipped an unrelated schema/UI while artefacts existed. |
 | M5 | **Verification habit** | Ran/clicked when asked; reported observed vs wireframe (or clear mismatch notes). **Do not** require one final browser walkthrough of every named workflow in a single turn. Per-workflow “what I saw” after Guide asked them to run is enough. Agent-run smoke tests do not replace student observation and are not required. |
-| M6 | **Assignment fit** | Wireframe-first and ERD-faithful implementation; reuse FastMVC auth/nav/seed; local verify then deploy. Do **not** score modal/FAB/admin-parity. |
+| M6 | **Assignment fit** | Wireframe-first and ERD-faithful implementation; reuse FastStarter auth/nav/seed; local verify then deploy. Do **not** score modal/FAB/admin-parity. |
 | M7 | **Slice explanation** | Own-words on **their** workflows, entities, relationships, wireframe clarifications, or a mismatch they found. Credit Phase 5 `student-build:code-check` / file snippets **when Guide asked**. Strong when they completed those. Starter-kit auth internals are **out of scope**. Do **not** score 1 for “never explained AuthDep.” Score down for missing snippets **only if Guide assigned a snippet/check and they refused or pasted without attempting**. If Guide never paused for snippets, do **not** Gap that — note “Guide did not elicit snippets” at most; keep M7 on other own-words evidence. |
 | M8 | **Prompt quality** | Phase-tagged prompts, `Feature (user)` format, concrete mismatch notes. Short “now do the next workflow” after workflow 1 is **solid (3)**, not weak. Whole-app “just build it” before artefacts is the low bar. |
 | M9 | **Response to pushback** | Keeps refining named mismatches rather than accepting incomplete behavior |
@@ -261,7 +261,7 @@ Show **awarded total / scoreable max** and **overall / 4**. Never present overal
 
 ## Calibration
 
-- **High overall (≥3.2)** — Ideal FastMVC session: student named workflows and entities, answered include/extend and relationship questions, engaged obvious-gap reconsider questions lightly, supplied wireframes, clarified unclear flows, attempted Phase 5 code checks, steered with mismatch notes, verified locally. Agent was primary implementer. Integrity clean. Incomplete deploy can still be high if other gates are met (note Phase 5 partial).
+- **High overall (≥3.2)** — Ideal FastStarter session: student named workflows and entities, answered include/extend and relationship questions, engaged obvious-gap reconsider questions lightly, supplied wireframes, clarified unclear flows, attempted Phase 5 code checks, steered with mismatch notes, verified locally. Agent was primary implementer. Integrity clean. Incomplete deploy can still be high if other gates are met (note Phase 5 partial).
 - **Mid (2.0–3.1)** — Missing student-owned artefacts (no `Feature (user)` lines, invented entities, no wireframes), or they accepted broken mismatches after seeing them.
 - **Low (&lt;2.0)** — Answer-seeking, skipped gates, little verification, agent invented the product, **or** likely paste-back / abandoned suspicion spiral.
 

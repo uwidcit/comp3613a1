@@ -12,7 +12,8 @@ The student drives the next phase with one complete prompt. Draft the use-case d
 | **2** | Prompt already given (`Feature (user)` lines). Agent asks about «include» / «extend», use cases shared across actors, and obvious missing use cases (edge-case reconsider), then drafts. | Agent writes `docs/diagrams/use-case.json`, runs `python manage.py usecase`, and embeds the UML PNG in `docs/report.md`. No Mermaid flowchart. No invented unrelated pick-lists. No code. |
 | **3** | Student names entities and properties. Agent asks which relationships exist for non-trivial entities, business rules, and edge cases; offers alternatives when a choice cannot handle a needed case. | Agent drafts the first-draft Mermaid `erDiagram` from their answers. No code. |
 | **4** | Student crafts wireframe images in `docs/wireframes/`. Agent asks how unclear named workflows complete when the design does not show it. | Agent checks coverage, suggests model edits, and flags broken or incomplete flows. Redesign only if really bad. No code until every use case has an image. |
-| **5** | State theming and branding preferences. Then implement. Agent presents implementation choices, asks more as confidence drops, and has the student complete **at least two snippets per workflow** (SQLModel + route) in real files. | **Build the ERD and wireframes** into working code. Tweaks update the model and the code, not the wireframe. Deploy after local verification. |
+| **5** | State theming and branding preferences; **apply** them to login/register (+ CSS tokens); remove irrelevant starter demo pages (keep `/config`). Then implement. Agent presents implementation choices, asks more as confidence drops, and has the student complete **at least two snippets per workflow** (SQLModel + route) in real files. | **Build the ERD and wireframes** into working code. Tweaks update the model and the code, not the wireframe. Deploy after local verification. |
+
 
 ## Question cap and pause
 
@@ -50,9 +51,9 @@ covered: yes|no
 
 ## Phase 5
 
-Ask for theming and branding preferences. Then **implement the provided ERD and wireframes**, one named workflow at a time, in the same conversation.
+Ask for theming and branding preferences. **Before pausing theming**, write preferences into `docs/report.md`, apply brand tokens in `app/static/css/app.css` / bases, **restyle the public landing (`/`), `login.html`, and `register.html`** to match, and **remove irrelevant starter demo pages/UI** (keep `/config` and auth). Then **implement the provided ERD and wireframes**, one named workflow at a time, in the same conversation.
 
-Before writing code, read `docs/report.md` (including the Mermaid `erDiagram`), the matching wireframe image(s), and existing FastMVC routes/auth. Reuse starter login, sessions, and roles. Build entities/fields/relationships from the ERD and screens/actions/copy from the wireframes. Do not invent a parallel schema or a different UI flow. Do not ask the student to explain starter auth. Do not ask them to produce an explore report — you read the repo. If the ERD or covering wireframe for this workflow is missing, stop and send them back; do not freestyle.
+Before writing workflow code, read `docs/report.md` (including the Mermaid `erDiagram`), the matching wireframe image(s), and existing FastStarter routes/auth. Reuse starter login, sessions, and roles (already themed). Build entities/fields/relationships from the ERD and screens/actions/copy from the wireframes. Do not invent a parallel schema or a different UI flow. Do not ask the student to explain starter auth. Do not ask them to produce an explore report — you read the repo. If the ERD or covering wireframe for this workflow is missing, stop and send them back; do not freestyle.
 
 **Ask more during implement.** Present bounded **implementation choices**, mix MCQ/open, and have the student **complete at least two snippets per named workflow**: one **SQLModel** (`app/models/…`) and one **route** (`app/routers/…`). Re-score implement confidence after each check; **as confidence drops, increase** remaining questions and add repository/service snippets (see student-build implement confidence ladder). Do not dump a finished workflow while they only watch. **MCQ options must not give away the answer**. Log `<!-- student-build:code-check … -->` with `implement_confidence`. Do not turn the phase into an exam. Do not quiz starter-kit auth internals. Finishing a workflow without the SQLModel + route student snippets is an anti-pattern.
 
@@ -87,6 +88,7 @@ When building or exporting the report, stop implementing, run student-judge, wri
 - Agent-drawn wireframes
 - Starting the next *phase* in the same chat
 - Requiring a new chat to start the next Phase 5 workflow
+- Pausing Phase 5 theming with unbranded stock login/register, or leaving starter demo pages (except `/config`)
 - Implementing every core layer with zero code-understanding checks
 - Verifying the app for the student with complex one-off PowerShell/Python scripts, UI scraping, or agent-side smoke tests
 - Implementing every layer yourself with no student file snippets, or skipping the required SQLModel + route pair

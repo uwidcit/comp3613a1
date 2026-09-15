@@ -1,4 +1,4 @@
-# Copilot instructions (FastMVC coursework)
+# Copilot instructions (FastStarter coursework)
 
 Follow `AGENTS.md` and the skills in `.agents/skills/`.
 
@@ -7,4 +7,4 @@ Follow `AGENTS.md` and the skills in `.agents/skills/`.
 - Student owns the workflows (at least three; more is allowed), design decisions, Phase 5 code-check answers when asked, and verification. Guide keeps `docs/report.md` current after each milestone.
 - No app code until wireframes in `docs/wireframes/` cover every use case.
 - After local verification, deploy Postgres and the web service with the Render MCP (`render.yaml`, `.vscode/mcp.json`). Student starts the `render` server in `.vscode/mcp.json` (API key via input prompt — never commit the key). Docs: https://render.com/docs/mcp-server and https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/extend-copilot-chat-with-mcp
-- Run/reset via `python manage.py init`, `python manage.py seed`, `python manage.py run`.
+- Run/reset via `python manage.py init` (creates tables and seeds demo users), then `python manage.py run`.

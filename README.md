@@ -1,6 +1,6 @@
 # comp3613a1
 
-COMP 3613 Assignment 1 starter ([uwidcit/comp3613a1](https://github.com/uwidcit/comp3613a1)). Built on FastMVC (FastAPI MVC).
+COMP 3613 Assignment 1 starter ([uwidcit/comp3613a1](https://github.com/uwidcit/comp3613a1)). Built on FastStarter (FastAPI MVC).
 
 **Assignment brief, agents, and GitHub Education link:** [ASSIGNMENT.md](ASSIGNMENT.md)
 
@@ -73,36 +73,23 @@ That installs the mermaid-cli version pinned in `package-lock.json` into `node_m
 **Windows:**
 
 ```powershell
-Copy-Item env.example .env
+Copy-Item .env.example .env
 ```
 
 **macOS / Linux:**
 
 ```bash
-cp env.example .env
+cp .env.example .env
 ```
 
-Defaults use a local SQLite file (`database.db`). Change `SECRET_KEY` before any real deployment.
+Defaults use a local SQLite file (`database.db`). Change `SECRET_KEY` before any real deployment. Set `CONFIG_PASSWORD` to enable the ops console at `/config` (leave empty to keep it disabled). If `.env` is missing, the app falls back to `.env.example` automatically.
 
 ### 4. Initialise the database (Python CLI)
 
-Creates tables (drops existing tables by default):
+Creates tables (drops existing by default) **and seeds demo users**:
 
 ```bash
 python manage.py init
-```
-
-Flags:
-
-```bash
-python manage.py init --no-drop   # create tables without dropping
-python manage.py init --seed      # init, then load demo users
-```
-
-### 5. Seed demo data (Python CLI)
-
-```bash
-python manage.py seed
 ```
 
 | Username | Password    | Role         |
@@ -110,22 +97,29 @@ python manage.py seed
 | `bob`    | `bobpass`   | regular_user |
 | `admin`  | `adminpass` | admin        |
 
-Seeding skips usernames that already exist. Add more rows in `cmd_seed` in `app/cli.py`.
+Flags:
+
+```bash
+python manage.py init --no-drop   # create/seed without dropping
+python manage.py init --no-seed   # tables only (skip demo users)
+```
+
+Seeding skips usernames that already exist. Add more rows in `cmd_seed` in `app/cli.py`. `python manage.py seed` still works if you only want to (re)insert demo users.
 
 ```bash
 python manage.py users
 ```
 
-### 6. Run the project (Python CLI)
+### 5. Run the project (Python CLI)
 
 ```bash
 python manage.py run
 ```
 
-Then open http://127.0.0.1:8000 (host/port from `.env` / settings).
+Then open http://127.0.0.1:5000 for the public landing page (host/port from `.env` / settings; default port **5000**). Sign in from there.
 
 ```bash
-python manage.py run --host 127.0.0.1 --port 8000
+python manage.py run --host 127.0.0.1 --port 5000
 python manage.py run --no-reload
 ```
 
@@ -137,8 +131,8 @@ Commands are implemented in `app/cli.py` (stdlib `argparse`) and invoked via `ma
 
 | Command | Purpose |
 |---------|---------|
-| `python manage.py init` | Drop (default) and create DB tables |
-| `python manage.py seed` | Insert demo users |
+| `python manage.py init` | Drop (default), create DB tables, and seed demo users |
+| `python manage.py seed` | Insert demo users only (also part of `init`) |
 | `python manage.py run` | Start Uvicorn (reload unless `ENV=production`) |
 | `python manage.py users` | Print users in the DB |
 | `python manage.py transcripts` | Dump all native Guide project chats to `docs/transcripts/` (+ `docs/transcripts.zip`) for submission |
@@ -151,11 +145,11 @@ Typical reset-and-start:
 
 ```bash
 # venv activated, cwd = project root
-python manage.py init --seed
+python manage.py init
 python manage.py run
 ```
 
-The app binds `0.0.0.0` and reads `PORT` when Render sets it. Locally it uses port 8000.
+The app binds `0.0.0.0` and reads `PORT` when Render sets it. Locally it uses `APP_PORT` (default **5000**).
 
 ---
 
@@ -174,7 +168,7 @@ Service shape lives in [`render.yaml`](render.yaml) (Blueprint reference for the
 1. Push your repo to GitHub (Render clones the remote; it cannot deploy an unpushed folder).
 2. Create a free [Render](https://render.com) account. Connect MCP for your agent using the table above, then set the active workspace (e.g. “Set my Render workspace to …”).
 3. Ask the agent to deploy using the Render MCP, matching `render.yaml`:
-   - `create_postgres` — name `fastmvc-db`, plan `free`, region `oregon`, disk 1 GB
+   - `create_postgres` — name `faststarter-db`, plan `free`, region `oregon`, disk 1 GB
    - `create_web_service` — runtime `python`, plan `free`, **same region**, repo and branch, build `pip install .`
 4. Set env vars on the web service (use the database **internal** connection string, not the external one):
    - `DATABASE_URI` — internal Postgres URL
@@ -184,7 +178,7 @@ Service shape lives in [`render.yaml`](render.yaml) (Blueprint reference for the
 5. Start command (do not drop tables on each boot):
 
 ```bash
-python manage.py init --no-drop && python manage.py seed && python manage.py run --host 0.0.0.0 --port $PORT
+python manage.py init --no-drop && python manage.py run --host 0.0.0.0 --port $PORT
 ```
 
 6. Confirm the deploy is live and `GET /health` succeeds. Put the public URL and the marker logins (username, password, role) in `docs/report.md`.
@@ -307,7 +301,8 @@ comp3613a1
 |-- ASSIGNMENT.md            # course brief, agents, GitHub Education link
 |-- README.md
 |-- manage.py                # python manage.py init|seed|run|users
-|-- env.example
+|-- .env.example
+|-- env.example              # legacy alias of .env.example
 |-- vendor/                  # PlantUML JAR + DejaVu fonts (committed)
 |-- package.json             # pinned mermaid-cli
 |-- package-lock.json
@@ -327,7 +322,7 @@ comp3613a1
 |    |- utilities/
 ```
 
-> **Note:** You **must** have a `.env` (copy from `env.example`) before init/seed/run. See `app/config.py` for settings.
+> **Note:** Prefer a local `.env` (copy from `.env.example`). If `.env` is missing, settings load from `.env.example` (or legacy `env.example`). See `app/config.py`.
 
 ## Using this in production
 

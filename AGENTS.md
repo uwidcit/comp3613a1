@@ -1,4 +1,4 @@
-# FastMVC agent instructions
+# FastStarter agent instructions
 
 These rules apply in **Cursor**, **GitHub Copilot** (agent / CLI), and **OpenCode**.
 
@@ -13,7 +13,7 @@ For any coursework build, implement, design, or debugging session, **load and fo
 - Phase 3: the student names entities and properties. Do not invent that list. Ask which relationships should exist for non-trivial entities; when a choice cannot handle a needed case, offer alternatives and ask how their pick would handle that case. Do not assume a many-to-many.
 - The student may **skip** up to 3 questions that are too arduous or needless. Assume and continue. Report `Skips: n/3 used` after each skip and when judging. A skip does not replace a missing workflow line or a missing wireframe.
 - Phase 4: wait for the student-crafted wireframe. That is the only artifact they must draw. No app code until those images cover the use cases. Compare the images to the model and suggest edits for missing metadata. Ask how a named workflow completes when that path is not obvious from the design. Flag unoptimized, incomplete, or broken workflows. Send them to redesign only if a named workflow cannot be completed, an image is missing, or the set is unreadable.
-- Phase 5: ask for theming and branding preferences, then **implement the ERD and wireframes** one workflow at a time. Present implementation choices; require **at least two student snippets per workflow** (SQLModel + route) in real `app/` files; as implement confidence drops, ask more and add repository/service snippets. Reuse starter login/sessions; do not quiz starter auth or demand an explore report. After they verify against the wireframe, continue here. Do not require a new chat per workflow. Do not invent a parallel product.
+- Phase 5: ask for theming and branding preferences, then **apply the theme to login/register** (CSS tokens + templates) and **remove irrelevant starter demo pages** (keep `/config`). Then **implement the ERD and wireframes** one workflow at a time. Present implementation choices; require **at least two student snippets per workflow** (SQLModel + route) in real `app/` files; as implement confidence drops, ask more and add repository/service snippets. Reuse starter login/sessions; do not quiz starter auth or demand an explore report. After they verify against the wireframe, continue here. Do not require a new chat per workflow. Do not invent a parallel product.
 - After a code change, **they** verify (`python manage.py run`) and report what they saw. Do not run complex one-off PowerShell/Python verification scripts or smoke-test the workflow for them.
 - When the named workflows work locally (at least three; more is allowed), deploy a Render Postgres database and the web service with the Render MCP. Follow `render.yaml`. Put the public URL in the report. Do not paste database passwords into the report.
 - Co-draft `docs/report.md` from their decisions and **update it after every phase milestone** (and after each verified Phase 5 workflow). When building or exporting the report, stop implementing, run student-judge, write `docs/judge.md`, **dump all project transcripts** (`python manage.py transcripts` → `docs/transcripts/` + zip) for submission, then export if they asked (`python manage.py report --name "..." --id "..."`). The PDF merges the judge scorecard and a transcript appendix. Do not refuse a draft export. Export hashes the course skills and fails if they were edited. Do not edit `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`.
@@ -27,8 +27,7 @@ If they ask to judge, grade, or score the session, **or** they ask to build/expo
 
 ```bash
 python manage.py init
-python manage.py seed
 python manage.py run
 ```
 
-Copy `env.example` to `.env` first. Details are in `README.md`.
+Copy `.env.example` to `.env` first (optional — the app falls back to `.env.example` if `.env` is missing). Details are in `README.md`.

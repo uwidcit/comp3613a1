@@ -2,7 +2,6 @@
 """Project CLI entrypoint (stdlib).
 
     python manage.py init
-    python manage.py seed
     python manage.py run
 """
 

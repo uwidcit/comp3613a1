@@ -15,7 +15,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 LOCK_PATH = REPO_ROOT / ".agents" / "skills.lock.json"
-LOCK_ENV = "FASTMVC_SKILLS_LOCK"
+LOCK_ENV = "FASTSTARTER_SKILLS_LOCK"
+_LOCK_ENV_ALIASES = (LOCK_ENV, "FASTMVC_SKILLS_LOCK")
 
 _GLOBS = (
     ".agents/skills/**/*.md",
@@ -86,7 +87,7 @@ def build_lock(files: dict[str, str] | None = None) -> dict[str, str | dict[str,
 
 
 def write_lock(root: Path = REPO_ROOT) -> Path:
-    if os.environ.get(LOCK_ENV) != "1":
+    if not any(os.environ.get(name) == "1" for name in _LOCK_ENV_ALIASES):
         raise SystemExit(
             "skills-lock is for course authors updating the official skills. "
             f"Set {LOCK_ENV}=1 in the environment, then re-run."

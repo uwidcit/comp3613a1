@@ -8,7 +8,7 @@ Student-facing Google Doc: https://docs.google.com/document/d/15tCfviVZO9vnqT7wv
 
 In this assignment you will interpret a **brief problem description**, decide what an MVP needs, identify **at least three** main workflows, model a solution, design a usable interface, and implement a working web application.
 
-Build with **this** starter ([comp3613a1](https://github.com/uwidcit/comp3613a1), FastMVC) and develop with **Cursor**, **GitHub Copilot** (agent mode), or **OpenCode**, using the Buildmine Guide skill. Your process (not only the final code) will be assessed.
+Build with **this** starter ([comp3613a1](https://github.com/uwidcit/comp3613a1), FastStarter) and develop with **Cursor**, **GitHub Copilot** (agent mode), or **OpenCode**, using the Buildmine Guide skill. Your process (not only the final code) will be assessed.
 
 You will also submit a **5-minute unlisted YouTube** presentation: selected project, your features, and a demo of the main workflows only.
 
@@ -21,7 +21,7 @@ Install, app commands, the Guide start prompt, and Render deploy steps are in [R
 1. Produce a reasonably in-depth interpretation of a short problem brief (actors, goals, assumptions, edge cases, MVP scope).
 2. Derive **at least three** important MVP workflows from that brief (three is the minimum, not a cap — not a laundry list of extras).
 3. Model entities and relationships that support those workflows.
-4. Design wireframes for those workflows and implement them as a usable UI on FastMVC.
+4. Design wireframes for those workflows and implement them as a usable UI on FastStarter.
 5. Deploy the application and a Postgres database on Render.
 6. Work with an LLM as a coach under Guide rules — you own decisions, verification, and explanations. Judge converts conversation confidence into the impression mark.
 7. Demo the main workflows in a short video without wasting time on an empty app, signup, login, or basic CRUD.
@@ -167,7 +167,7 @@ UML use-case diagram (PNG), Mermaid model diagram (including revisions from impl
 
 ### C. Implementation and deployment (GitHub + Render)
 
-FastMVC web UI (not CLI-only), models matching the current diagram, all named workflows usable end-to-end, seed data. Wireframe images in `docs/wireframes/`. A Render Postgres database and a public web service, URL in the PDF.
+FastStarter web UI (not CLI-only), models matching the current diagram, all named workflows usable end-to-end, seed data. Wireframe images in `docs/wireframes/`. A Render Postgres database and a public web service, URL in the PDF.
 
 ### D. Impression evidence (PDF)
 
@@ -220,7 +220,7 @@ The PDF may include your student ID on the cover page. The **video must not**.
 | Use case diagram | UML image; actors and use cases for the named workflows | 10 |
 | Model diagram | Mermaid; first draft revised as the features are built | 10 |
 | UI design | External wireframes for the named workflows; every use case covered | 10 |
-| Implementation and deployment | FastMVC; named workflows end-to-end; seed data; Render Postgres and public web URL | 30 |
+| Implementation and deployment | FastStarter; named workflows end-to-end; seed data; Render Postgres and public web URL | 30 |
 | Presentation | 5-min unlisted YouTube: project, features, demo of the named workflows only; name shown, no student ID; link in the report | 10 |
 | Impression | Judge confidence on the conversation, converted to a mark out of 10 | 10 |
 | **Total** |  | **100** |
@@ -237,7 +237,7 @@ Example: confidence 0.74 → 7/10. No Guide conversation to score, or a web-chat
 
 ## Notes
 
-- Individual work. FastMVC boilerplate may be used and cited.
+- Individual work. FastStarter boilerplate may be used and cited.
 - LLMs only under Guide in Cursor, Copilot Agent, or OpenCode.
 - Prefer deep workflows over many shallow ones. Three is the minimum; more is allowed.
 - The use-case diagram is a UML PNG in `docs/diagrams/` (agent-generated; embedded in `docs/report.md`). The model diagram is Mermaid. Wireframes are images you make elsewhere and drop into `docs/wireframes/`.

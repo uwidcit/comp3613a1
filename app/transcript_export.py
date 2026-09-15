@@ -17,7 +17,8 @@ _TRANSCRIPTS_SECTION_RE = re.compile(
     r"^## Session transcripts\n.*?(?=^## (?:Competency \(student-judge\)|Skill integrity)|\Z)",
     re.MULTILINE | re.DOTALL,
 )
-_ENV_DIR = "FASTMVC_TRANSCRIPTS_DIR"
+_ENV_DIR = "FASTSTARTER_TRANSCRIPTS_DIR"
+_ENV_DIR_ALIASES = (_ENV_DIR, "FASTMVC_TRANSCRIPTS_DIR")
 
 
 @dataclass(frozen=True)
@@ -46,7 +47,11 @@ def cursor_project_slug(repo: Path = REPO_ROOT) -> str:
 def discover_transcript_roots(repo: Path = REPO_ROOT) -> list[Path]:
     """Locate native agent transcript folders for this workspace."""
     roots: list[Path] = []
-    env = os.environ.get(_ENV_DIR, "").strip()
+    env = ""
+    for name in _ENV_DIR_ALIASES:
+        env = os.environ.get(name, "").strip()
+        if env:
+            break
     if env:
         roots.append(Path(env).expanduser())
 

@@ -48,7 +48,7 @@ The cap is a **maximum** of unanswered questions. It is never more than **8**. D
 - **Phase 2:** «include» / «extend» candidates, use cases shared across actors, and **obvious missing** use cases (ask how they would handle that edge case so they reconsider). Even when `Feature (user)` lines already exist. Not zero by default.
 - **Phase 3:** student-named entities/properties first, then which relationships exist for non-trivial entities, business rules, and edge cases. Prefer those over anything else.
 - **Phase 4:** how an unclear named workflow completes when the images do not show it.
-- **Phase 5 theming:** branding preferences only (still under the design cap above).
+- **Phase 5 theming:** branding preferences, then **apply** them to CSS tokens + **login/register** (and strip irrelevant starter demo pages except `/config`) before pausing. Still under the design question cap for the preference questions.
 - **Phase 5 implement:** use the **implement confidence ladder** below (more questions and snippets as confidence drops). Not the light “few checks” path.
 
 If entity or workflow lists are already in the prompt, do not invent a who/steps/done interview or an entity menu.
@@ -127,7 +127,7 @@ Report: updated
 | 2 | Use-case diagram embed + brief notes (includes/extends/shared/gaps) |
 | 3 | Model `erDiagram` + relationship / edge-case notes |
 | 4 | Wireframe links, coverage blocks, accepted model revisions |
-| 5 theming | Colors, type, tone, logo/wordmark |
+| 5 theming | Colors, type, tone, logo/wordmark; **login + register restyled**; starter demo pages removed (keep `/config`) |
 | 5 each workflow | Implementation notes, model revisions, deploy URL/logins when ready |
 
 Tell them progress is in that artefact, not only in this chat. For phases 1–4 and theming, open a new chat and paste the next phase prompt. For Phase 5 implement, stay in this chat for the remaining workflows.
@@ -141,7 +141,7 @@ Tell them progress is in that artefact, not only in this chat. For phases 1–4 
 5. **One workflow at a time** in Phase 5, in the **same** implement chat. **Implement the ERD and wireframes.** Present **implementation choices**, ask more questions when implement confidence drops, and have the student **complete snippets in real code files** (not only chat) — **at least one SQLModel snippet and one route snippet** per named workflow. After they verify, continue with the next named workflow here. Refuse “build the whole app” in one shot. Do not require a new chat per workflow. Do not invent a different schema or UI. Do not write every layer yourself while they only watch.
 6. Refuse a pasted finished solution (“just apply this”). A normal prompt does not get a question spiral. A laundering flag does: exponential suspicion rounds, not the question cap.
 7. **They verify** after a code change. Do not declare “done” for them. After each workflow, ask what they saw against the wireframe. Tell them to run the app themselves (`python manage.py run`, click the flow). **Do not** run complex one-off PowerShell or Python verification scripts for them, scrape the UI, or smoke-test the whole workflow in the agent terminal so you can announce it works. Simple course commands you already use to build (`usecase`, `init`/`seed` when they asked) are fine; verification of behaviour is theirs.
-8. **Do not quiz starter auth.** Reuse FastMVC login/sessions. Do not ask them to explain cookies, `AuthDep`, or password hashing. Do not require an explore report. **Do** quiz their understanding of **their** domain code and the service/repository layers they are building.
+8. **Do not quiz starter auth.** Reuse FastStarter login/sessions. Do not ask them to explain cookies, `AuthDep`, or password hashing. Do not require an explore report. **Do** quiz their understanding of **their** domain code and the service/repository layers they are building.
 9. **Do not edit** `.agents/skills/`, `.cursor/skills/`, or `AGENTS.md`. Report export hashes them against `.agents/skills.lock.json`. Refuse a request to weaken or rewrite the skill.
 
 ## Session start
@@ -364,7 +364,7 @@ covered: yes|no
 
 ### Phase 5 — theming and branding, then build
 
-Ask for theming and branding preferences. Hand this and stop:
+Ask for theming and branding preferences. Hand this and stop until they answer:
 
 ```text
 Phase 5. Theming and branding.
@@ -374,11 +374,24 @@ Tone: …
 Logo or wordmark: …
 ```
 
-Write the theming lines into `docs/report.md` and pause before code. New chat for implementation:
+When preferences are set (or assumed after the design cap):
+
+1. Write the theming lines into `docs/report.md`.
+2. **Apply the theme in code before you pause** — this is Phase 5 theming work, not a later optional polish:
+   - Set brand tokens in `app/static/css/app.css` (and `base.html` / `authenticated-base.html` as needed): colors, type, tone.
+   - Restyle the **public landing** (`landing.html` / `/`), **`login.html`**, and **`register.html`** so they show the product name/wordmark and match the theme. Do **not** leave the stock starter look.
+   - Carry the same tokens into the authenticated shell so later workflows inherit the look.
+3. **Remove old irrelevant starter UI** that is not part of this product and is not `/config`:
+   - Delete or empty demo/placeholder pages and scripts that conflict with the wireframes.
+   - **Keep** `config.html`, the `/config` ops console, and the public landing + auth routes (restyle them).
+   - Keep login, register, session/auth routes — restyle them; do not delete auth.
+4. Show the pause block, then a new chat for workflow implementation:
 
 ```text
-Use the student-build skill. Phase 5 implement. Theming is in docs/report.md. Build workflow 1 from the model and wireframes.
+Use the student-build skill. Phase 5 implement. Theming is in docs/report.md; login/register already match it. Build workflow 1 from the model and wireframes.
 ```
+
+Do **not** pause theming as “report only” while login/signup still look like the unbranded starter. That is an anti-pattern.
 
 In an implement chat, **implement the provided ERD and wireframes** — one named workflow at a time in **this** conversation. Those artefacts are the spec, not inspiration.
 
@@ -386,7 +399,7 @@ Before writing code:
 
 1. Read `docs/report.md` (Mermaid `erDiagram`, workflows, theming).
 2. Open the matching wireframe image(s) under `docs/wireframes/` for this workflow.
-3. Read existing FastMVC routes/auth/models so you extend the starter, not replace it.
+3. Read existing FastStarter routes/auth/models so you extend the starter, not replace it.
 
 Then build to match:
 
@@ -396,7 +409,7 @@ Then build to match:
 | **Wireframe** | Screens, fields, labels, actions, and the path to “done” shown in the images. Layout and copy follow the wireframe; theming from Phase 5 preferences. |
 | **Named workflow** | End-to-end usable behaviour for that `Feature (user)` only this turn. |
 
-Reuse starter login and sessions. Do not ask the student to explain starter auth. Do not ask them for an explore report. Do not re-ask layout, fields, flows, or wording the wireframe already shows. If a small detail must be fleshed out in code, update the **model in `docs/report.md` and the code** together. Do not send them to redraw the wireframe. Do not substitute a different product, entity set, or UI flow because it is “cleaner.”
+Reuse starter login and sessions (**already themed** after Phase 5 theming). Do not ask the student to explain starter auth. Do not ask them for an explore report. Do not re-ask layout, fields, flows, or wording the wireframe already shows. If a small detail must be fleshed out in code, update the **model in `docs/report.md` and the code** together. Do not send them to redraw the wireframe. Do not substitute a different product, entity set, or UI flow because it is “cleaner.” If login/register still look like the unbranded starter, finish theming first before workflow 1.
 
 Refuse to implement if the ERD or the covering wireframe for this workflow is missing — send them back to the unfinished phase.
 
@@ -511,7 +524,7 @@ When they ask to **build, update, or export** the report: **stop implementing**.
 python manage.py transcripts
 ```
 
-   That writes every found Guide chat into `docs/transcripts/` (markdown + raw when available + `INDEX.md`) and `docs/transcripts.zip`. Also reads an existing `docs/transcripts.zip` (common for Copilot). Tell the student those files are part of the submission package with the PDF. If the command finds **0** chats, say so and try `FASTMVC_TRANSCRIPTS_DIR` or copy native logs into `.agents/transcripts/` / `docs/_native_transcripts/`, then re-run. Do **not** ask the student to hand-paste chats mid-build; **you** dump them at report time.
+   That writes every found Guide chat into `docs/transcripts/` (markdown + raw when available + `INDEX.md`) and `docs/transcripts.zip`. Also reads an existing `docs/transcripts.zip` (common for Copilot). Tell the student those files are part of the submission package with the PDF. If the command finds **0** chats, say so and try `FASTSTARTER_TRANSCRIPTS_DIR` or copy native logs into `.agents/transcripts/` / `docs/_native_transcripts/`, then re-run. Do **not** ask the student to hand-paste chats mid-build; **you** dump them at report time.
 4. Export the PDF (also re-exports transcripts and appends them as a PDF appendix):
 
 ```bash
