@@ -11,16 +11,33 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from fpdf import FPDF, TextStyle
+from fpdf import FPDF, FontFace, TextStyle
+from fpdf.html import HTML2FPDF
 from PIL import Image
 
 from app.skill_integrity import IntegrityResult, require_clean, stamp_markdown
+from app.transcript_export import (
+    appendix_markdown,
+    export_project_transcripts,
+    merge_transcripts_section,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REPORT = REPO_ROOT / "docs" / "report.md"
 DEFAULT_PDF = REPO_ROOT / "docs" / "report.pdf"
 DEFAULT_JUDGE = REPO_ROOT / "docs" / "judge.md"
 COMPETENCY_HEADING = "## Competency (student-judge)"
+USECASE_HEADING = "## Use case diagram"
+USECASE_IMAGE_REL = "diagrams/use-case.png"
+USECASE_IMAGE_MD = f"![Use case diagram]({USECASE_IMAGE_REL})"
+_USECASE_IMAGE_RE = re.compile(
+    r"!\[[^\]]*\]\((?:docs/)?diagrams/use-case\.png\)",
+    re.IGNORECASE,
+)
+_USECASE_SECTION_RE = re.compile(
+    r"^## Use case diagram\n.*?(?=^## |\Z)",
+    re.MULTILINE | re.DOTALL,
+)
 
 NAVY = (27, 54, 93)
 NAVY_HEX = "#1B365D"
@@ -72,7 +89,17 @@ _FONT_CANDIDATES = (
 )
 
 
+class ReportHTML2FPDF(HTML2FPDF):
+    """fpdf2 ignores <font color> inside <th>/<td>; force white heading text."""
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        super().handle_starttag(tag, attrs)
+        if tag == "table" and self.table is not None:
+            self.table._headings_style = FontFace(emphasis="BOLD", color="#FFFFFF")
+
+
 class ReportPDF(FPDF):
+    HTML2FPDF_CLASS = ReportHTML2FPDF
     incomplete = False
 
     def header(self) -> None:
@@ -141,7 +168,10 @@ def export_report(
         print(f"Created {src} (empty draft).")
 
     integrity = require_clean()
+    transcripts = export_project_transcripts()
     markdown = merge_judge_section(src.read_text(encoding="utf-8"))
+    markdown = ensure_usecase_in_report(markdown, report_path=src)
+    markdown = merge_transcripts_section(markdown, transcripts)
     markdown = stamp_markdown(markdown, integrity)
     src.write_text(markdown, encoding="utf-8")
     if COMPETENCY_HEADING not in markdown:
@@ -156,13 +186,81 @@ def export_report(
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         cover = _cover_html(clean_name, clean_id, app_url, logins, integrity, missing)
         body = _markdown_to_html(markdown, src.parent, Path(tmp))
+        appendix = _markdown_to_html(
+            appendix_markdown(transcripts),
+            src.parent,
+            Path(tmp),
+        )
         _write_report_html(pdf, cover + body)
+        if appendix.strip():
+            pdf.add_page()
+            _write_report_html(pdf, appendix)
     pdf.output(dest)
     print(f"Wrote {dest}")
     if missing:
         print("Incomplete draft. Missing: " + "; ".join(missing))
         print("Re-export later when those sections are filled. Full marks still need a live URL.")
     return dest
+
+
+def ensure_usecase_in_report(
+    markdown: str,
+    *,
+    report_path: Path | None = None,
+) -> str:
+    """Keep the use-case PNG linked with a path relative to docs/report.md.
+
+    Regenerates docs/diagrams/use-case.png when the JSON spec exists.
+    Rewrites broken ``docs/diagrams/...`` links to ``diagrams/use-case.png``.
+    """
+    text = markdown.replace("\r\n", "\n").replace("\r", "\n")
+    spec = REPO_ROOT / "docs" / "diagrams" / "use-case.json"
+    png = REPO_ROOT / "docs" / "diagrams" / "use-case.png"
+    if spec.is_file():
+        try:
+            from app.usecase_diagram import render_usecase_png
+
+            render_usecase_png(spec_path=spec, output=png)
+            print(f"Rendered use-case diagram -> {png.as_posix()}")
+        except SystemExit as exc:
+            print(f"Use-case diagram not rendered: {exc}")
+        except Exception as exc:  # noqa: BLE001 — export should continue
+            print(f"Use-case diagram not rendered: {exc}")
+
+    if _USECASE_IMAGE_RE.search(text):
+        text = _USECASE_IMAGE_RE.sub(USECASE_IMAGE_MD, text, count=1)
+    elif _USECASE_SECTION_RE.search(text):
+        text = _USECASE_SECTION_RE.sub(
+            f"{USECASE_HEADING}\n\n{USECASE_IMAGE_MD}\n\n",
+            text,
+            count=1,
+        )
+    else:
+        # Insert before Model diagram when possible.
+        if re.search(r"^## Model diagram\s*$", text, re.MULTILINE):
+            text = re.sub(
+                r"^## Model diagram\s*$",
+                f"{USECASE_HEADING}\n\n{USECASE_IMAGE_MD}\n\n## Model diagram",
+                text,
+                count=1,
+                flags=re.MULTILINE,
+            )
+        else:
+            text = text.rstrip() + f"\n\n{USECASE_HEADING}\n\n{USECASE_IMAGE_MD}\n"
+
+    # Verify the relative link resolves from the report file.
+    base = (report_path or DEFAULT_REPORT).parent
+    resolved = _resolve(USECASE_IMAGE_REL, base)
+    if resolved is None and not png.is_file():
+        print(
+            "Warning: use-case PNG missing. Write docs/diagrams/use-case.json "
+            "and run python manage.py usecase (or re-export after Phase 2)."
+        )
+    elif resolved is not None:
+        print(f"Use-case diagram linked in report -> {USECASE_IMAGE_REL}")
+    if not text.endswith("\n"):
+        text += "\n"
+    return text
 
 
 def merge_judge_section(markdown: str, judge_path: Path | None = None) -> str:
@@ -717,15 +815,33 @@ def _blocks(markdown: str) -> list[tuple]:
 
 
 def _resolve(raw: str, base: Path) -> Path | None:
+    """Resolve an image path from report-relative, repo-root, or docs/-prefixed forms."""
+    candidates: list[Path] = []
     path = Path(raw)
-    if path.is_file():
-        return path
-    from_report = (base / path).resolve()
-    if from_report.is_file():
-        return from_report
-    from_root = (REPO_ROOT / path).resolve()
-    if from_root.is_file():
-        return from_root
+    if path.is_absolute():
+        candidates.append(path)
+    else:
+        candidates.append(base / path)
+        candidates.append(REPO_ROOT / path)
+        # report.md lives in docs/; authors sometimes write docs/diagrams/... by mistake
+        posix = path.as_posix().lstrip("./")
+        if posix.startswith("docs/"):
+            candidates.append(base / posix[len("docs/") :])
+            candidates.append(REPO_ROOT / posix)
+        elif base.name == "docs":
+            candidates.append(REPO_ROOT / "docs" / posix)
+
+    seen: set[Path] = set()
+    for candidate in candidates:
+        try:
+            key = candidate.resolve()
+        except OSError:
+            key = candidate
+        if key in seen:
+            continue
+        seen.add(key)
+        if key.is_file():
+            return key
     return None
 
 

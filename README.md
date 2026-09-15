@@ -141,7 +141,8 @@ Commands are implemented in `app/cli.py` (stdlib `argparse`) and invoked via `ma
 | `python manage.py seed` | Insert demo users |
 | `python manage.py run` | Start Uvicorn (reload unless `ENV=production`) |
 | `python manage.py users` | Print users in the DB |
-| `python manage.py report --name "..." --id "..."` | Merge `docs/judge.md` into the report if present, export `docs/report.pdf`. Incomplete drafts allowed. Cover has name, ID, and skill-integrity hash. Fails only if course skills were edited |
+| `python manage.py transcripts` | Dump all native Guide project chats to `docs/transcripts/` (+ `docs/transcripts.zip`) for submission |
+| `python manage.py report --name "..." --id "..."` | Merge `docs/judge.md`, re-export Guide transcripts, write `docs/report.pdf` (transcript appendix). Incomplete drafts allowed. Cover has name, ID, and skill-integrity hash. Fails only if course skills were edited |
 | `python manage.py usecase` | Render `docs/diagrams/use-case.json` to a UML use-case PNG via the vendored PlantUML JAR (`docs/diagrams/use-case.png`) |
 | `python manage.py skills-verify` | Check course skills against `.agents/skills.lock.json` |
 | `python manage.py --help` | Show all commands |
@@ -160,10 +161,18 @@ The app binds `0.0.0.0` and reads `PORT` when Render sets it. Locally it uses po
 
 ## Deploy (Render MCP)
 
-Deploy a **Postgres database** and the **web app** on Render’s free plan. Use the Render MCP from your agent (Cursor, Copilot, or OpenCode). Config lives in `render.yaml` and `.cursor/mcp.json`. Do not commit an API key. Do not put the **database** password in the report or the video. **App** usernames and passwords belong in `docs/report.md`.
+Deploy a **Postgres database** and the **web app** on Render’s free plan. Agents talk to Render through the [Render MCP server](https://render.com/docs/mcp-server) (`https://mcp.render.com/mcp`). This repo already ships the MCP config for each supported agent — do **not** paste an API key into a committed file. Do not put the **database** password in the report or the video. **App** usernames and passwords belong in `docs/report.md`.
+
+| Agent | MCP config in this repo | Auth |
+|-------|-------------------------|------|
+| **Cursor** | [`.cursor/mcp.json`](.cursor/mcp.json) | Prefer `/add-plugin render` then **Authenticate** (OAuth). Or create an [API key](https://dashboard.render.com/u/settings?add-api-key) and put it only in your user `~/.cursor/mcp.json` headers — never in the repo. |
+| **GitHub Copilot** (VS Code) | [`.vscode/mcp.json`](.vscode/mcp.json) | Create a Render [API key](https://dashboard.render.com/u/settings?add-api-key). Open `.vscode/mcp.json`, click **Start**, paste the key when prompted (`${input:render-api-key}`). Use Copilot Chat in **Agent** mode. See [Extend Copilot Chat with MCP](https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/extend-copilot-chat-with-mcp). |
+| **OpenCode** | [`opencode.json`](opencode.json) | From the project root run `opencode`, then `/mcps` (or `opencode mcp auth render`) and finish OAuth in the browser. |
+
+Service shape lives in [`render.yaml`](render.yaml) (Blueprint reference for the agent — create resources with MCP, do not also apply the Blueprint in the Dashboard).
 
 1. Push your repo to GitHub (Render clones the remote; it cannot deploy an unpushed folder).
-2. Create a free [Render](https://render.com) account. Open this project so `.cursor/mcp.json` loads the Render MCP (`https://mcp.render.com/mcp`). Sign in when prompted, or install the [Render plugin](https://render.com/docs/mcp-server) and complete OAuth.
+2. Create a free [Render](https://render.com) account. Connect MCP for your agent using the table above, then set the active workspace (e.g. “Set my Render workspace to …”).
 3. Ask the agent to deploy using the Render MCP, matching `render.yaml`:
    - `create_postgres` — name `fastmvc-db`, plan `free`, region `oregon`, disk 1 GB
    - `create_web_service` — runtime `python`, plan `free`, **same region**, repo and branch, build `pip install .`
@@ -200,7 +209,7 @@ Workflows (at least three; format Feature (user); steps go in the wireframe):
 - …
 ```
 
-When finished: ask the Guide to **build the report**. That run includes student-judge (`docs/judge.md` is appended to the PDF).
+When finished: ask the Guide to **build the report**. That run includes student-judge, dumps all project transcripts to `docs/transcripts/` (+ zip) for submission, and builds the PDF.
 
 ### GitHub Education (student license)
 
@@ -220,6 +229,7 @@ If the student Copilot offer is not available yet, use **Copilot Free** in agent
 2. **File → Open Folder** → this project root (not a parent folder).
 3. New **Agent** chat. Confirm it can see `student-build` (or type `/student-build`).
 4. Paste the Guide prompt above.
+5. For Render deploy later: run `/add-plugin render` (or rely on [`.cursor/mcp.json`](.cursor/mcp.json)) and complete OAuth when asked. Docs: [Render MCP](https://render.com/docs/mcp-server).
 
 ### GitHub Copilot (agent mode)
 
@@ -231,6 +241,7 @@ Skills load only in **agent** mode or the Copilot CLI — not inline autocomplet
 4. **File → Open Folder** → this project root.
 5. Open Copilot Chat and switch the mode to **Agent** (not Ask, not Edit).
 6. Start with the prompt above. If the skill does not attach, say: `Use the student-build skill in .agents/skills/student-build/SKILL.md`.
+7. For Render deploy later: open [`.vscode/mcp.json`](.vscode/mcp.json), click **Start**, paste a Render API key when prompted, then confirm tools appear in Copilot Chat (tools icon). Docs: [Extend Copilot Chat with MCP](https://docs.github.com/en/copilot/how-tos/provide-context/use-mcp-in-your-ide/extend-copilot-chat-with-mcp) · [Render MCP](https://render.com/docs/mcp-server).
 
 Optional CLI (same account): [Install GitHub Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli), then run it from this folder. It also reads `AGENTS.md` and `.github/copilot-instructions.md`.
 
@@ -262,6 +273,7 @@ Then:
 2. Run `opencode`.
 3. Connect a model with `/connect` (or `opencode auth login`). Do **not** run `/init` — this repo already has `AGENTS.md`, and `/init` would overwrite it.
 4. Start with the prompt above. OpenCode should follow `AGENTS.md` and can load `.agents/skills/student-build`.
+5. For Render deploy later: [`opencode.json`](opencode.json) already lists the Render MCP — run `/mcps` and authenticate when prompted.
 
 More setup detail: [`.agents/skills/README.md`](.agents/skills/README.md).
 
@@ -286,6 +298,10 @@ In this template, business rules often sit in a **service** layer, with reposito
 comp3613a1
 |-- .agents/skills/           # Guide + Judge (Cursor, Copilot, OpenCode)
 |-- .cursor/skills/          # same skills (older Cursor)
+|-- .cursor/mcp.json         # Render MCP (Cursor)
+|-- .vscode/mcp.json         # Render MCP (Copilot / VS Code)
+|-- opencode.json            # Render MCP (OpenCode)
+|-- render.yaml              # Render Blueprint reference for MCP deploy
 |-- .github/copilot-instructions.md
 |-- AGENTS.md                # always-on: use Guide unless asked to Judge
 |-- ASSIGNMENT.md            # course brief, agents, GitHub Education link

@@ -69,7 +69,7 @@ You pick the assigned project. The agent does not. Name **at least three** workf
 
 ### Phase 2 — Use-case diagram (agent drafts)
 
-The agent asks which use cases should «include» or «extend» others and whether any use cases are shared across actors, then writes a UML use-case PNG (`docs/diagrams/use-case.png`) and inserts it into `docs/report.md`. You do not draw it. Mermaid is not used for this diagram.
+The agent asks which use cases should «include» or «extend» others, whether any use cases are shared across actors, and — if an obvious companion is missing — how you would handle that edge case (so you can reconsider). Then it writes a UML use-case PNG (`docs/diagrams/use-case.png`) and inserts it into `docs/report.md`. You do not draw it. Mermaid is not used for this diagram.
 
 ### Phase 3 — Model diagram (agent drafts)
 
@@ -81,7 +81,7 @@ This is the only artifact you must draw. Draw wireframes for **your named workfl
 
 ### Phase 5 — Theming, then implement and deploy
 
-State theming and branding preferences (colors, type, tone, logo or wordmark). Then the agent implements from the current model and the imported wireframes, one workflow at a time in the same chat. For a few core pieces it may ask a short multiple-choice or open question, or ask you to write a small snippet in the right layer file (for example repository vs service). If a detail is fleshed out in code, the agent updates the model. It will not send you back to redraw the wireframe. Verify each workflow locally, then continue here.
+State theming and branding preferences (colors, type, tone, logo or wordmark). Then the agent **implements your ERD and wireframes** — models and relationships from the diagram, screens and flows from the images — one workflow at a time in the same chat. It will present **implementation choices**, ask questions, and have you **complete short snippets in real code files**. If you struggle, it asks more and requires more snippets. If a detail is fleshed out in code, the agent updates the model. It will not send you back to redraw the wireframe. Verify each workflow locally against the wireframe, then continue here.
 
 When all named workflows work locally (at least three), deploy **both** a Render Postgres database and the web service with the **Render MCP**. Steps are in [README.md](README.md). Put the public URL in the report. A local-only app cannot earn full implementation marks.
 
@@ -89,13 +89,14 @@ Markers will exercise **your** named workflows on the deployed app. If a named w
 
 ## Report
 
-Draft the report **with** the agent as Markdown (`docs/report.md`). The use-case diagram is a UML image (`docs/diagrams/use-case.png`). The model diagram is Mermaid. Wireframes are image links to `docs/wireframes/`. The report must include the **deployed app link** and the **user logins** a marker needs (username, password, and role for every account, including any you added beyond bob and admin). When you ask the agent to build or export the report, it runs **student-judge**, writes `docs/judge.md`, and appends that scorecard to the report. After you have reviewed the Markdown, export a PDF. The cover includes your **name**, **student ID**, the **deployed app link**, and those **logins**:
+Draft the report **with** the agent as Markdown (`docs/report.md`). Update it after **every phase**. The use-case diagram is a UML image (`docs/diagrams/use-case.png`). The model diagram is Mermaid. Wireframes are image links to `docs/wireframes/`. The report must include the **deployed app link** and the **user logins** a marker needs (username, password, and role for every account, including any you added beyond bob and admin). When you ask the agent to build or export the report, it runs **student-judge**, writes `docs/judge.md`, **dumps all native Guide chat transcripts** into `docs/transcripts/` and `docs/transcripts.zip` for submission, and appends that scorecard plus a transcript appendix to the PDF. After you have reviewed the Markdown, export a PDF. The cover includes your **name**, **student ID**, the **deployed app link**, and those **logins**:
 
 ```bash
+python manage.py transcripts
 python manage.py report --name "Your Name" --id "816000000"
 ```
 
-That writes `docs/report.pdf`. You may export an incomplete draft at any phase. Missing URL, logins, diagrams, or wireframes do not block the export. The final submission still needs the public URL and marker logins for full marks. Export fails only if the course skills were edited. Submit the PDF you want marked. The YouTube video must show your name and must **not** show or say your student ID. App logins belong in the report. Database passwords do not.
+That refreshes `docs/transcripts/` (+ zip) and writes `docs/report.pdf`. Include the PDF (and keep the transcript dump with your submission materials). You may export an incomplete draft at any phase. Missing URL, logins, diagrams, or wireframes do not block the export. The final submission still needs the public URL and marker logins for full marks. Export fails only if the course skills were edited. Submit the PDF you want marked. The YouTube video must show your name and must **not** show or say your student ID. App logins belong in the report. Database passwords do not.
 
 Do **not** edit `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`. Export hashes those files and stamps the result on the PDF cover. A mismatch is an integrity fail. Markers re-check with `python manage.py skills-verify`.
 
@@ -170,7 +171,7 @@ FastMVC web UI (not CLI-only), models matching the current diagram, all named wo
 
 ### D. Impression evidence (PDF)
 
-Which agent you used. The Judge reads your Guide chats in Cursor, Copilot Agent, or OpenCode when you ask to build the report. Chat logs are not a repo deliverable. The impression mark comes from that conversation, not from a self-written process essay.
+Which agent you used. The Judge reads your Guide chats in Cursor, Copilot Agent, or OpenCode when you ask to build the report. Report export also writes those chats into `docs/transcripts/` and a PDF appendix — you do not paste them by hand during the build. The impression mark comes from that conversation, not from a self-written process essay.
 
 ### E. 5-minute presentation (unlisted YouTube)
 
@@ -196,7 +197,7 @@ If the video is longer than 5 minutes, only the first 5 minutes are marked. A mi
 
 ## Submission
 
-One PDF via myeLearning, plus the unlisted YouTube link **inside that PDF**:
+One PDF via myeLearning, plus the unlisted YouTube link **inside that PDF**. Keep `docs/transcripts.zip` (or the `docs/transcripts/` dump) with your submission materials — the Guide creates it when the report is built:
 
 1. Cover page — Name, ID, **deployed app link**, **user logins** (username / password / role), GitHub, YouTube URL, agent used, account email
 2. Problem interpretation
@@ -206,6 +207,7 @@ One PDF via myeLearning, plus the unlisted YouTube link **inside that PDF**:
 6. Wireframe images for the named workflows
 7. Implementation and deployment notes (public URL, what is seeded)
 8. Judge impression block (student-judge scorecard appended when the report is built)
+9. Session transcripts appendix (exported Guide chats; also `docs/transcripts/` + `docs/transcripts.zip`)
 
 The PDF may include your student ID on the cover page. The **video must not**.
 

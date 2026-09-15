@@ -106,7 +106,7 @@ def cmd_run(args: argparse.Namespace) -> None:
 
 
 def cmd_report(args: argparse.Namespace) -> None:
-    """Export docs/report.md to PDF. Merges docs/judge.md into Competency when present."""
+    """Export docs/report.md to PDF; merges judge + exports Guide transcripts."""
     from app.report_pdf import export_report
     from app.skill_integrity import format_report, verify
 
@@ -117,6 +117,22 @@ def cmd_report(args: argparse.Namespace) -> None:
         output=None if args.output is None else Path(args.output),
     )
     print(format_report(verify()))
+
+
+def cmd_transcripts(args: argparse.Namespace) -> None:
+    """Dump all native Guide project transcripts into docs/transcripts/ for submission."""
+    from app.transcript_export import export_project_transcripts
+
+    result = export_project_transcripts(make_zip=not args.no_zip)
+    if result.found == 0:
+        print(
+            "Warning: no Guide transcripts found. "
+            "Set FASTMVC_TRANSCRIPTS_DIR if chats live outside Cursor's agent-transcripts folder."
+        )
+        raise SystemExit(2)
+    print(f"Submission dump ready: {result.out_dir}")
+    if result.zip_path:
+        print(f"Zip for submission: {result.zip_path}")
 
 
 def cmd_skills_verify(args: argparse.Namespace) -> None:
@@ -209,13 +225,24 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_report = sub.add_parser(
         "report",
-        help="Export docs/report.md to PDF; merges docs/judge.md (incomplete drafts allowed)",
+        help="Export docs/report.md to PDF; merges judge.md and exports Guide transcripts",
     )
     p_report.add_argument("--name", required=True, help="Student name (printed on the PDF cover)")
     p_report.add_argument("--id", dest="student_id", required=True, help="Student ID (PDF only)")
     p_report.add_argument("--src", default=None, help="Markdown path (default: docs/report.md)")
     p_report.add_argument("--output", default=None, help="PDF path (default: docs/report.pdf)")
     p_report.set_defaults(func=cmd_report)
+
+    p_transcripts = sub.add_parser(
+        "transcripts",
+        help="Dump all native Guide project chats to docs/transcripts/ (+ zip) for submission",
+    )
+    p_transcripts.add_argument(
+        "--no-zip",
+        action="store_true",
+        help="Skip writing docs/transcripts.zip",
+    )
+    p_transcripts.set_defaults(func=cmd_transcripts)
 
     p_usecase = sub.add_parser(
         "usecase",

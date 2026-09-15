@@ -1,5 +1,6 @@
 # Render Blueprint for COMP 3613.
 # Students deploy with the Render MCP (create the database, then the web service).
+# MCP config ships in: .cursor/mcp.json (Cursor), .vscode/mcp.json (Copilot), opencode.json (OpenCode).
 # Do not also apply this file in the Dashboard or you will create a second copy.
 # Free web services sleep after inactivity. Free Postgres expires after 30 days.
 

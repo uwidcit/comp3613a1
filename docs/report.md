@@ -1,6 +1,6 @@
 # COMP 3613 Assignment 1
 
-Draft this file with the Guide. The use-case diagram is a UML PNG (`docs/diagrams/use-case.png`). The model diagram is Mermaid. Link wireframe images from `docs/wireframes/`.
+Draft this file with the Guide. **Update it after every phase milestone** before you pause. The use-case diagram is a UML PNG at `docs/diagrams/use-case.png`, linked from this file as `diagrams/use-case.png` (path relative to `docs/report.md`). The model diagram is Mermaid. Link wireframe images as `wireframes/<file>` (files live in `docs/wireframes/`).
 
 Do not put your student ID in this file if you will commit it. The PDF cover adds your name and ID at export time.
 
@@ -18,7 +18,7 @@ Do not put your student ID in this file if you will commit it. The PDF cover add
 
 ## Use case diagram
 
-![Use case diagram](docs/diagrams/use-case.png)
+![Use case diagram](diagrams/use-case.png)
 
 ## Model diagram
 
@@ -47,6 +47,10 @@ Every account a marker needs, including extra users you added. Starter accounts:
 - admin / adminpass — admin
 
 ## YouTube URL
+
+## Session transcripts
+
+Filled by `python manage.py report` from native Guide chats (`docs/transcripts/`). Do not paste chats here during the build.
 
 ## Competency (student-judge)
 
