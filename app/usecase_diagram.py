@@ -1,50 +1,51 @@
 """Render a UML use-case diagram PNG from a small JSON spec.
 
 Mermaid has no real UML use-case notation (stick-figure actors, system
-boundary, ellipses). Phase 2 writes docs/diagrams/use-case.json and this
-module draws the PNG the report embeds.
+boundary, ellipses, «include» / «extend»). Phase 2 writes
+docs/diagrams/use-case.json; this module compiles PlantUML and runs the
+vendored JAR (vendor/plantuml/plantuml.jar).
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
-import textwrap
+import os
+import re
+import shutil
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFont
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
+VENDOR_JAR = REPO_ROOT / "vendor" / "plantuml" / "plantuml.jar"
+VENDOR_MANIFEST = REPO_ROOT / "vendor" / "manifest.json"
+JAR_REL = "vendor/plantuml/plantuml.jar"
 
 DEFAULT_SPEC = REPO_ROOT / "docs" / "diagrams" / "use-case.json"
 DEFAULT_PNG = REPO_ROOT / "docs" / "diagrams" / "use-case.png"
 
-NAVY = (27, 54, 93)
-GOLD = (196, 163, 90)
-INK = (30, 35, 45)
-FILL = (255, 255, 255)
-BOX = (248, 250, 252)
-LINE = (27, 54, 93)
+_ALIAS_RE = re.compile(r"[^A-Za-z0-9]+")
 
-_FONT_CANDIDATES = (
-    Path(r"C:\Windows\Fonts\arial.ttf"),
-    Path(r"C:\Windows\Fonts\arialbd.ttf"),
-    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
-    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
-    Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
-)
+
+@dataclass(frozen=True)
+class Actor:
+    name: str
+    side: str  # left | right
 
 
 @dataclass(frozen=True)
 class UseCase:
     name: str
     actors: tuple[str, ...]
+    includes: tuple[str, ...]
+    extends: tuple[str, ...]
 
 
 @dataclass(frozen=True)
 class DiagramSpec:
     system: str
-    actors: tuple[str, ...]
+    actors: tuple[Actor, ...]
     use_cases: tuple[UseCase, ...]
 
 
@@ -55,8 +56,10 @@ def render_usecase_png(
     spec = load_spec(spec_path or DEFAULT_SPEC)
     dest = output or DEFAULT_PNG
     dest.parent.mkdir(parents=True, exist_ok=True)
-    image = _draw(spec)
-    image.save(dest, "PNG")
+    plantuml = to_plantuml(spec)
+    puml = dest.with_suffix(".puml")
+    puml.write_text(plantuml, encoding="utf-8")
+    _run_plantuml(puml, dest)
     return dest
 
 
@@ -74,169 +77,313 @@ def load_spec(path: Path) -> DiagramSpec:
         raise SystemExit("Use-case spec must be a JSON object.")
 
     system = str(payload.get("system") or "System").strip() or "System"
-    raw_actors = payload.get("actors") or []
-    if not isinstance(raw_actors, list) or not raw_actors:
+    actors = _parse_actors(payload.get("actors") or [])
+    if not actors:
         raise SystemExit("Use-case spec needs a non-empty actors array.")
-    actors = tuple(str(item).strip() for item in raw_actors if str(item).strip())
+    actor_names = tuple(actor.name for actor in actors)
 
     raw_cases = payload.get("use_cases") or []
     if not isinstance(raw_cases, list) or not raw_cases:
         raise SystemExit("Use-case spec needs a non-empty use_cases array.")
     cases: list[UseCase] = []
     for item in raw_cases:
-        if isinstance(item, str):
-            name = item.strip()
-            linked = actors
-        elif isinstance(item, dict):
-            name = str(item.get("name") or "").strip()
-            linked_raw = item.get("actors") or actors
-            if isinstance(linked_raw, list):
-                linked = tuple(str(a).strip() for a in linked_raw if str(a).strip()) or actors
-            else:
-                linked = actors
-        else:
-            continue
-        if name:
-            cases.append(UseCase(name=name, actors=linked))
+        parsed = _parse_use_case(item, actor_names)
+        if parsed is not None:
+            cases.append(parsed)
     if not cases:
         raise SystemExit("Use-case spec has no named use cases.")
-    return DiagramSpec(system=system, actors=actors, use_cases=tuple(cases))
+
+    includes_extra = _parse_relations(payload.get("includes") or [])
+    extends_extra = _parse_relations(payload.get("extends") or [])
+    by_name = {case.name: case for case in cases}
+    for source, target in includes_extra:
+        if source in by_name:
+            current = by_name[source]
+            by_name[source] = UseCase(
+                name=current.name,
+                actors=current.actors,
+                includes=tuple(dict.fromkeys((*current.includes, target))),
+                extends=current.extends,
+            )
+    for source, target in extends_extra:
+        if source in by_name:
+            current = by_name[source]
+            by_name[source] = UseCase(
+                name=current.name,
+                actors=current.actors,
+                includes=current.includes,
+                extends=tuple(dict.fromkeys((*current.extends, target))),
+            )
+    ordered = tuple(by_name[case.name] for case in cases)
+    return DiagramSpec(system=system, actors=actors, use_cases=ordered)
 
 
-def _fonts() -> tuple[ImageFont.FreeTypeFont, ImageFont.FreeTypeFont, ImageFont.FreeTypeFont]:
-    regular_path = next((path for path in _FONT_CANDIDATES if path.is_file()), None)
-    if regular_path is None:
-        raise SystemExit("No TrueType font found for the use-case diagram (Arial or DejaVu).")
-    bold_path = regular_path
-    if "arial.ttf" in regular_path.name.lower():
-        candidate = regular_path.with_name("arialbd.ttf")
-        if candidate.is_file():
-            bold_path = candidate
-    elif "DejaVuSans.ttf" in regular_path.name:
-        candidate = regular_path.with_name("DejaVuSans-Bold.ttf")
-        if candidate.is_file():
-            bold_path = candidate
-    title = ImageFont.truetype(str(bold_path), 22)
-    label = ImageFont.truetype(str(regular_path), 15)
-    small = ImageFont.truetype(str(regular_path), 13)
-    return title, label, small
+def to_plantuml(spec: DiagramSpec) -> str:
+    aliases: dict[str, str] = {}
+    used: set[str] = set()
+    for actor in spec.actors:
+        aliases[f"actor:{actor.name}"] = _alias("A", actor.name, used)
+    for case in spec.use_cases:
+        aliases[f"uc:{case.name}"] = _alias("UC", case.name, used)
 
+    lines = [
+        "@startuml",
+        "!pragma layout smetana",
+        "skinparam shadowing false",
+        "skinparam actorBorderColor #1B365D",
+        "skinparam actorFontColor #1E232D",
+        "skinparam usecaseBackgroundColor #FFFFFF",
+        "skinparam usecaseBorderColor #1B365D",
+        "skinparam usecaseFontColor #1E232D",
+        "skinparam rectangleBorderColor #1B365D",
+        "skinparam rectangleBackgroundColor #F8FAFC",
+        "skinparam arrowColor #1B365D",
+        "",
+    ]
+    left = [actor for actor in spec.actors if actor.side != "right"]
+    right = [actor for actor in spec.actors if actor.side == "right"]
+    for actor in left:
+        lines.append(
+            f"actor {_quote(actor.name)} as {aliases[f'actor:{actor.name}']}"
+        )
+    if left:
+        lines.append("")
+    lines.append(f"rectangle {_quote(spec.system)} {{")
+    for case in spec.use_cases:
+        lines.append(
+            f"  usecase {_quote(case.name)} as {aliases[f'uc:{case.name}']}"
+        )
+    lines.append("}")
+    if right:
+        lines.append("")
+    for actor in right:
+        lines.append(
+            f"actor {_quote(actor.name)} as {aliases[f'actor:{actor.name}']}"
+        )
+    lines.append("")
 
-def _draw(spec: DiagramSpec) -> Image.Image:
-    title_font, label_font, small_font = _fonts()
-    columns = 2 if len(spec.use_cases) > 4 else 1
-    ellipse_w, ellipse_h = 300, 86
-    h_gap, v_gap = 36, 28
-    rows = (len(spec.use_cases) + columns - 1) // columns
-    inner_w = columns * ellipse_w + (columns - 1) * h_gap
-    inner_h = rows * ellipse_h + (rows - 1) * v_gap
-    box_pad_x, box_pad_top, box_pad_bot = 48, 56, 40
-    box_w = inner_w + 2 * box_pad_x
-    box_h = inner_h + box_pad_top + box_pad_bot
-
-    actor_col = 150
-    left_margin, right_margin = 48, 48
-    top_margin, bottom_margin = 40, 48
-    width = left_margin + actor_col + 36 + box_w + right_margin
-    height = top_margin + max(box_h, 110 * len(spec.actors)) + bottom_margin
-
-    image = Image.new("RGB", (width, height), FILL)
-    draw = ImageDraw.Draw(image)
-
-    box_x = left_margin + actor_col + 36
-    box_y = top_margin + max(0, (height - top_margin - bottom_margin - box_h) // 2)
-    draw.rounded_rectangle(
-        (box_x, box_y, box_x + box_w, box_y + box_h),
-        radius=8,
-        fill=BOX,
-        outline=NAVY,
-        width=3,
-    )
-    _centered_text(draw, spec.system, box_x + box_w / 2, box_y + 28, title_font, NAVY)
-    draw.line((box_x + 24, box_y + 44, box_x + box_w - 24, box_y + 44), fill=GOLD, width=3)
-
-    ellipses: list[tuple[float, float, float, float, UseCase]] = []
-    for index, use_case in enumerate(spec.use_cases):
-        col = index % columns
-        row = index // columns
-        cx = box_x + box_pad_x + col * (ellipse_w + h_gap) + ellipse_w / 2
-        cy = box_y + box_pad_top + row * (ellipse_h + v_gap) + ellipse_h / 2
-        ellipses.append((cx, cy, ellipse_w, ellipse_h, use_case))
-
-    actor_span = max(box_h, 110 * len(spec.actors))
-    actor_positions: dict[str, tuple[float, float]] = {}
-    for index, actor in enumerate(spec.actors):
-        if len(spec.actors) == 1:
-            ay = box_y + box_h / 2
-        else:
-            ay = box_y + 40 + index * (actor_span - 80) / (len(spec.actors) - 1)
-        ax = left_margin + actor_col / 2
-        actor_positions[actor] = (ax, ay)
-
-    for cx, cy, ew, eh, use_case in ellipses:
-        left = cx - ew / 2
-        for actor in use_case.actors:
-            if actor not in actor_positions:
+    actor_side = {actor.name: actor.side for actor in spec.actors}
+    for case in spec.use_cases:
+        uc_alias = aliases[f"uc:{case.name}"]
+        for actor_name in case.actors:
+            actor_key = f"actor:{actor_name}"
+            if actor_key not in aliases:
                 continue
-            ax, ay = actor_positions[actor]
-            draw.line((ax + 22, ay, left, cy), fill=LINE, width=2)
+            actor_alias = aliases[actor_key]
+            if actor_side.get(actor_name) == "right":
+                lines.append(f"{uc_alias} <-- {actor_alias}")
+            else:
+                lines.append(f"{actor_alias} --> {uc_alias}")
+        for included in case.includes:
+            other = aliases.get(f"uc:{included}")
+            if other:
+                lines.append(f"{uc_alias} ..> {other} : <<include>>")
+        for base in case.extends:
+            other = aliases.get(f"uc:{base}")
+            if other:
+                lines.append(f"{uc_alias} ..> {other} : <<extend>>")
 
-    for cx, cy, ew, eh, use_case in ellipses:
-        bbox = (cx - ew / 2, cy - eh / 2, cx + ew / 2, cy + eh / 2)
-        draw.ellipse(bbox, fill=FILL, outline=NAVY, width=3)
-        _wrapped_center(draw, use_case.name, cx, cy, ew - 28, label_font, INK)
-
-    for actor, (ax, ay) in actor_positions.items():
-        _stick_actor(draw, ax, ay, actor, small_font)
-
-    return image
-
-
-def _stick_actor(
-    draw: ImageDraw.ImageDraw,
-    x: float,
-    y: float,
-    name: str,
-    font: ImageFont.FreeTypeFont,
-) -> None:
-    head_r = 11
-    draw.ellipse((x - head_r, y - 38, x + head_r, y - 38 + 2 * head_r), outline=NAVY, width=3)
-    draw.line((x, y - 16, x, y + 10), fill=NAVY, width=3)
-    draw.line((x - 16, y - 6, x + 16, y - 6), fill=NAVY, width=3)
-    draw.line((x, y + 10, x - 14, y + 32), fill=NAVY, width=3)
-    draw.line((x, y + 10, x + 14, y + 32), fill=NAVY, width=3)
-    _centered_text(draw, name, x, y + 48, font, INK)
+    lines.append("")
+    lines.append("@enduml")
+    lines.append("")
+    return "\n".join(lines)
 
 
-def _centered_text(
-    draw: ImageDraw.ImageDraw,
-    text: str,
-    x: float,
-    y: float,
-    font: ImageFont.FreeTypeFont,
-    color: tuple[int, int, int],
-) -> None:
-    bbox = draw.textbbox((0, 0), text, font=font)
-    w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    draw.text((x - w / 2, y - h / 2), text, font=font, fill=color)
+def _parse_actors(raw: object) -> tuple[Actor, ...]:
+    if not isinstance(raw, list):
+        return ()
+    names: list[str] = []
+    sides: dict[str, str] = {}
+    for item in raw:
+        if isinstance(item, str):
+            name = item.strip()
+            if name:
+                names.append(name)
+        elif isinstance(item, dict):
+            name = str(item.get("name") or "").strip()
+            if not name:
+                continue
+            names.append(name)
+            side = str(item.get("side") or "").strip().lower()
+            if side in {"left", "right"}:
+                sides[name] = side
+    unique: list[str] = []
+    for name in names:
+        if name not in unique:
+            unique.append(name)
+    if not unique:
+        return ()
+    assigned: list[Actor] = []
+    for index, name in enumerate(unique):
+        if name in sides:
+            side = sides[name]
+        elif len(unique) == 1:
+            side = "left"
+        elif index == 0:
+            side = "left"
+        elif index == len(unique) - 1:
+            side = "right"
+        else:
+            side = "left" if index % 2 == 0 else "right"
+        assigned.append(Actor(name=name, side=side))
+    return tuple(assigned)
 
 
-def _wrapped_center(
-    draw: ImageDraw.ImageDraw,
-    text: str,
-    x: float,
-    y: float,
-    max_width: float,
-    font: ImageFont.FreeTypeFont,
-    color: tuple[int, int, int],
-) -> None:
-    avg = max(draw.textlength("M", font=font), 1)
-    width_chars = max(int(max_width / avg), 8)
-    lines = textwrap.wrap(text, width=width_chars) or [text]
-    line_h = draw.textbbox((0, 0), "Ag", font=font)[3]
-    total = line_h * len(lines)
-    start = y - total / 2
-    for index, line in enumerate(lines):
-        bbox = draw.textbbox((0, 0), line, font=font)
-        w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-        draw.text((x - w / 2, start + index * line_h + (line_h - h) / 2), line, font=font, fill=color)
+def _parse_use_case(item: object, actor_names: tuple[str, ...]) -> UseCase | None:
+    if isinstance(item, str):
+        name = item.strip()
+        return UseCase(name=name, actors=actor_names, includes=(), extends=()) if name else None
+    if not isinstance(item, dict):
+        return None
+    name = str(item.get("name") or "").strip()
+    if not name:
+        return None
+    linked_raw = item.get("actors")
+    if isinstance(linked_raw, list):
+        linked = tuple(str(actor).strip() for actor in linked_raw if str(actor).strip())
+    elif linked_raw is None:
+        linked = ()
+    else:
+        linked = actor_names
+    includes = _name_list(item.get("includes") or item.get("include"))
+    extends = _name_list(item.get("extends") or item.get("extend"))
+    return UseCase(name=name, actors=linked, includes=includes, extends=extends)
+
+
+def _name_list(raw: object) -> tuple[str, ...]:
+    if isinstance(raw, str) and raw.strip():
+        return (raw.strip(),)
+    if not isinstance(raw, list):
+        return ()
+    names: list[str] = []
+    for item in raw:
+        if isinstance(item, str) and item.strip():
+            names.append(item.strip())
+        elif isinstance(item, dict):
+            name = str(item.get("name") or item.get("to") or "").strip()
+            if name:
+                names.append(name)
+    return tuple(dict.fromkeys(names))
+
+
+def _parse_relations(raw: object) -> list[tuple[str, str]]:
+    if not isinstance(raw, list):
+        return []
+    pairs: list[tuple[str, str]] = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        source = str(item.get("from") or item.get("source") or "").strip()
+        target = str(item.get("to") or item.get("target") or "").strip()
+        if source and target:
+            pairs.append((source, target))
+    return pairs
+
+
+def _quote(text: str) -> str:
+    escaped = text.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
+def _alias(prefix: str, name: str, used: set[str]) -> str:
+    slug = _ALIAS_RE.sub("_", name).strip("_") or "X"
+    if slug[0].isdigit():
+        slug = f"{prefix}_{slug}"
+    candidate = slug
+    n = 2
+    while candidate in used:
+        candidate = f"{slug}_{n}"
+        n += 1
+    used.add(candidate)
+    return candidate
+
+
+def _expected_jar_sha256() -> str | None:
+    if not VENDOR_MANIFEST.is_file():
+        return None
+    try:
+        payload = json.loads(VENDOR_MANIFEST.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    files = payload.get("files") if isinstance(payload, dict) else None
+    if not isinstance(files, dict):
+        return None
+    info = files.get(JAR_REL)
+    if not isinstance(info, dict):
+        return None
+    digest = info.get("sha256")
+    return str(digest) if digest else None
+
+
+def _require_jar() -> Path:
+    if not VENDOR_JAR.is_file():
+        raise SystemExit(
+            f"Missing {JAR_REL}. This JAR is tracked in git — restore it from "
+            "the repo (see vendor/README.md)."
+        )
+    expected = _expected_jar_sha256()
+    actual = hashlib.sha256(VENDOR_JAR.read_bytes()).hexdigest()
+    if expected and actual != expected:
+        raise SystemExit(
+            f"{JAR_REL} checksum mismatch.\n"
+            f"  expected: {expected}\n"
+            f"  actual:   {actual}\n"
+            "Restore the committed JAR or update vendor/manifest.json."
+        )
+    return VENDOR_JAR
+
+
+def _java_bin() -> str:
+    java = shutil.which("java")
+    if java:
+        return java
+    home = os.environ.get("JAVA_HOME", "").strip()
+    if home:
+        candidate = Path(home) / "bin" / ("java.exe" if os.name == "nt" else "java")
+        if candidate.is_file():
+            return str(candidate)
+    raise SystemExit(
+        "Java is required to render the use-case diagram from "
+        f"{JAR_REL}. Install a JRE, put java on PATH, then re-run "
+        "python manage.py usecase."
+    )
+
+
+def _run_plantuml(puml: Path, dest: Path) -> None:
+    jar = _require_jar()
+    java = _java_bin()
+    cmd = [
+        java,
+        "-Djava.awt.headless=true",
+        "-jar",
+        str(jar),
+        "-charset",
+        "UTF-8",
+        "-tpng",
+        "-Playout=smetana",
+        "-o",
+        str(dest.parent.resolve()),
+        str(puml.resolve()),
+    ]
+    try:
+        completed = subprocess.run(
+            cmd,
+            check=False,
+            timeout=120,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise SystemExit("PlantUML timed out rendering the use-case diagram.") from exc
+    except OSError as exc:
+        raise SystemExit(f"Failed to launch Java/PlantUML: {exc}") from exc
+    if completed.returncode != 0:
+        detail = (completed.stderr or completed.stdout or "").strip() or f"exit {completed.returncode}"
+        raise SystemExit(f"PlantUML failed:\n{detail}")
+    produced = dest.parent / (puml.stem + ".png")
+    if produced != dest:
+        if not produced.is_file():
+            raise SystemExit(f"PlantUML did not write {produced.as_posix()}.")
+        shutil.move(str(produced), str(dest))
+    elif not dest.is_file():
+        raise SystemExit(f"PlantUML did not write {dest.as_posix()}.")

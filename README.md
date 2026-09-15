@@ -23,9 +23,11 @@ Advantages of this structure:
 
 ## Initial setup
 
-You need **Python 3.10+**. Coursework agents (Cursor, Copilot, or OpenCode) are in [ASSIGNMENT.md](ASSIGNMENT.md).
+You need **Python 3.10+** and a **Java JRE** (`java` on `PATH`) for use-case PNGs. Coursework agents (Cursor, Copilot, or OpenCode) are in [ASSIGNMENT.md](ASSIGNMENT.md). **Node.js** is optional: only for rendering Mermaid model diagrams inside the PDF.
 
 All project commands are a **Python CLI** (`manage.py`). There are no shell setup scripts.
+
+Third-party binaries that are not on PyPI are **committed** under `vendor/` (PlantUML JAR, DejaVu fonts). Python packages are pinned in `requirements.lock`. Mermaid CLI is pinned in `package-lock.json`. See [vendor/README.md](vendor/README.md).
 
 ### 1. Clone
 
@@ -42,7 +44,8 @@ cd comp3613a1
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -e .
+pip install -r requirements.lock
+pip install -e . --no-deps
 ```
 
 **macOS / Linux:**
@@ -51,10 +54,19 @@ pip install -e .
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-pip install -e .
+pip install -r requirements.lock
+pip install -e . --no-deps
 ```
 
-`pip install -e .` installs this project and everything listed in `pyproject.toml`.
+`requirements.lock` is compiled from `pyproject.toml` (hashes included). `pip install -e .` without the lockfile still works, but versions can drift.
+
+Optional, only if you will export a PDF that contains a Mermaid model diagram:
+
+```bash
+npm ci
+```
+
+That installs the mermaid-cli version pinned in `package-lock.json` into `node_modules/` (not committed).
 
 ### 3. Create `.env`
 
@@ -130,7 +142,7 @@ Commands are implemented in `app/cli.py` (stdlib `argparse`) and invoked via `ma
 | `python manage.py run` | Start Uvicorn (reload unless `ENV=production`) |
 | `python manage.py users` | Print users in the DB |
 | `python manage.py report --name "..." --id "..."` | Merge `docs/judge.md` into the report if present, export `docs/report.pdf`. Incomplete drafts allowed. Cover has name, ID, and skill-integrity hash. Fails only if course skills were edited |
-| `python manage.py usecase` | Render `docs/diagrams/use-case.json` to a UML use-case PNG (`docs/diagrams/use-case.png`) |
+| `python manage.py usecase` | Render `docs/diagrams/use-case.json` to a UML use-case PNG via the vendored PlantUML JAR (`docs/diagrams/use-case.png`) |
 | `python manage.py skills-verify` | Check course skills against `.agents/skills.lock.json` |
 | `python manage.py --help` | Show all commands |
 
@@ -280,6 +292,10 @@ comp3613a1
 |-- README.md
 |-- manage.py                # python manage.py init|seed|run|users
 |-- env.example
+|-- vendor/                  # PlantUML JAR + DejaVu fonts (committed)
+|-- package.json             # pinned mermaid-cli
+|-- package-lock.json
+|-- requirements.lock        # pinned Python deps (hashes)
 |-- pyproject.toml
 |-- app/
 |    |- cli.py               # Python CLI: init / seed / run / users

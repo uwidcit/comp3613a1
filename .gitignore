@@ -14,6 +14,7 @@ dist/
 downloads/
 eggs/
 .eggs/
+# Python packaging dirs — vendored JARs/fonts live in vendor/ (committed).
 lib/
 lib64/
 parts/
@@ -208,3 +209,6 @@ __marimo__/
 
 database.db
 docs/report.pdf
+
+# Node (mermaid-cli). package.json + package-lock.json are committed.
+node_modules/

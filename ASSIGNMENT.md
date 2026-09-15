@@ -69,19 +69,19 @@ You pick the assigned project. The agent does not. Name **at least three** workf
 
 ### Phase 2 — Use-case diagram (agent drafts)
 
-The agent writes a UML use-case PNG (`docs/diagrams/use-case.png`) from your Phase 1 prompt and inserts it into `docs/report.md`. You do not draw it. Mermaid is not used for this diagram. It will assume actors and use cases the prompt implies.
+The agent asks which use cases should «include» or «extend» others and whether any use cases are shared across actors, then writes a UML use-case PNG (`docs/diagrams/use-case.png`) and inserts it into `docs/report.md`. You do not draw it. Mermaid is not used for this diagram.
 
 ### Phase 3 — Model diagram (agent drafts)
 
-You name the entities and their properties. The agent asks about relationships (including bridge / join tables), and important edge cases, then drafts the first Mermaid model. It will not invent the entity list or give you a pick-list.
+You name the entities and their properties. The agent asks which relationships should exist for non-trivial entities (including bridge / join tables), and important business rules / edge cases. If a relationship you pick cannot handle a case the workflows need, it will offer alternatives and ask you to reconsider. It will not invent the entity list or give you a pick-list.
 
 ### Phase 4 — Wireframes (you, outside the agent)
 
-This is the only artifact you must draw. Draw wireframes for **your named workflows only**, outside the agent (paper, Figma, Excalidraw, draw.io, and so on). Export **PNG or JPG** and put the images in `docs/wireframes/`. The agent waits, then suggests model edits for fields and metadata the images show, and flags workflows that look incomplete or broken. You redesign only if a named workflow cannot be completed or an image is missing or unreadable. **You cannot start Phase 5 until every use case has a wireframe image in the workspace.** Later tweaks do not mean a new wireframe.
+This is the only artifact you must draw. Draw wireframes for **your named workflows only**, outside the agent (paper, Figma, Excalidraw, draw.io, and so on). Export **PNG or JPG** and put the images in `docs/wireframes/`. The agent waits, then suggests model edits for fields and metadata the images show, asks how a workflow completes when that path is not obvious from the design, and flags workflows that look incomplete or broken. You redesign only if a named workflow cannot be completed or an image is missing or unreadable. **You cannot start Phase 5 until every use case has a wireframe image in the workspace.** Later tweaks do not mean a new wireframe.
 
 ### Phase 5 — Theming, then implement and deploy
 
-State theming and branding preferences (colors, type, tone, logo or wordmark). Then the agent implements from the current model and the imported wireframes, one workflow at a time in the same chat. If a detail is fleshed out in code, the agent updates the model. It will not send you back to redraw the wireframe. Verify each workflow locally, then continue here.
+State theming and branding preferences (colors, type, tone, logo or wordmark). Then the agent implements from the current model and the imported wireframes, one workflow at a time in the same chat. For a few core pieces it may ask a short multiple-choice or open question, or ask you to write a small snippet in the right layer file (for example repository vs service). If a detail is fleshed out in code, the agent updates the model. It will not send you back to redraw the wireframe. Verify each workflow locally, then continue here.
 
 When all named workflows work locally (at least three), deploy **both** a Render Postgres database and the web service with the **Render MCP**. Steps are in [README.md](README.md). Put the public URL in the report. A local-only app cannot earn full implementation marks.
 

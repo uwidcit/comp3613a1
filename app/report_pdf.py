@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import html as html_lib
+import json
+import os
 import re
 import shutil
 import subprocess
@@ -10,6 +12,7 @@ import tempfile
 from pathlib import Path
 
 from fpdf import FPDF, TextStyle
+from PIL import Image
 
 from app.skill_integrity import IntegrityResult, require_clean, stamp_markdown
 
@@ -26,6 +29,12 @@ ZEBRA = "#F4F7FA"
 HIGHLIGHT = "#E7EEF6"
 MUTED = (90, 96, 110)
 
+# A4 width 210mm minus left/right margins (16mm). fpdf2 HTML <img width> is in
+# points and then divided by pdf.k, so 178 here would render at ~63mm.
+_CONTENT_WIDTH_MM = 178.0
+_MAX_IMAGE_HEIGHT_MM = 175.0
+_PT_PER_MM = 72 / 25.4
+
 _JUDGE_COMMENT_RE = re.compile(
     r"<!-- student-judge:competency(?:\n.*?)?-->\n?",
     re.DOTALL,
@@ -36,6 +45,12 @@ _JUDGE_SECTION_RE = re.compile(
 )
 
 _FONT_CANDIDATES = (
+    (
+        REPO_ROOT / "vendor" / "fonts" / "DejaVuSans.ttf",
+        REPO_ROOT / "vendor" / "fonts" / "DejaVuSans-Bold.ttf",
+        REPO_ROOT / "vendor" / "fonts" / "DejaVuSans-Oblique.ttf",
+        REPO_ROOT / "vendor" / "fonts" / "DejaVuSans-BoldOblique.ttf",
+    ),
     (
         Path(r"C:\Windows\Fonts\arial.ttf"),
         Path(r"C:\Windows\Fonts\arialbd.ttf"),
@@ -242,35 +257,35 @@ def _write_report_html(pdf: ReportPDF, markup: str) -> None:
                 font_style="B",
                 color=NAVY_HEX,
                 font_size_pt=16,
-                t_margin=5,
-                b_margin=4,
+                t_margin=3,
+                b_margin=0.05,
             ),
             "h2": TextStyle(
                 font_family="Body",
                 font_style="B",
                 color=NAVY_HEX,
                 font_size_pt=13,
-                t_margin=7,
-                b_margin=3.5,
+                t_margin=3.2,
+                b_margin=0.05,
             ),
             "h3": TextStyle(
                 font_family="Body",
                 font_style="B",
                 color=NAVY_HEX,
                 font_size_pt=11,
-                t_margin=5.5,
-                b_margin=2.5,
+                t_margin=3.0,
+                b_margin=0.04,
             ),
-            "p": TextStyle(font_family="Body", font_size_pt=10.5, t_margin=2, b_margin=3.5),
+            "p": TextStyle(font_family="Body", font_size_pt=10.5, t_margin=0.7, b_margin=0.9),
             "li": TextStyle(
                 font_family="Body",
                 font_size_pt=10.5,
                 l_margin=5,
-                t_margin=1.8,
-                b_margin=1.2,
+                t_margin=0.15,
+                b_margin=0.15,
             ),
-            "ul": TextStyle(t_margin=2.5, b_margin=3),
-            "ol": TextStyle(t_margin=2.5, b_margin=3),
+            "ul": TextStyle(t_margin=0, b_margin=0),
+            "ol": TextStyle(t_margin=0, b_margin=0),
             "pre": TextStyle(
                 font_family="Body",
                 font_size_pt=8.5,
@@ -409,23 +424,30 @@ def _markdown_to_html(markdown: str, base: Path, tmp: Path) -> str:
             lower = text.lower()
             if "competency" in lower:
                 parts.append('<p style="break-before: page"></p>')
-            parts.append(f'<{tag} style="line-height: 1.35">{_inline_html(text)}</{tag}>')
+            parts.append(f"<{tag}>{_inline_html(text)}</{tag}>")
         elif kind == "paragraph":
-            parts.append(f'<p style="line-height: 1.45">{_inline_html(blocks[i][1])}</p>')
+            parts.append(f'<p style="line-height: 1.35">{_inline_html(blocks[i][1])}</p>')
         elif kind == "list":
             items: list[str] = []
             while i < len(blocks) and blocks[i][0] == "list":
-                items.append(f'<li style="line-height: 1.45">{_inline_html(blocks[i][1])}</li>')
+                items.append("• " + _inline_html(blocks[i][1]))
                 i += 1
-            parts.append("<ul>" + "".join(items) + "</ul>")
+            # fpdf2 <ul> inserts a 0-height dummy paragraph; the first <li> then
+            # sits on the heading line. A single paragraph keeps bullets under the title.
+            parts.append(
+                '<p style="line-height: 1.35">' + "<br>".join(items) + "</p>"
+            )
             continue
         elif kind == "ordered":
             items = []
-            start = blocks[i][1]
             while i < len(blocks) and blocks[i][0] == "ordered":
-                items.append(f'<li style="line-height: 1.45">{_inline_html(blocks[i][2])}</li>')
+                items.append(
+                    f"{html_lib.escape(blocks[i][1])}. {_inline_html(blocks[i][2])}"
+                )
                 i += 1
-            parts.append(f'<ol start="{html_lib.escape(start)}">' + "".join(items) + "</ol>")
+            parts.append(
+                '<p style="line-height: 1.35">' + "<br>".join(items) + "</p>"
+            )
             continue
         elif kind == "table":
             parts.append(_table_html(blocks[i][1]))
@@ -438,12 +460,12 @@ def _markdown_to_html(markdown: str, base: Path, tmp: Path) -> str:
                     + "</i></p>"
                 )
             else:
-                parts.append(f'<img src="{html_lib.escape(str(path))}" width="178">')
+                parts.append(_image_html(path))
         elif kind == "mermaid":
             diagram_n += 1
             png = tmp / f"diagram-{diagram_n}.png"
             if _render_mermaid(blocks[i][1], png):
-                parts.append(f'<img src="{html_lib.escape(str(png))}" width="178">')
+                parts.append(_image_html(png))
             else:
                 parts.append(
                     "<p><i>Mermaid source (install Node.js and re-run export to render the image):</i></p>"
@@ -451,27 +473,56 @@ def _markdown_to_html(markdown: str, base: Path, tmp: Path) -> str:
                 )
                 print(
                     "warning: Mermaid diagram left as source. "
-                    "Install Node.js, then re-run so npx @mermaid-js/mermaid-cli can render it."
+                    "Install Node.js, run npm ci, then re-export (pinned mermaid-cli in package-lock.json)."
                 )
         elif kind == "code":
             parts.append(f"<pre>{html_lib.escape(blocks[i][1])}</pre>")
         i += 1
-    return "\n".join(parts)
+    return "".join(parts)
+
+
+def _image_html(path: Path) -> str:
+    """Embed an image at nearly full content width so UML/wireframes stay readable."""
+    try:
+        with Image.open(path) as image:
+            px_w, px_h = image.size
+    except OSError:
+        px_w, px_h = 1600, 900
+    if px_w <= 0:
+        px_w, px_h = 1600, 900
+    aspect = px_h / px_w
+    width_mm = _CONTENT_WIDTH_MM
+    height_mm = width_mm * aspect
+    if height_mm > _MAX_IMAGE_HEIGHT_MM:
+        height_mm = _MAX_IMAGE_HEIGHT_MM
+        width_mm = height_mm / aspect
+    width_pt = width_mm * _PT_PER_MM
+    height_pt = height_mm * _PT_PER_MM
+    src = html_lib.escape(str(path))
+    return f'<img src="{src}" width="{width_pt:.1f}" height="{height_pt:.1f}">'
 
 
 def _table_html(rows: list[list[str]]) -> str:
     if not rows:
         return ""
+    rows = _compact_scorecard(rows)
     widths = _col_widths(rows[0])
     header = [cell.strip() or "Item" for cell in rows[0]]
     header = [_display_header(cell) for cell in header]
     body = rows[1:]
+    labels = [cell.strip().lower() for cell in header]
+    center = {
+        i
+        for i, label in enumerate(labels)
+        if label in {"score", "score / 4", "avg", "in avg"}
+    }
     head_cells = []
     for index, cell in enumerate(header):
         width = widths[index] if index < len(widths) else None
         width_attr = f' width="{width}%"' if width else ""
+        align = "center" if index in center else "left"
         head_cells.append(
-            f'<th{width_attr} align="left">'
+            f'<th{width_attr} align="{align}">'
             f'<font color="#FFFFFF"><b>{_cell_html(cell)}</b></font></th>'
         )
     body_rows = []
@@ -483,8 +534,11 @@ def _table_html(rows: list[list[str]]) -> str:
             bg = ZEBRA
         else:
             bg = "#FFFFFF"
-        tds = "".join(f'<td align="left">{_cell_html(cell)}</td>' for cell in row)
-        body_rows.append(f'<tr bgcolor="{bg}">{tds}</tr>')
+        tds = []
+        for index, cell in enumerate(row):
+            align = "center" if index in center else "left"
+            tds.append(f'<td align="{align}">{_cell_html(cell)}</td>')
+        body_rows.append(f'<tr bgcolor="{bg}">{"".join(tds)}</tr>')
     return (
         '<table width="100%" border="1" cellpadding="3">'
         f'<thead><tr bgcolor="{NAVY_HEX}">{"".join(head_cells)}</tr></thead>'
@@ -493,9 +547,37 @@ def _table_html(rows: list[list[str]]) -> str:
     )
 
 
+def _compact_scorecard(rows: list[list[str]]) -> list[list[str]]:
+    """Drop Max when every scored cell is /4, and put that on the Score header."""
+    header = [cell.strip() for cell in rows[0]]
+    labels = [cell.lower() for cell in header]
+    if "score" not in labels or "max" not in labels:
+        return rows
+    max_i = labels.index("max")
+    score_i = labels.index("score")
+    skip = {"", "—", "-", "n/a"}
+    values = {
+        row[max_i].strip().lower()
+        for row in rows[1:]
+        if max_i < len(row)
+    } - skip
+    if values and values != {"4"}:
+        return rows
+    header[score_i] = "Score / 4"
+    header.pop(max_i)
+    body = []
+    for row in rows[1:]:
+        new_row = list(row)
+        if max_i < len(new_row):
+            new_row.pop(max_i)
+        body.append(new_row)
+    return [header, *body]
+
+
 def _display_header(cell: str) -> str:
     aliases = {
         "in avg": "Avg",
+        "score / 4": "Score / 4",
         "scoreable max": "Max points",
         "awarded total": "Awarded",
         "overall (avg of scored)": "Overall",
@@ -515,9 +597,11 @@ def _col_widths(header: list[str]) -> list[int]:
     joined = " ".join(labels)
     if count == 3 and "phase" in joined:
         return [12, 16, 72]
-    if count >= 6 and "evidence" in joined:
-        widths = [7, 22, 12, 10, 9, 40]
-        return _fit_widths(widths, count)
+    if "evidence" in joined:
+        if count == 5:
+            return [8, 17, 14, 8, 53]
+        if count >= 6:
+            return _fit_widths([7, 18, 10, 8, 8, 49], count)
     share = 100 // max(count, 1)
     widths = [share] * count
     widths[-1] = 100 - share * (count - 1)
@@ -645,17 +729,36 @@ def _resolve(raw: str, base: Path) -> Path | None:
     return None
 
 
+def _mermaid_cli_spec() -> str:
+    package_json = REPO_ROOT / "package.json"
+    if package_json.is_file():
+        try:
+            payload = json.loads(package_json.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            payload = {}
+        deps = payload.get("dependencies") if isinstance(payload, dict) else None
+        if isinstance(deps, dict):
+            version = str(deps.get("@mermaid-js/mermaid-cli") or "").strip()
+            if version:
+                return f"@mermaid-js/mermaid-cli@{version}"
+    return "@mermaid-js/mermaid-cli"
+
+
 def _render_mermaid(source: str, png: Path) -> bool:
     mmd = png.with_suffix(".mmd")
     mmd.write_text(source, encoding="utf-8")
     commands: list[list[str]] = []
+    local_name = "mmdc.cmd" if os.name == "nt" else "mmdc"
+    local = REPO_ROOT / "node_modules" / ".bin" / local_name
+    if local.is_file():
+        commands.append([str(local), "-i", str(mmd), "-o", str(png), "-b", "white"])
     mmdc = shutil.which("mmdc")
     if mmdc:
         commands.append([mmdc, "-i", str(mmd), "-o", str(png), "-b", "white"])
     npx = shutil.which("npx")
     if npx:
         commands.append(
-            [npx, "--yes", "@mermaid-js/mermaid-cli", "-i", str(mmd), "-o", str(png), "-b", "white"]
+            [npx, "--yes", _mermaid_cli_spec(), "-i", str(mmd), "-o", str(png), "-b", "white"]
         )
     for cmd in commands:
         try:
