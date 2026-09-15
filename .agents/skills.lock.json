@@ -1,18 +1,18 @@
 {
   "algorithm": "sha256",
   "normalization": "utf-8-lf",
-  "root": "a9fba432bdccd5353db0208f1edaa8bc187cfb4715c97a6a6288eaf9ffcf733c",
+  "root": "e06ddb0125f20a6e93be6d7b48e76977a44be71430e74542b8653e67cf92f1f6",
   "files": {
     ".agents/skills/README.md": "e194e4783c77bf55cf43b8357eadb0f4089adeafa5193031ff019dc0d36f0104",
-    ".agents/skills/student-build/SKILL.md": "3e153e8b095d833fbb701a55a021214258986bf551b9d65215184d93463b92f1",
-    ".agents/skills/student-build/framework-phases.md": "36c84cf52e742f0ade040e4cf6c3eec1f476c223c365dd9324dbd815370bc9ed",
-    ".agents/skills/student-judge/SKILL.md": "ec64bbd2440c4ca7fd3de6345ce21d8a4c945eb0d5fea82b9a0d82fc08e81552",
-    ".agents/skills/student-judge/framework-phases.md": "36c84cf52e742f0ade040e4cf6c3eec1f476c223c365dd9324dbd815370bc9ed",
+    ".agents/skills/student-build/SKILL.md": "20253c317ccd9dacb45d0bb0a5e841289cfa7e8aa7a51e7681cdc374f19eb026",
+    ".agents/skills/student-build/framework-phases.md": "e0ea0f32df64a2178272554676cf1b7d2a91527f819f86df20e34eec147c1b95",
+    ".agents/skills/student-judge/SKILL.md": "ff32020c25700c79db6409e34291ad1aed2061d9724c07fce557e1f480463ecd",
+    ".agents/skills/student-judge/framework-phases.md": "e0ea0f32df64a2178272554676cf1b7d2a91527f819f86df20e34eec147c1b95",
     ".cursor/skills/README.md": "501b7d199fa27fc9916604fe8f7dad1e5309510ceb95f21bdeb771805709a606",
-    ".cursor/skills/student-build/SKILL.md": "3e153e8b095d833fbb701a55a021214258986bf551b9d65215184d93463b92f1",
-    ".cursor/skills/student-build/framework-phases.md": "36c84cf52e742f0ade040e4cf6c3eec1f476c223c365dd9324dbd815370bc9ed",
-    ".cursor/skills/student-judge/SKILL.md": "ec64bbd2440c4ca7fd3de6345ce21d8a4c945eb0d5fea82b9a0d82fc08e81552",
-    ".cursor/skills/student-judge/framework-phases.md": "36c84cf52e742f0ade040e4cf6c3eec1f476c223c365dd9324dbd815370bc9ed",
-    "AGENTS.md": "ca75825056c3c4031cc4065151ea9c3880ac9f050626f4cbb6cc88a5088b7253"
+    ".cursor/skills/student-build/SKILL.md": "20253c317ccd9dacb45d0bb0a5e841289cfa7e8aa7a51e7681cdc374f19eb026",
+    ".cursor/skills/student-build/framework-phases.md": "e0ea0f32df64a2178272554676cf1b7d2a91527f819f86df20e34eec147c1b95",
+    ".cursor/skills/student-judge/SKILL.md": "ff32020c25700c79db6409e34291ad1aed2061d9724c07fce557e1f480463ecd",
+    ".cursor/skills/student-judge/framework-phases.md": "e0ea0f32df64a2178272554676cf1b7d2a91527f819f86df20e34eec147c1b95",
+    "AGENTS.md": "41b45a54c4898b6cff947c6fabe705301b8f06dfb0c31ad1732a4c57805c7853"
   }
 }

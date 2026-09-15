@@ -86,21 +86,48 @@ def discover_transcript_roots(repo: Path = REPO_ROOT) -> list[Path]:
 
 
 def find_jsonl_files(roots: list[Path] | None = None) -> list[Path]:
-    """Return unique *.jsonl transcript files under known roots."""
+    """Return unique transcript source files (*.jsonl, else *.md dumps)."""
     files: list[Path] = []
     seen: set[Path] = set()
-    for root in roots or discover_transcript_roots():
+    search_roots = list(roots or discover_transcript_roots())
+    zip_path = REPO_ROOT / "docs" / "transcripts.zip"
+    if zip_path.is_file():
+        extract_dir = REPO_ROOT / "docs" / "transcripts" / "_from_zip"
+        extract_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            with zipfile.ZipFile(zip_path, "r") as zf:
+                zf.extractall(extract_dir)
+            search_roots.insert(0, extract_dir)
+        except OSError:
+            pass
+
+    def _add(path: Path) -> None:
+        try:
+            key = path.resolve()
+        except OSError:
+            key = path
+        if key in seen:
+            return
+        seen.add(key)
+        files.append(path)
+
+    for root in search_roots:
         if not root.is_dir():
             continue
         for path in sorted(root.rglob("*.jsonl")):
-            try:
-                key = path.resolve()
-            except OSError:
-                key = path
-            if key in seen:
+            _add(path)
+
+    if files:
+        return files
+
+    # Copilot / manual dumps: markdown chat exports under transcript folders.
+    for root in search_roots:
+        if not root.is_dir():
+            continue
+        for path in sorted(root.rglob("*.md")):
+            if path.name.lower() in {"index.md", "readme.md"}:
                 continue
-            seen.add(key)
-            files.append(path)
+            _add(path)
     return files
 
 
@@ -168,12 +195,25 @@ def export_project_transcripts(
     for src in sources:
         chat_id = src.stem
         md_path = dest / f"{chat_id}.md"
-        md_path.write_text(jsonl_to_markdown(src, chat_id=chat_id), encoding="utf-8")
-        raw_copy = dest / f"{chat_id}.jsonl"
-        try:
-            shutil.copy2(src, raw_copy)
-        except OSError:
-            raw_copy.write_text(src.read_text(encoding="utf-8", errors="replace"), encoding="utf-8")
+        if src.suffix.lower() == ".jsonl":
+            md_path.write_text(jsonl_to_markdown(src, chat_id=chat_id), encoding="utf-8")
+            raw_copy = dest / f"{chat_id}.jsonl"
+            try:
+                shutil.copy2(src, raw_copy)
+            except OSError:
+                raw_copy.write_text(
+                    src.read_text(encoding="utf-8", errors="replace"),
+                    encoding="utf-8",
+                )
+        else:
+            # Already markdown (e.g. Copilot dump) — copy through.
+            try:
+                shutil.copy2(src, md_path)
+            except OSError:
+                md_path.write_text(
+                    src.read_text(encoding="utf-8", errors="replace"),
+                    encoding="utf-8",
+                )
         written.append(md_path)
 
     index = dest / "INDEX.md"
@@ -247,7 +287,8 @@ def merge_transcripts_section(
             f"{bullets}\n"
         )
     else:
-        searched = "\n".join(f"- `{root}`" for root in result.source_roots)
+        # Use forward slashes so Windows paths never hit re.sub escape rules (\U…).
+        searched = "\n".join(f"- `{root.as_posix()}`" for root in result.source_roots)
         detail = (
             "No native Guide transcripts were found at export time.\n\n"
             "Searched:\n\n"
@@ -260,12 +301,17 @@ def merge_transcripts_section(
         "Students do not paste chats here during the build.\n\n"
         f"{detail}"
     )
+    # Always replace via a callable — path strings can contain backslashes that
+    # re.sub would treat as escape sequences in a plain replacement template.
+    def _insert_section(_match: re.Match[str]) -> str:
+        return section.rstrip() + "\n\n"
+
     if _TRANSCRIPTS_SECTION_RE.search(text):
-        text = _TRANSCRIPTS_SECTION_RE.sub(section.rstrip() + "\n\n", text, count=1)
+        text = _TRANSCRIPTS_SECTION_RE.sub(_insert_section, text, count=1)
     elif re.search(r"^## Competency \(student-judge\)\s*$", text, re.MULTILINE):
         text = re.sub(
             r"^## Competency \(student-judge\)\s*$",
-            section + "\n## Competency (student-judge)",
+            lambda _m: section + "\n## Competency (student-judge)",
             text,
             count=1,
             flags=re.MULTILINE,
@@ -273,7 +319,7 @@ def merge_transcripts_section(
     elif re.search(r"^## Skill integrity\s*$", text, re.MULTILINE):
         text = re.sub(
             r"^## Skill integrity\s*$",
-            section + "\n## Skill integrity",
+            lambda _m: section + "\n## Skill integrity",
             text,
             count=1,
             flags=re.MULTILINE,
