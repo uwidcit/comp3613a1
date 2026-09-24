@@ -43,14 +43,15 @@ When you change a skill, update **both** `.agents/skills/` and `.cursor/skills/`
 
 ## This assignment's phases
 
-Use **student-build**. One phase per design chat. Ask only unanswered gaps (at most 8). Do not re-ask the prompt or collect wireframe steps. The student picks the project in Phase 1. Write the artefact, pause, and tell them to open a new chat for the next *phase*. Phase 5 implement may build every workflow in the same conversation. The student may **skip** up to 3 needless questions. A skip cannot assign the project or replace a workflow. Report `Skips: n/3 used`.
+Use **student-build**. One phase per design chat. Ask only unanswered gaps (at most 8). Do not re-ask the prompt or collect wireframe steps. The student picks the project in Phase 1. Write the artefact, pause, and tell them to open a new chat for the next *phase*. Phase 5 (theme → build → **polish**) may stay in one conversation. Phase 6 is deploy. The student may **skip** up to 3 needless questions. A skip cannot assign the project or replace a workflow. Report `Skips: n/3 used`.
 
 1. Select the project and name **at least three** workflows. More is allowed.
 2. Agent drafts the UML use-case PNG from that prompt and embeds it in `docs/report.md`.
 3. Student names entities and properties. Agent asks about relationships, bridge tables, and edge cases, then drafts the model.
 4. Wait for student-crafted wireframe images in `docs/wireframes/`. Suggest model edits. Flag broken or incomplete flows. Redesign only if really bad.
-5. Ask for theming and branding preferences, then implement. Deploy after local verification.
+5. Theme, implement, and **polish** — student steers verify notes, UI/workflow fine-tunes, and model revisions. Accepting the first build is a red flag. Do not deploy yet.
+6. Deploy (Render Postgres + web service) after Phase 5 polish.
 
-Judge scores COMP 3613 phases 1–5 (not generic Buildmine). Read all native agent chats for this project (phases start in new chats). Students never put transcripts in the repo. Do not penalize missing explore reports or starter-kit auth lectures. Terse steering after artefacts exist is high-quality. The scorecard must show awarded total / scoreable max, then overall / 4. Impression mark: `round(confidence × 10)` out of 10. Building or exporting the report runs Judge and writes `docs/judge.md`.
+Judge scores COMP 3613 phases **1–6** (not generic Buildmine). Phase 5 engagement (polish beyond the first dump) is critical. Read all native agent chats for this project (phases start in new chats). Students never put transcripts in the repo. Do not penalize missing explore reports or starter-kit auth lectures. Terse steering after artefacts exist is high-quality. The scorecard must show awarded total / scoreable max, then overall / 4. Impression mark: `round(confidence × 10)` out of 10. Building or exporting the report runs Judge and writes `docs/judge.md`.
 
-Export the report with `python manage.py report --name "..." --id "..."`. That command merges `docs/judge.md` into `docs/report.md`, hashes the course skills against `.agents/skills.lock.json`, and stamps the result on the PDF. Do not edit the skills or the lock. Course authors refresh the lock with `FASTSTARTER_SKILLS_LOCK=1 python manage.py skills-lock`.
+Export the report with `python manage.py report --name "..." --id "..."`. That command merges `docs/judge.md`, dumps Guide transcripts to `docs/transcripts/` (+ zip), hashes the course skills against `.agents/skills.lock.json`, and writes `docs/report.pdf`. Guide must write `docs/judge.md` (student-judge) first. Do not edit the skills or the lock. Course authors refresh the lock with `FASTSTARTER_SKILLS_LOCK=1 python manage.py skills-lock`.

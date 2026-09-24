@@ -61,7 +61,7 @@ You may add minimal supporting behaviour (login, roles, seed data, navigation) r
 
 ## How you build (phases)
 
-The brief does **not** list features for you. Work in this order. Use the **student-build** skill. **One phase per chat** for design (1–4 and theming). When a phase is done, the agent writes an artefact you can open, then stops. Start the next *phase* in a **new chat**. Phase 5 implement may build every named workflow in the **same** conversation, one at a time after you verify. It asks a few questions based on how complete your prompt is, at most eight, then writes the artefact. It will not pick your project for you. A pasted answer that looks like another chatbot’s will not stay inside that cap. If a question is too arduous or needless, say **skip**. You have **3 skips**. A skip does not replace your workflows or your wireframes. **No app code before Phase 5.**
+The brief does **not** list features for you. Work in this order. Use the **student-build** skill. **One phase per chat** for design (1–4 and theming preferences). When a phase is done, the agent writes an artefact you can open, then stops. Start the next *phase* in a **new chat**. Phase 5 (theme → build → **polish**) may build and refine every named workflow in the **same** conversation, one at a time after you verify. Phase 6 is **deploy**, only after polish. It asks a few questions based on how complete your prompt is, at most eight, then writes the artefact. It will not pick your project for you. A pasted answer that looks like another chatbot’s will not stay inside that cap. If a question is too arduous or needless, say **skip**. You have **3 skips**. A skip does not replace your workflows or your wireframes. **No app code before Phase 5.**
 
 ### Phase 1 — Select the project and name at least three workflows
 
@@ -79,24 +79,27 @@ You name the entities and their properties. The agent asks which relationships s
 
 This is the only artifact you must draw. Draw wireframes for **your named workflows only**, outside the agent (paper, Figma, Excalidraw, draw.io, and so on). Export **PNG or JPG** and put the images in `docs/wireframes/`. The agent waits, then suggests model edits for fields and metadata the images show, asks how a workflow completes when that path is not obvious from the design, and flags workflows that look incomplete or broken. You redesign only if a named workflow cannot be completed or an image is missing or unreadable. **You cannot start Phase 5 until every use case has a wireframe image in the workspace.** Later tweaks do not mean a new wireframe.
 
-### Phase 5 — Theming, then implement and deploy
+### Phase 5 — Theming, implement, and polish
 
-State theming and branding preferences (colors, type, tone, logo or wordmark). Then the agent **implements your ERD and wireframes** — models and relationships from the diagram, screens and flows from the images — one workflow at a time in the same chat. It will present **implementation choices**, ask questions, and have you **complete short snippets in real code files**. If you struggle, it asks more and requires more snippets. If a detail is fleshed out in code, the agent updates the model. It will not send you back to redraw the wireframe. Verify each workflow locally against the wireframe, then continue here.
+State theming and branding preferences (colors, type, tone, logo or wordmark). Then the agent **applies** that brand to landing, login, and register, and **implements your ERD and wireframes** — models and relationships from the diagram, screens and flows from the images — one workflow at a time in the same chat. It will present **implementation choices**, ask questions, and have you **complete short snippets in real code files**. If you struggle, it asks more and requires more snippets. If a detail is fleshed out in code, the agent updates the model.
 
-When all named workflows work locally (at least three), deploy **both** a Render Postgres database and the web service with the **Render MCP**. Steps are in [README.md](README.md). Put the public URL in the report. A local-only app cannot earn full implementation marks.
+**Your engagement here is critical.** Do not treat the first successful build as done. After each workflow (and again when all named workflows exist), run the app, report what you saw vs the wireframe, and steer **polish**: UI tweaks, workflow fixes, and **model revisions** when a feature needs them. Keep iterating until features work the way you want.
+
+### Phase 6 — Deploy
+
+Only after Phase 5 polish. Deploy **both** a Render Postgres database and the web service with the **Render MCP**. Steps are in [README.md](README.md). Put the public URL in the report. A local-only app cannot earn full implementation marks.
 
 Markers will exercise **your** named workflows on the deployed app. If a named workflow cannot be completed, you lose marks for that area.
 
 ## Report
 
-Draft the report **with** the agent as Markdown (`docs/report.md`). Update it after **every phase**. The use-case diagram is a UML image (`docs/diagrams/use-case.png`). The model diagram is Mermaid. Wireframes are image links to `docs/wireframes/`. The report must include the **deployed app link** and the **user logins** a marker needs (username, password, and role for every account, including any you added beyond bob and admin). When you ask the agent to build or export the report, it runs **student-judge**, writes `docs/judge.md`, **dumps all native Guide chat transcripts** into `docs/transcripts/` and `docs/transcripts.zip` for submission, and appends that scorecard plus a transcript appendix to the PDF. After you have reviewed the Markdown, export a PDF. The cover includes your **name**, **student ID**, the **deployed app link**, and those **logins**:
+Draft the report **with** the agent as Markdown (`docs/report.md`). Update it after **every phase**. The use-case diagram is a UML image (`docs/diagrams/use-case.png`). The model diagram is Mermaid. Wireframes are image links to `docs/wireframes/`. The report must include the **deployed app link** and the **user logins** a marker needs (username, password, and role for every account, including any you added beyond bob and admin). When you ask the agent to build or export the report, it runs **student-judge**, writes `docs/judge.md`, then runs one command that dumps transcripts and builds the PDF (scorecard + transcript appendix). After you have reviewed the Markdown, export a PDF. The cover includes your **name**, **student ID**, the **deployed app link**, and those **logins**:
 
 ```bash
-python manage.py transcripts
 python manage.py report --name "Your Name" --id "816000000"
 ```
 
-That refreshes `docs/transcripts/` (+ zip) and writes `docs/report.pdf`. Include the PDF (and keep the transcript dump with your submission materials). You may export an incomplete draft at any phase. Missing URL, logins, diagrams, or wireframes do not block the export. The final submission still needs the public URL and marker logins for full marks. Export fails only if the course skills were edited. Submit the PDF you want marked. The YouTube video must show your name and must **not** show or say your student ID. App logins belong in the report. Database passwords do not.
+That merges `docs/judge.md`, refreshes `docs/transcripts/` (+ zip), and writes `docs/report.pdf`. Include the PDF (and keep the transcript dump with your submission materials). You may export an incomplete draft at any phase. Missing URL, logins, diagrams, or wireframes do not block the export. The final submission still needs the public URL and marker logins for full marks. Export fails only if the course skills were edited. Submit the PDF you want marked. The YouTube video must show your name and must **not** show or say your student ID. App logins belong in the report. Database passwords do not.
 
 Do **not** edit `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`. Export hashes those files and stamps the result on the PDF cover. A mismatch is an integrity fail. Markers re-check with `python manage.py skills-verify`.
 
@@ -167,7 +170,7 @@ UML use-case diagram (PNG), Mermaid model diagram (including revisions from impl
 
 ### C. Implementation and deployment (GitHub + Render)
 
-FastStarter web UI (not CLI-only), models matching the current diagram, all named workflows usable end-to-end, seed data. Wireframe images in `docs/wireframes/`. A Render Postgres database and a public web service, URL in the PDF.
+FastStarter web UI (not CLI-only), models matching the current diagram (including Phase 5 polish revisions), all named workflows usable end-to-end, seed data. Wireframe images in `docs/wireframes/`. Student-steered polish after the first build (verify notes, UI/workflow fine-tunes). A Render Postgres database and a public web service (**Phase 6**), URL in the PDF.
 
 ### D. Impression evidence (PDF)
 

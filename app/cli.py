@@ -113,16 +113,29 @@ def cmd_run(args: argparse.Namespace) -> None:
 
 
 def cmd_report(args: argparse.Namespace) -> None:
-    """Export docs/report.md to PDF; merges judge + exports Guide transcripts."""
+    """Build the submission package: merge judge, dump transcripts, write PDF.
+
+    Guide must write ``docs/judge.md`` (student-judge) before this command.
+    Transcripts are dumped automatically — no separate ``transcripts`` step needed.
+    """
     from app.report_pdf import export_report
     from app.skill_integrity import format_report, verify
 
-    export_report(
+    result = export_report(
         name=args.name,
         student_id=args.student_id,
         source=None if args.src is None else Path(args.src),
         output=None if args.output is None else Path(args.output),
     )
+    print()
+    print("Report package:")
+    print(
+        f"  Judge:       {'merged docs/judge.md' if result.judge_merged else 'MISSING - Guide must run student-judge first'}"
+    )
+    print(f"  Transcripts: {result.transcript_count} chat(s) in docs/transcripts/")
+    if result.transcript_zip:
+        print(f"  Zip:         {result.transcript_zip.as_posix()}")
+    print(f"  PDF:         {result.pdf_path.as_posix()}")
     print(format_report(verify()))
 
 
@@ -239,7 +252,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_report = sub.add_parser(
         "report",
-        help="Export docs/report.md to PDF; merges judge.md and exports Guide transcripts",
+        help=(
+            "Build submission package: merge docs/judge.md, dump Guide transcripts, "
+            "write docs/report.pdf (Guide runs student-judge first)"
+        ),
     )
     p_report.add_argument("--name", required=True, help="Student name (printed on the PDF cover)")
     p_report.add_argument("--id", dest="student_id", required=True, help="Student ID (PDF only)")

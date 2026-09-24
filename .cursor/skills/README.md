@@ -1,126 +1,57 @@
-# Buildmine skills (Cursor, Copilot, OpenCode)
+# Shared skills (Cursor, Copilot, OpenCode)
 
-Two project skills for coursework. Canonical copies: `.agents/skills/` (also under `.cursor/skills/`).
+Canonical skills for all three agents:
 
-| Skill | When to use |
-|-------|-------------|
-| **student-build** | This assignment, while building |
-| **student-judge** | Rubric method. This assignment’s phases and impression mark come from **student-build**. |
+| Skill | Path |
+|-------|------|
+| Assignment coach | `.agents/skills/student-build/SKILL.md` |
+| Judge | `.agents/skills/student-judge/SKILL.md` |
 
-## Which agents load them
+A copy also lives under `.cursor/skills/` for older Cursor builds.
 
-| Agent | Works? | How |
-|-------|--------|-----|
-| Cursor Hobby | Yes | Open folder; new Agent chat; `/student-build` |
-| GitHub Copilot agent / CLI | Yes | Open repo; agent mode (not autocomplete-only); `/student-build` |
-| OpenCode | Yes | Run from repo root; it reads `AGENTS.md` and `.agents/skills/` |
-| ChatGPT / Claude / Gemini **web** | No | They never see these files |
+| Agent | How it loads these |
+|-------|--------------------|
+| **Cursor** | Discovers `.agents/skills/` and `.cursor/skills/`. Start a new Agent chat, then `/student-build`. |
+| **GitHub Copilot** | Agent mode and Copilot CLI load `.agents/skills/*/SKILL.md` plus `AGENTS.md` and `.github/copilot-instructions.md`. Use **Agent** mode (not Ask/Edit, not autocomplete-only). |
+| **OpenCode** | Loads `.agents/skills/` and always reads `AGENTS.md`. Run from the project root. Do not run `/init` (it overwrites `AGENTS.md`). |
 
-`AGENTS.md` and `.github/copilot-instructions.md` tell Copilot and OpenCode to follow **student-build** by default.
+## GitHub Education
 
-## Cursor Hobby checklist
+Student license / benefits (apply, then activate Copilot):
 
-1. Install [Cursor](https://cursor.com) and stay on free **Hobby**.
-2. **File → Open Folder** on this project root.
-3. Confirm `.agents/skills/student-build/SKILL.md`.
-4. New Agent chat → `Use student-build`.
-5. End with `Build the report` (runs student-judge and export).
+https://github.com/settings/education/benefits
 
-## GitHub Education (student license)
-
-Apply (signed in): **https://github.com/settings/education/benefits**
-
-[Apply as a student](https://docs.github.com/en/education/about-github-education/github-education-for-students/apply-to-github-education-as-a-student). Use a verified academic email if you have one. After approval, activate Copilot from that page ([Copilot for students](https://docs.github.com/en/copilot/how-tos/copilot-on-github/set-up-copilot/enable-copilot/set-up-for-students)). If the student offer is not available, use Copilot Free. Do not buy a paid plan for this course.
+[How to apply](https://docs.github.com/en/education/about-github-education/github-education-for-students/apply-to-github-education-as-a-student) · [Copilot for students](https://docs.github.com/en/copilot/how-tos/copilot-on-github/set-up-copilot/enable-copilot/set-up-for-students)
 
 ## Copilot setup
 
-1. GitHub account, then the Education link above.
-2. Install [VS Code](https://code.visualstudio.com/) and the **GitHub Copilot** and **GitHub Copilot Chat** extensions. Sign in.
-3. Open this project root. In Copilot Chat, set the mode to **Agent** (not Ask, not Edit, not autocomplete-only).
-4. `Use the student-build skill.` It reads `.agents/skills/` and `.github/copilot-instructions.md`.
-
-Optional: [Copilot CLI](https://docs.github.com/en/copilot/how-tos/copilot-cli/set-up-copilot-cli/install-copilot-cli) from this folder. One slice at a time — free quotas are limited.
+1. GitHub account → apply at the benefits link above → activate Copilot (or use Copilot Free).
+2. VS Code + GitHub Copilot and Copilot Chat extensions, signed in.
+3. Open this repo. Copilot Chat → **Agent**.
+4. `Use the student-build skill.`
 
 ## OpenCode setup
 
-Free client; you still need a model (local or a free API tier). Docs: https://opencode.ai/docs/
+1. Install: `npm install -g opencode-ai` (Windows also: `scoop install opencode` or `choco install opencode`). macOS/Linux: `curl -fsSL https://opencode.ai/install | bash`. Docs: https://opencode.ai/docs/
+2. From this repo root: `opencode`, then `/connect` a model.
+3. Do not run `/init`.
+4. `Use the student-build skill.`
 
-**Windows:** `npm install -g opencode-ai` (or `scoop install opencode` / `choco install opencode`).
+Web chat (chatgpt.com, claude.ai, gemini.google.com) does **not** load these files. That path is not allowed for the assignment.
 
-**macOS / Linux:** `curl -fsSL https://opencode.ai/install | bash` or `brew install anomalyco/tap/opencode`.
+When you change a skill, update **both** `.agents/skills/` and `.cursor/skills/` so they stay the same.
 
-Then `cd` to this repo, run `opencode`, and `/connect` a model. **Do not run `/init`** — it overwrites the course `AGENTS.md`. Start with `Use the student-build skill.`
+## This assignment's phases
 
-## Do / don’t
+Use **student-build**. One phase per design chat. Ask only unanswered gaps (at most 8). Do not re-ask the prompt or collect wireframe steps. The student picks the project in Phase 1. Write the artefact, pause, and tell them to open a new chat for the next *phase*. Phase 5 (theme → build → **polish**) may stay in one conversation. Phase 6 is deploy. The student may **skip** up to 3 needless questions. A skip cannot assign the project or replace a workflow. Report `Skips: n/3 used`.
 
-- **Do** stay in one agent session so Guide can see your decisions.
-- **Don’t** build in a web chatbot and paste the result back.
-- **Don’t** say “just apply this.”
+1. Select the project and name **at least three** workflows. More is allowed.
+2. Agent drafts the UML use-case PNG from that prompt and embeds it in `docs/report.md`.
+3. Student names entities and properties. Agent asks about relationships, bridge tables, and edge cases, then drafts the model.
+4. Wait for student-crafted wireframe images in `docs/wireframes/`. Suggest model edits. Flag broken or incomplete flows. Redesign only if really bad.
+5. Theme, implement, and **polish** — student steers verify notes, UI/workflow fine-tunes, and model revisions. Accepting the first build is a red flag. Do not deploy yet.
+6. Deploy (Render Postgres + web service) after Phase 5 polish.
 
-## Installation (students)
+Judge scores COMP 3613 phases **1–6** (not generic Buildmine). Phase 5 engagement (polish beyond the first dump) is critical. Read all native agent chats for this project (phases start in new chats). Students never put transcripts in the repo. Do not penalize missing explore reports or starter-kit auth lectures. Terse steering after artefacts exist is high-quality. The scorecard must show awarded total / scoreable max, then overall / 4. Impression mark: `round(confidence × 10)` out of 10. Building or exporting the report runs Judge and writes `docs/judge.md`.
 
-Skills under `.cursor/skills/` are **already included** when you clone or fork this repo. You normally do **not** need to copy anything.
-
-1. Open this project folder in **Cursor** (File → Open Folder).
-2. Confirm the skills exist (paths above).
-3. Start an Agent chat in the project. Cursor discovers project skills automatically from `.cursor/skills/`.
-4. For the build: `@student-build` / ask the agent to follow the student-build skill.
-5. When finished: ask the Guide to **build the report**. That run includes Judge and appends the scorecard.
-
-### If skills are missing (older fork / incomplete copy)
-
-Copy from a fresh [comp3613a1](https://github.com/uwidcit/comp3613a1) clone into your project root and commit:
-
-```text
-.cursor/skills/student-build/
-.cursor/skills/student-judge/
-.cursor/skills/README.md
-```
-
-Do **not** put course skills only in `~/.cursor/skills/` if your assignment requires them in the submitted repo — markers need them in the project.
-
-### Personal vs project skills
-
-| Location | Scope |
-|----------|--------|
-| `.cursor/skills/` (this repo) | Shared with anyone who clones; use for coursework |
-| `~/.cursor/skills/` | Your machine only; optional for personal prefs |
-
-## Quick start prompts
-
-**Guide (start of assignment):**
-
-```text
-Use student-build.
-
-Phase 1. Assigned project: …
-Workflows (at least three; format Feature (user); steps go in the wireframe):
-- Explore/Search Publications (Public)
-- …
-- …
-```
-
-**Judge / report export:**
-
-```text
-Use student-build. Build the report and export the PDF. Name: … ID: …
-```
-
-That run includes student-judge. The scorecard is written to `docs/judge.md` and appended to the PDF.
-
-Or judge only:
-
-```text
-Use the student-judge skill on this session.
-```
-
-## Notes
-
-- Course briefs are short on purpose — **you** choose at least three workflows (more is allowed). Drive the next phase with one complete prompt. The agent does not interview you.
-- No app code until wireframe images in `docs/wireframes/` cover every use case. Use-case diagram is a UML PNG; model is Mermaid in `docs/report.md`.
-- Deploy Postgres and the web app with the Render MCP after local verification (`render.yaml`).
-- Guide refuses shallow “just build it” prompts and quarantines paste-backs from other chatbots.
-- Judge scores COMP 3613 process and integrity on phases 1–5. Building the report runs Judge and appends the scorecard. Working code alone is not a high score. Read all native agent chats for this project; students never put transcripts in the repo. Do not penalize missing explore reports or starter-kit auth lectures. The scorecard shows awarded total / scoreable max, then overall / 4.
-- Keep `framework-phases.md` next to each `SKILL.md` (both skills link to it).
-- Do not edit these skill files. Report export hashes them against `.agents/skills.lock.json`.
-- Free Hobby quotas last longer if you stay in-phase and verify each workflow yourself.
+Export the report with `python manage.py report --name "..." --id "..."`. That command merges `docs/judge.md`, dumps Guide transcripts to `docs/transcripts/` (+ zip), hashes the course skills against `.agents/skills.lock.json`, and writes `docs/report.pdf`. Guide must write `docs/judge.md` (student-judge) first. Do not edit the skills or the lock. Course authors refresh the lock with `FASTSTARTER_SKILLS_LOCK=1 python manage.py skills-lock`.

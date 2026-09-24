@@ -1,6 +1,6 @@
 # comp3613a1
 
-COMP 3613 Assignment 1 starter ([uwidcit/comp3613a1](https://github.com/uwidcit/comp3613a1)). Built on FastStarter (FastAPI MVC).
+COMP 3613 Assignment 1 starter ([uwidcit/comp3613a1](https://github.com/uwidcit/comp3613a1)). Built on **FastStarter** (FastAPI + SQLModel).
 
 **Assignment brief, agents, and GitHub Education link:** [ASSIGNMENT.md](ASSIGNMENT.md)
 
@@ -135,8 +135,8 @@ Commands are implemented in `app/cli.py` (stdlib `argparse`) and invoked via `ma
 | `python manage.py seed` | Insert demo users only (also part of `init`) |
 | `python manage.py run` | Start Uvicorn (reload unless `ENV=production`) |
 | `python manage.py users` | Print users in the DB |
-| `python manage.py transcripts` | Dump all native Guide project chats to `docs/transcripts/` (+ `docs/transcripts.zip`) for submission |
-| `python manage.py report --name "..." --id "..."` | Merge `docs/judge.md`, re-export Guide transcripts, write `docs/report.pdf` (transcript appendix). Incomplete drafts allowed. Cover has name, ID, and skill-integrity hash. Fails only if course skills were edited |
+| `python manage.py transcripts` | Optional: dump Guide chats only (also part of `report`) |
+| `python manage.py report --name "..." --id "..."` | **Submission package:** merge `docs/judge.md`, dump transcripts → `docs/transcripts/` (+ zip), write `docs/report.pdf`. Guide must run student-judge first. Incomplete drafts allowed. Fails only if course skills were edited |
 | `python manage.py usecase` | Render `docs/diagrams/use-case.json` to a UML use-case PNG via the vendored PlantUML JAR (`docs/diagrams/use-case.png`) |
 | `python manage.py skills-verify` | Check course skills against `.agents/skills.lock.json` |
 | `python manage.py --help` | Show all commands |
@@ -155,7 +155,7 @@ The app binds `0.0.0.0` and reads `PORT` when Render sets it. Locally it uses `A
 
 ## Deploy (Render MCP)
 
-Deploy a **Postgres database** and the **web app** on Render’s free plan. Agents talk to Render through the [Render MCP server](https://render.com/docs/mcp-server) (`https://mcp.render.com/mcp`). This repo already ships the MCP config for each supported agent — do **not** paste an API key into a committed file. Do not put the **database** password in the report or the video. **App** usernames and passwords belong in `docs/report.md`.
+**Phase 6** — only after Phase 5 polish (named workflows work locally and you have steered UI/workflow/model refinements). Deploy a **Postgres database** and the **web app** on Render’s free plan. Agents talk to Render through the [Render MCP server](https://render.com/docs/mcp-server) (`https://mcp.render.com/mcp`). This repo already ships the MCP config for each supported agent — do **not** paste an API key into a committed file. Do not put the **database** password in the report or the video. **App** usernames and passwords belong in `docs/report.md`.
 
 | Agent | MCP config in this repo | Auth |
 |-------|-------------------------|------|
@@ -203,7 +203,7 @@ Workflows (at least three; format Feature (user); steps go in the wireframe):
 - …
 ```
 
-When finished: ask the Guide to **build the report**. That run includes student-judge, dumps all project transcripts to `docs/transcripts/` (+ zip) for submission, and builds the PDF.
+When finished: ask the Guide to **build the report**. That run writes `docs/judge.md` (student-judge), then `python manage.py report` dumps transcripts and builds the PDF.
 
 ### GitHub Education (student license)
 
@@ -273,18 +273,15 @@ More setup detail: [`.agents/skills/README.md`](.agents/skills/README.md).
 
 ---
 
-## What is the Model View Controller (MVC) pattern?
+## Architecture
 
-- **Models** — SQLModel/SQLAlchemy classes (database tables)
-- **Controllers** — utility functions that mutate models and/or perform business logic
-- **Views** — bind controllers to HTTP routes, passing request parameters through
+This starter uses a layered FastAPI layout:
 
-In this template, business rules often sit in a **service** layer, with repositories handling data access.
-
-## What is the Service repository pattern?
-
-- **Repository layer** — mediator to the datastore (CRUD); no business rules
-- **Service layer** — application **rules** (authz, workflows, invariants)
+- **Models / schemas** — SQLModel tables and request/response shapes
+- **Repositories** — datastore access (CRUD); no business rules
+- **Services** — application rules (authz, workflows, invariants)
+- **Routers** — HTTP routes; bind forms/JSON to services and return templates or API responses
+- **Templates / static** — UI rendering and assets
 
 ## App structure
 

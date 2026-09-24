@@ -9,6 +9,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+from dataclasses import dataclass
 from pathlib import Path
 
 from fpdf import FPDF, FontFace, TextStyle
@@ -143,14 +144,24 @@ class ReportPDF(FPDF):
         self.set_text_color(0, 0, 0)
 
 
+@dataclass(frozen=True)
+class ReportExportResult:
+    """Outcome of ``python manage.py report`` (judge merge + transcripts + PDF)."""
+
+    pdf_path: Path
+    judge_merged: bool
+    transcript_count: int
+    transcript_zip: Path | None
+
+
 def export_report(
     *,
     name: str,
     student_id: str,
     source: Path | None = None,
     output: Path | None = None,
-) -> Path:
-    """Write a PDF from the markdown report. Returns the output path."""
+) -> ReportExportResult:
+    """Merge judge, dump transcripts, write PDF. Returns paths and status."""
     src = source or DEFAULT_REPORT
     dest = output or DEFAULT_PDF
     clean_name = name.strip()
@@ -168,7 +179,26 @@ def export_report(
         print(f"Created {src} (empty draft).")
 
     integrity = require_clean()
+
+    # 1) Judge - Guide writes docs/judge.md via student-judge before this command.
+    judge_path = DEFAULT_JUDGE
+    judge_merged = judge_path.is_file() and bool(judge_path.read_text(encoding="utf-8").strip())
+    if judge_merged:
+        print(f"  [1/3] Judge: merged {judge_path.as_posix()}")
+    else:
+        print(
+            "  [1/3] Judge: MISSING - Guide must run student-judge and write "
+            f"{judge_path.as_posix()} before a complete export."
+        )
+
+    # 2) Transcripts - always dump as part of report (no separate step required).
     transcripts = export_project_transcripts()
+    print(
+        f"  [2/3] Transcripts: {transcripts.found} chat(s) -> "
+        f"{transcripts.out_dir.as_posix()}"
+        + (f" (+ {transcripts.zip_path.name})" if transcripts.zip_path else "")
+    )
+
     markdown = merge_judge_section(src.read_text(encoding="utf-8"))
     markdown = ensure_usecase_in_report(markdown, report_path=src)
     markdown = merge_transcripts_section(markdown, transcripts)
@@ -176,8 +206,8 @@ def export_report(
     src.write_text(markdown, encoding="utf-8")
     if COMPETENCY_HEADING not in markdown:
         print(
-            "No judge report yet. Ask the Guide to build or export the report "
-            "so it runs student-judge and writes docs/judge.md."
+            "No judge scorecard in the report yet. Ask the Guide to build the report "
+            "(runs student-judge -> docs/judge.md), then re-run this command."
         )
     app_url, logins, missing = _marker_access(markdown)
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -196,11 +226,16 @@ def export_report(
             pdf.add_page()
             _write_report_html(pdf, appendix)
     pdf.output(dest)
-    print(f"Wrote {dest}")
+    print(f"  [3/3] PDF: {dest.as_posix()}")
     if missing:
         print("Incomplete draft. Missing: " + "; ".join(missing))
         print("Re-export later when those sections are filled. Full marks still need a live URL.")
-    return dest
+    return ReportExportResult(
+        pdf_path=dest,
+        judge_merged=judge_merged and COMPETENCY_HEADING in markdown,
+        transcript_count=transcripts.found,
+        transcript_zip=transcripts.zip_path,
+    )
 
 
 def ensure_usecase_in_report(
@@ -344,8 +379,21 @@ def _fonts() -> tuple[Path | None, Path | None, Path | None, Path | None]:
 
 
 def _write_report_html(pdf: ReportPDF, markup: str) -> None:
+    # Core fonts (e.g. Courier on <code>) are latin-1; normalize fancy punctuation.
+    safe = (
+        markup.replace("\u2026", "...")
+        .replace("\u2014", "-")
+        .replace("\u2013", "-")
+        .replace("\u2192", "->")
+        .replace("\u201c", '"')
+        .replace("\u201d", '"')
+        .replace("\u2018", "'")
+        .replace("\u2019", "'")
+        .replace("\u00a0", " ")
+        .replace("\u2728", "*")
+    )
     pdf.write_html(
-        markup,
+        safe,
         font_family="Body",
         table_line_separators=True,
         warn_on_tags_not_matching=False,
@@ -416,7 +464,7 @@ def _cover_html(
     ) or "Not yet"
     root = integrity.root
     if len(root) > 28:
-        root = f"{root[:12]}…{root[-10:]}"
+        root = f"{root[:12]}...{root[-10:]}"
     integrity_value = html_lib.escape(f"{integrity.status.upper()}. Root {root}")
     rows = [
         ("Student name", html_lib.escape(name), False),
@@ -732,8 +780,15 @@ def _cell_html(text: str) -> str:
 def _inline_html(text: str) -> str:
     escaped = html_lib.escape(text)
     escaped = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", escaped)
-    escaped = re.sub(r"`([^`]+)`", r"<font face='Courier'>\1</font>", escaped)
-    escaped = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r'<a href="\2">\1</a>', escaped)
+    escaped = re.sub(r"`([^`]+)`", r"<font face='Body'>\1</font>", escaped)
+
+    def _link(match: re.Match[str]) -> str:
+        label, href = match.group(1), match.group(2)
+        if href.startswith(("http://", "https://", "mailto:")):
+            return f'<a href="{href}">{label}</a>'
+        return label
+
+    escaped = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", _link, escaped)
     return escaped
 
 
