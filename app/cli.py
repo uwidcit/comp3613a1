@@ -113,10 +113,10 @@ def cmd_run(args: argparse.Namespace) -> None:
 
 
 def cmd_report(args: argparse.Namespace) -> None:
-    """Build the submission package: merge judge, dump transcripts, write PDF.
+    """Build the submission package: merge judge, package transcripts, write PDF.
 
-    Guide must write ``docs/judge.md`` (student-judge) before this command.
-    Transcripts are dumped automatically — no separate ``transcripts`` step needed.
+    Guide must (1) write ``docs/judge.md`` and (2) pull every Guide chat into
+    ``docs/transcripts/*.md`` before this command. Report only packages those files.
     """
     from app.report_pdf import export_report
     from app.skill_integrity import format_report, verify
@@ -132,7 +132,14 @@ def cmd_report(args: argparse.Namespace) -> None:
     print(
         f"  Judge:       {'merged docs/judge.md' if result.judge_merged else 'MISSING - Guide must run student-judge first'}"
     )
-    print(f"  Transcripts: {result.transcript_count} chat(s) in docs/transcripts/")
+    print(
+        f"  Transcripts: {result.transcript_count} chat(s) in docs/transcripts/"
+        + (
+            ""
+            if result.transcript_count
+            else " (EMPTY - Guide must pull Copilot/Cursor/OpenCode chats first)"
+        )
+    )
     if result.transcript_zip:
         print(f"  Zip:         {result.transcript_zip.as_posix()}")
     print(f"  PDF:         {result.pdf_path.as_posix()}")
@@ -140,17 +147,18 @@ def cmd_report(args: argparse.Namespace) -> None:
 
 
 def cmd_transcripts(args: argparse.Namespace) -> None:
-    """Dump all native Guide project transcripts into docs/transcripts/ for submission."""
-    from app.transcript_export import export_project_transcripts
+    """Package agent-written markdown under docs/transcripts/ (+ zip)."""
+    from app.transcript_export import package_transcripts
 
-    result = export_project_transcripts(make_zip=not args.no_zip)
+    result = package_transcripts(make_zip=not args.no_zip)
     if result.found == 0:
         print(
-            "Warning: no Guide transcripts found. "
-            "Set FASTSTARTER_TRANSCRIPTS_DIR if chats live outside Cursor's agent-transcripts folder."
+            "Warning: no chat markdown in docs/transcripts/. "
+            "The Guide agent must pull every Guide chat for this project "
+            "(Copilot Agent, Cursor, or OpenCode) into docs/transcripts/<slug>.md first."
         )
         raise SystemExit(2)
-    print(f"Submission dump ready: {result.out_dir}")
+    print(f"Submission package ready: {result.out_dir}")
     if result.zip_path:
         print(f"Zip for submission: {result.zip_path}")
 
@@ -253,8 +261,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_report = sub.add_parser(
         "report",
         help=(
-            "Build submission package: merge docs/judge.md, dump Guide transcripts, "
-            "write docs/report.pdf (Guide runs student-judge first)"
+            "Build submission package: merge docs/judge.md, package docs/transcripts/, "
+            "write docs/report.pdf (Guide pulls chats + runs student-judge first)"
         ),
     )
     p_report.add_argument("--name", required=True, help="Student name (printed on the PDF cover)")
@@ -265,7 +273,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_transcripts = sub.add_parser(
         "transcripts",
-        help="Dump all native Guide project chats to docs/transcripts/ (+ zip) for submission",
+        help="Package agent-written docs/transcripts/*.md into INDEX + zip (no IDE scrape)",
     )
     p_transcripts.add_argument(
         "--no-zip",

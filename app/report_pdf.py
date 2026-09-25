@@ -39,6 +39,17 @@ _USECASE_SECTION_RE = re.compile(
     r"^## Use case diagram\n.*?(?=^## |\Z)",
     re.MULTILINE | re.DOTALL,
 )
+WIREFRAMES_HEADING = "## Wireframes"
+_WIREFRAMES_DIR = REPO_ROOT / "docs" / "wireframes"
+_WIREFRAME_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
+_WIREFRAMES_SECTION_RE = re.compile(
+    r"^## Wireframes\n.*?(?=^## |\Z)",
+    re.MULTILINE | re.DOTALL,
+)
+_WIREFRAME_IMAGE_RE = re.compile(
+    r"!\[[^\]]*\]\((?:docs/)?wireframes/([^)]+)\)",
+    re.IGNORECASE,
+)
 
 NAVY = (27, 54, 93)
 NAVY_HEX = "#1B365D"
@@ -191,16 +202,23 @@ def export_report(
             f"{judge_path.as_posix()} before a complete export."
         )
 
-    # 2) Transcripts - always dump as part of report (no separate step required).
+    # 2) Transcripts - Guide agent must already have written docs/transcripts/*.md
     transcripts = export_project_transcripts()
     print(
-        f"  [2/3] Transcripts: {transcripts.found} chat(s) -> "
+        f"  [2/3] Transcripts: {transcripts.found} chat(s) packaged from "
         f"{transcripts.out_dir.as_posix()}"
         + (f" (+ {transcripts.zip_path.name})" if transcripts.zip_path else "")
     )
+    if transcripts.found == 0:
+        print(
+            "  Warning: docs/transcripts/ has no chat markdown. "
+            "Guide must pull every Guide chat (Copilot/Cursor/OpenCode) into "
+            "docs/transcripts/<slug>.md before a complete export."
+        )
 
     markdown = merge_judge_section(src.read_text(encoding="utf-8"))
     markdown = ensure_usecase_in_report(markdown, report_path=src)
+    markdown = ensure_wireframes_in_report(markdown, report_path=src)
     markdown = merge_transcripts_section(markdown, transcripts)
     markdown = stamp_markdown(markdown, integrity)
     src.write_text(markdown, encoding="utf-8")
@@ -293,6 +311,114 @@ def ensure_usecase_in_report(
         )
     elif resolved is not None:
         print(f"Use-case diagram linked in report -> {USECASE_IMAGE_REL}")
+    if not text.endswith("\n"):
+        text += "\n"
+    return text
+
+
+def _wireframe_image_files() -> list[Path]:
+    """PNG/JPG/… files under docs/wireframes/ (sorted by name)."""
+    if not _WIREFRAMES_DIR.is_dir():
+        return []
+    files = [
+        path
+        for path in sorted(_WIREFRAMES_DIR.iterdir())
+        if path.is_file() and path.suffix.lower() in _WIREFRAME_EXTS
+    ]
+    return files
+
+
+def ensure_wireframes_in_report(
+    markdown: str,
+    *,
+    report_path: Path | None = None,
+) -> str:
+    """Embed every docs/wireframes image in the Wireframes section of the report.
+
+    Paths are relative to docs/report.md (``wireframes/<file>``). Existing
+    markdown image links for a file are kept; missing files are appended.
+    Broken ``docs/wireframes/...`` links are rewritten to ``wireframes/...``.
+    """
+    del report_path  # reserved for future resolve checks
+    text = markdown.replace("\r\n", "\n").replace("\r", "\n")
+    # Normalize docs/wireframes/… → wireframes/…
+    text = re.sub(
+        r"!\[([^\]]*)\]\(docs/wireframes/([^)]+)\)",
+        r"![\1](wireframes/\2)",
+        text,
+        flags=re.IGNORECASE,
+    )
+
+    files = _wireframe_image_files()
+    linked = {match.group(1).replace("\\", "/").lstrip("./") for match in _WIREFRAME_IMAGE_RE.finditer(text)}
+
+    blocks: list[str] = []
+    for path in files:
+        rel = f"wireframes/{path.name}"
+        alt = path.stem.replace("-", " ").replace("_", " ")
+        if path.name in linked or rel in linked:
+            # Keep existing heading+image for this file; still list for section rebuild of missing only
+            continue
+        blocks.append(f"### {alt}\n\n![{alt}]({rel})\n")
+
+    if not files:
+        print(
+            "Warning: no wireframe images in docs/wireframes/. "
+            "Phase 4 must add PNG/JPG files and embed them in the report."
+        )
+    else:
+        print(f"Wireframe images on disk: {len(files)} under docs/wireframes/")
+
+    if not blocks and _WIREFRAMES_SECTION_RE.search(text) and files:
+        # All files already linked — leave section body as-is (after path normalize).
+        if not text.endswith("\n"):
+            text += "\n"
+        print(f"Wireframes already embedded in report ({len(files)} image link(s)).")
+        return text
+
+    if blocks:
+        extra = "\n".join(blocks).rstrip() + "\n"
+        if _WIREFRAMES_SECTION_RE.search(text):
+            def _append_missing(match: re.Match[str]) -> str:
+                body = match.group(0).rstrip()
+                # If section is only the heading (or heading + blank), replace with embeds.
+                lines = [ln for ln in body.splitlines() if ln.strip()]
+                if len(lines) <= 1:
+                    return f"{WIREFRAMES_HEADING}\n\n{extra}\n"
+                return body + "\n\n" + extra + "\n"
+
+            text = _WIREFRAMES_SECTION_RE.sub(_append_missing, text, count=1)
+        elif re.search(r"^## Theming\s*$", text, re.MULTILINE):
+            text = re.sub(
+                r"^## Theming\s*$",
+                f"{WIREFRAMES_HEADING}\n\n{extra}\n## Theming",
+                text,
+                count=1,
+                flags=re.MULTILINE,
+            )
+        else:
+            text = text.rstrip() + f"\n\n{WIREFRAMES_HEADING}\n\n{extra}\n"
+        print(f"Embedded {len(blocks)} wireframe image(s) into report Wireframes section.")
+    elif not _WIREFRAMES_SECTION_RE.search(text):
+        placeholder = (
+            f"{WIREFRAMES_HEADING}\n\n"
+            "Embed each student wireframe here (paths relative to this file), e.g.\n\n"
+            "```markdown\n"
+            "### Explore search\n\n"
+            "![Explore search](wireframes/explore.png)\n"
+            "```\n"
+        )
+        if re.search(r"^## Theming\s*$", text, re.MULTILINE):
+            text = re.sub(
+                r"^## Theming\s*$",
+                placeholder + "\n## Theming",
+                text,
+                count=1,
+                flags=re.MULTILINE,
+            )
+        else:
+            text = text.rstrip() + "\n\n" + placeholder
+
     if not text.endswith("\n"):
         text += "\n"
     return text

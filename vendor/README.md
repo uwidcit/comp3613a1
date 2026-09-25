@@ -9,15 +9,8 @@ binaries at runtime. Refresh them only when bumping a version; keep
 | `vendor/plantuml/plantuml.jar` | PlantUML MIT 1.2026.7 | MIT | [GitHub release](https://github.com/plantuml/plantuml/releases/tag/v1.2026.7) (`plantuml-mit-1.2026.7.jar`) |
 | `vendor/fonts/DejaVuSans*.ttf` | DejaVu 2.37 | Bitstream Vera / Arev (see `LICENSE`) | [dejavu-fonts 2.37](https://github.com/dejavu-fonts/dejavu-fonts/releases/tag/version_2_37) |
 
-Python packages are pinned in `requirements.lock` (from `pyproject.toml`).
+Python packages are pinned in `requirements.txt` (`pip install -r requirements.txt`). No Poetry.
 Mermaid CLI is pinned in `package-lock.json`.
-
-Refresh the Python lock (venv with pip-tools):
-
-```bash
-pip install pip-tools
-pip-compile --generate-hashes --output-file=requirements.lock pyproject.toml
-```
 
 ## Refresh PlantUML
 

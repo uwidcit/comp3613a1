@@ -1,17 +1,17 @@
-FROM python:3.14-slim
-
-RUN apt-get update \
-    && apt-get install -y curl \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY ./pyproject.toml ./
-COPY ./README.md ./
-COPY ./app /app
-
-RUN pip install .
+# syntax=docker/dockerfile:1
+FROM python:3.12-slim
 
 WORKDIR /app
 
-ENTRYPOINT ["python"]
+COPY ./requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-CMD ["-m", "app.main"]
+COPY ./app ./app
+COPY ./manage.py ./
+COPY ./vendor ./vendor
+COPY ./.env.example ./
+
+ENV PYTHONUNBUFFERED=1
+EXPOSE 8000
+
+CMD ["python", "manage.py", "run", "--host", "0.0.0.0", "--port", "8000"]

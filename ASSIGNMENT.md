@@ -77,7 +77,7 @@ You name the entities and their properties. The agent asks which relationships s
 
 ### Phase 4 — Wireframes (you, outside the agent)
 
-This is the only artifact you must draw. Draw wireframes for **your named workflows only**, outside the agent (paper, Figma, Excalidraw, draw.io, and so on). Export **PNG or JPG** and put the images in `docs/wireframes/`. The agent waits, then suggests model edits for fields and metadata the images show, asks how a workflow completes when that path is not obvious from the design, and flags workflows that look incomplete or broken. You redesign only if a named workflow cannot be completed or an image is missing or unreadable. **You cannot start Phase 5 until every use case has a wireframe image in the workspace.** Later tweaks do not mean a new wireframe.
+This is the only artifact you must draw. Draw wireframes for **your named workflows only**, outside the agent (paper, Figma, Excalidraw, draw.io, and so on). Export **PNG or JPG** and put the images in `docs/wireframes/`. The agent waits, **embeds each image in `docs/report.md`**, suggests model edits for fields and metadata the images show, asks how a workflow completes when that path is not obvious from the design, and flags workflows that look incomplete or broken. You redesign only if a named workflow cannot be completed or an image is missing or unreadable. **You cannot start Phase 5 until every use case has a wireframe image in the workspace.** Later tweaks do not mean a new wireframe.
 
 ### Phase 5 — Theming, implement, and polish
 
@@ -93,13 +93,13 @@ Markers will exercise **your** named workflows on the deployed app. If a named w
 
 ## Report
 
-Draft the report **with** the agent as Markdown (`docs/report.md`). Update it after **every phase**. The use-case diagram is a UML image (`docs/diagrams/use-case.png`). The model diagram is Mermaid. Wireframes are image links to `docs/wireframes/`. The report must include the **deployed app link** and the **user logins** a marker needs (username, password, and role for every account, including any you added beyond bob and admin). When you ask the agent to build or export the report, it runs **student-judge**, writes `docs/judge.md`, then runs one command that dumps transcripts and builds the PDF (scorecard + transcript appendix). After you have reviewed the Markdown, export a PDF. The cover includes your **name**, **student ID**, the **deployed app link**, and those **logins**:
+Draft the report **with** the agent as Markdown (`docs/report.md`). Update it after **every phase**. The use-case diagram is a UML image (`docs/diagrams/use-case.png`). The model diagram is Mermaid. Wireframes are **embedded images** in the report (`wireframes/<file>`). The report must include the **deployed app link** and the **user logins** a marker needs (username, password, and role for every account, including any you added beyond bob and admin). When you ask the agent to build or export the report, it runs **student-judge**, writes `docs/judge.md`, **pulls every Guide chat** into `docs/transcripts/` (works for Copilot Agent, Cursor, or OpenCode — you do not paste chats by hand), then runs one command that packages those files and builds the PDF. After you have reviewed the Markdown, export a PDF. The cover includes your **name**, **student ID**, the **deployed app link**, and those **logins**:
 
 ```bash
 python manage.py report --name "Your Name" --id "816000000"
 ```
 
-That merges `docs/judge.md`, refreshes `docs/transcripts/` (+ zip), and writes `docs/report.pdf`. Include the PDF (and keep the transcript dump with your submission materials). You may export an incomplete draft at any phase. Missing URL, logins, diagrams, or wireframes do not block the export. The final submission still needs the public URL and marker logins for full marks. Export fails only if the course skills were edited. Submit the PDF you want marked. The YouTube video must show your name and must **not** show or say your student ID. App logins belong in the report. Database passwords do not.
+That merges `docs/judge.md`, packages `docs/transcripts/` (+ zip), and writes `docs/report.pdf`. Include the PDF (and keep the transcript dump with your submission materials). You may export an incomplete draft at any phase. Missing URL, logins, diagrams, or wireframes do not block the export. The final submission still needs the public URL and marker logins for full marks. Export fails only if the course skills were edited. Submit the PDF you want marked. The YouTube video must show your name and must **not** show or say your student ID. App logins belong in the report. Database passwords do not.
 
 Do **not** edit `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`. Export hashes those files and stamps the result on the PDF cover. A mismatch is an integrity fail. Markers re-check with `python manage.py skills-verify`.
 
@@ -174,7 +174,7 @@ FastStarter web UI (not CLI-only), models matching the current diagram (includin
 
 ### D. Impression evidence (PDF)
 
-Which agent you used. The Judge reads your Guide chats in Cursor, Copilot Agent, or OpenCode when you ask to build the report. Report export also writes those chats into `docs/transcripts/` and a PDF appendix — you do not paste them by hand during the build. The impression mark comes from that conversation, not from a self-written process essay.
+Which agent you used. The Judge reads your Guide chats in Copilot Agent, Cursor, or OpenCode when you ask to build the report. The Guide writes those chats into `docs/transcripts/` and the PDF appendix — you do not paste them by hand during the build. The impression mark comes from that conversation, not from a self-written process essay.
 
 ### E. 5-minute presentation (unlisted YouTube)
 
@@ -243,7 +243,7 @@ Example: confidence 0.74 → 7/10. No Guide conversation to score, or a web-chat
 - Individual work. FastStarter boilerplate may be used and cited.
 - LLMs only under Guide in Cursor, Copilot Agent, or OpenCode.
 - Prefer deep workflows over many shallow ones. Three is the minimum; more is allowed.
-- The use-case diagram is a UML PNG in `docs/diagrams/` (agent-generated; embedded in `docs/report.md`). The model diagram is Mermaid. Wireframes are images you make elsewhere and drop into `docs/wireframes/`.
+- The use-case diagram is a UML PNG in `docs/diagrams/` (agent-generated; embedded in `docs/report.md`). The model diagram is Mermaid. Wireframes are images you make elsewhere, drop into `docs/wireframes/`, and **embed in `docs/report.md`**.
 - Do not edit the course skills or the skill lockfile. Report export checks their hashes.
 - Only `main` is graded unless stated otherwise.
 - Video must be **unlisted** (or public). Unlisted is preferred. Do not submit a private video or a Drive file instead of YouTube.

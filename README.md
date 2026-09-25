@@ -27,7 +27,7 @@ You need **Python 3.10+** and a **Java JRE** (`java` on `PATH`) for use-case PNG
 
 All project commands are a **Python CLI** (`manage.py`). There are no shell setup scripts.
 
-Third-party binaries that are not on PyPI are **committed** under `vendor/` (PlantUML JAR, DejaVu fonts). Python packages are pinned in `requirements.lock`. Mermaid CLI is pinned in `package-lock.json`. See [vendor/README.md](vendor/README.md).
+Third-party binaries that are not on PyPI are **committed** under `vendor/` (PlantUML JAR, DejaVu fonts). Python packages are pinned in `requirements.txt`. Mermaid CLI is pinned in `package-lock.json`. See [vendor/README.md](vendor/README.md).
 
 ### 1. Clone
 
@@ -44,8 +44,7 @@ cd comp3613a1
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -r requirements.lock
-pip install -e . --no-deps
+pip install -r requirements.txt
 ```
 
 **macOS / Linux:**
@@ -54,11 +53,10 @@ pip install -e . --no-deps
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
-pip install -r requirements.lock
-pip install -e . --no-deps
+pip install -r requirements.txt
 ```
 
-`requirements.lock` is compiled from `pyproject.toml` (hashes included). `pip install -e .` without the lockfile still works, but versions can drift.
+Run commands from the project root so `python manage.py` can import `app/`. No Poetry.
 
 Optional, only if you will export a PDF that contains a Mermaid model diagram:
 
@@ -135,8 +133,9 @@ Commands are implemented in `app/cli.py` (stdlib `argparse`) and invoked via `ma
 | `python manage.py seed` | Insert demo users only (also part of `init`) |
 | `python manage.py run` | Start Uvicorn (reload unless `ENV=production`) |
 | `python manage.py users` | Print users in the DB |
-| `python manage.py transcripts` | Optional: dump Guide chats only (also part of `report`) |
-| `python manage.py report --name "..." --id "..."` | **Submission package:** merge `docs/judge.md`, dump transcripts → `docs/transcripts/` (+ zip), write `docs/report.pdf`. Guide must run student-judge first. Incomplete drafts allowed. Fails only if course skills were edited |
+| `python manage.py transcripts` | Optional: package agent-written `docs/transcripts/*.md` into INDEX + zip (no IDE scrape) |
+| `python manage.py report --name "..." --id "..."` | **Submission package:** merge `docs/judge.md`, package `docs/transcripts/`, write `docs/report.pdf`. Guide must run student-judge and **pull chats into `docs/transcripts/`** first (Copilot/Cursor/OpenCode). Incomplete drafts allowed. Fails only if course skills were edited |
+
 | `python manage.py usecase` | Render `docs/diagrams/use-case.json` to a UML use-case PNG via the vendored PlantUML JAR (`docs/diagrams/use-case.png`) |
 | `python manage.py skills-verify` | Check course skills against `.agents/skills.lock.json` |
 | `python manage.py --help` | Show all commands |
@@ -169,7 +168,7 @@ Service shape lives in [`render.yaml`](render.yaml) (Blueprint reference for the
 2. Create a free [Render](https://render.com) account. Connect MCP for your agent using the table above, then set the active workspace (e.g. “Set my Render workspace to …”).
 3. Ask the agent to deploy using the Render MCP, matching `render.yaml`:
    - `create_postgres` — name `faststarter-db`, plan `free`, region `oregon`, disk 1 GB
-   - `create_web_service` — runtime `python`, plan `free`, **same region**, repo and branch, build `pip install .`
+   - `create_web_service` — runtime `python`, plan `free`, **same region**, repo and branch, build `pip install -r requirements.txt`
 4. Set env vars on the web service (use the database **internal** connection string, not the external one):
    - `DATABASE_URI` — internal Postgres URL
    - `SECRET_KEY` — long random string
@@ -203,7 +202,7 @@ Workflows (at least three; format Feature (user); steps go in the wireframe):
 - …
 ```
 
-When finished: ask the Guide to **build the report**. That run writes `docs/judge.md` (student-judge), then `python manage.py report` dumps transcripts and builds the PDF.
+When finished: ask the Guide to **build the report**. That run writes `docs/judge.md`, pulls every Guide chat into `docs/transcripts/` (Copilot Agent, Cursor, or OpenCode — not a Cursor-only scrape), then `python manage.py report` packages them and builds the PDF.
 
 ### GitHub Education (student license)
 
@@ -275,13 +274,16 @@ More setup detail: [`.agents/skills/README.md`](.agents/skills/README.md).
 
 ## Architecture
 
-This starter uses a layered FastAPI layout:
+This starter uses a layered FastAPI layout (see `docs/diagrams/application-components.jpg`):
 
-- **Models / schemas** — SQLModel tables and request/response shapes
-- **Repositories** — datastore access (CRUD); no business rules
-- **Services** — application rules (authz, workflows, invariants)
-- **Routers** — HTTP routes; bind forms/JSON to services and return templates or API responses
-- **Templates / static** — UI rendering and assets
+- **Routes** — HTTP entry; thin; call services; return HTML/JSON/redirects
+- **Dependencies** — shared resources (`SessionDep`, auth)
+- **Schemas** — validated request/response shapes
+- **Services** — application rules; coordinate repositories; **no SQL**
+- **Repositories** — persistence (CRUD / queries); **no business policy**
+- **Models** — SQLModel tables; structure only
+
+A route that runs `select(…)` / `db.exec(…)` breaks the architecture. Put filters and commits in repositories; put workflow rules in services.
 
 ## App structure
 
@@ -303,8 +305,8 @@ comp3613a1
 |-- vendor/                  # PlantUML JAR + DejaVu fonts (committed)
 |-- package.json             # pinned mermaid-cli
 |-- package-lock.json
-|-- requirements.lock        # pinned Python deps (hashes)
-|-- pyproject.toml
+|-- requirements.txt          # pinned Python deps (pip install -r requirements.txt)
+|-- pyproject.toml            # package metadata only (optional; not required for local run)
 |-- app/
 |    |- cli.py               # Python CLI: init / seed / run / users
 |    |- main.py

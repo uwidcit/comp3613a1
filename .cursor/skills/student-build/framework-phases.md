@@ -19,7 +19,7 @@ The student drives the next phase with one complete prompt. Draft the use-case d
 
 One question cap for design phases 1–4 (and Phase 5 theming preferences). Do not split clarifying and follow-ups. The design cap is a **maximum** of unanswered questions. Never more than **8** on that path. An empty Phase 1 is below 0.40 and may ask up to **8**. At 0.40–0.59 up to **7**. At 0.60–0.74 up to **6**. At 0.75–0.89 up to **5**. At 0.90–1.00 up to **4**. Phase 2 still asks about include/extend, shared use cases, and obvious missing use cases when `Feature (user)` lines exist. Phase 3 prefers entity, property, relationship, and edge-case questions. Phase 4 prefers unclear-workflow and diagram/wireframe gap questions.
 
-**Phase 5 implement / polish** uses a separate **implement confidence ladder**: every named workflow needs **at least a SQLModel snippet and a route snippet** in real `app/` files; as confidence drops, ask more and add repository/service snippets (minima 2–6 checks per workflow; never more than 8 unless suspicion is open). After first builds, keep steering on polish until the student is satisfied the features match the design. Do not silent-implement a whole workflow. Do not treat “first build looks ok” as Phase 5 done.
+**Phase 5 implement / polish** uses a separate **implement confidence ladder**: every named workflow needs **at least a SQLModel snippet and a thin route snippet** in real `app/` files (route calls service/repository — no SQL in routers); as confidence drops, ask more and add repository/service snippets (minima 2–6 checks per workflow; never more than 8 unless suspicion is open). **Drop confidence** when a snippet puts `select`/`db.exec`/filters in a route. After first builds, keep steering on polish until the student is satisfied the features match the design. Do not silent-implement a whole workflow. Do not treat “first build looks ok” as Phase 5 done.
 
 A laundering flag (paste-back, assistant voice, “just apply this”) leaves the cap. Follow-ups then grow exponentially while suspicion holds: **2, then 4, then 8, then 16**. Log a `student-judge:sincerity` block each round. Do not write the artefact from the paste.
 
@@ -32,7 +32,7 @@ A design chat is one phase. **Update `docs/report.md` with this phase’s conten
 | 1 | `docs/report.md` — at least three workflows |
 | 2 | `docs/diagrams/use-case.png` embedded in `docs/report.md` as `![…](diagrams/use-case.png)` |
 | 3 | `docs/report.md` — model diagram (student-named entities) |
-| 4 | `docs/wireframes/` plus coverage notes and any model revisions in `docs/report.md` |
+| 4 | `docs/wireframes/` images **embedded** in `docs/report.md` (`![…](wireframes/<file>)`) plus coverage notes and any model revisions |
 | 5 | theming + implementation notes + polish / model revisions; local app working |
 | 6 | public Render URL and marker logins in `docs/report.md` |
 
@@ -42,7 +42,17 @@ Use-case diagram is a UML PNG: write `docs/diagrams/use-case.json`, run `python 
 
 ## Wireframes
 
-The agent does not draw them. Wait until image files are in `docs/wireframes/`. Coverage is a file check first. After coverage, compare each image to the model, suggest missing metadata, raise unoptimized, incomplete, or broken workflows, and ask how a named workflow finishes when that path is not obvious from the design. Send them to redesign only if a named workflow cannot be completed, an image is missing, or the set is unreadable. One coverage block per use case:
+The agent does not draw them. Wait until image files are in `docs/wireframes/`. Coverage is a file check first. After coverage, compare each image to the model, suggest missing metadata, raise unoptimized, incomplete, or broken workflows, and ask how a named workflow finishes when that path is not obvious from the design. Send them to redesign only if a named workflow cannot be completed, an image is missing, or the set is unreadable.
+
+**Embed every wireframe image in `docs/report.md`** under `## Wireframes` before pausing Phase 4 — markdown images with paths relative to the report file:
+
+```markdown
+### <Workflow or screen name>
+
+![<alt>](wireframes/<file>.png)
+```
+
+Do not use `docs/wireframes/...` inside the report (broken relative link). Do not leave `## Wireframes` empty when images exist. Report export also embeds any missing files from that folder into the PDF. One coverage block per use case:
 
 ```text
 <!-- student-build:wireframe-coverage
@@ -64,13 +74,13 @@ Do **not** jump to Render deploy inside Phase 5. Do **not** declare Phase 5 done
 
 Before writing workflow code, read `docs/report.md`, matching wireframes, and existing FastStarter routes/auth. Reuse starter login/sessions. Do not invent a parallel schema or UI. Do not quiz starter auth. Do not require an explore report. If the ERD or covering wireframe is missing, stop.
 
-**Ask more during implement.** Present bounded implementation choices; mix MCQ/open; require SQLModel + route snippets. MCQ options/stems must not give away the answer; snippet prompts must not lecture the solution. Log `<!-- student-build:code-check … -->`.
+**Ask more during implement.** Present bounded implementation choices; mix MCQ/open; require SQLModel + thin route snippets (architecture: routes → services → repositories → models; see `docs/diagrams/application-components.jpg`). MCQ options/stems must not give away the answer; snippet prompts must not lecture the solution. Reject fat routes with inline SQL. Log `<!-- student-build:code-check … -->` including `architecture_ok`.
 
 ## Phase 6 — deploy
 
 Only after Phase 5’s exit gate (local polish engaged, named workflows work). Deploy Render Postgres + web service with the Render MCP (`README.md`, `render.yaml`). Put the public URL and marker logins in `docs/report.md`. Do not paste the database password into the report.
 
-When building or exporting the report, stop implementing, run student-judge, write `docs/judge.md`, then `python manage.py report` (dumps transcripts + PDF).
+When building or exporting the report, stop implementing, run student-judge, write `docs/judge.md`, **have the Guide agent pull every Guide chat into `docs/transcripts/*.md`** (Copilot Agent / Cursor / OpenCode — no Cursor-only Python scrape), then `python manage.py report` (packages those files + PDF).
 
 ## Anti-patterns
 
@@ -96,6 +106,8 @@ When building or exporting the report, stop implementing, run student-judge, wri
 - App code before Phase 4 images cover the use cases
 - Mermaid flowchart (stadium/circle + rectangles) as the use-case diagram
 - Embedding the use-case PNG as `docs/diagrams/use-case.png` inside `docs/report.md` (broken relative link; use `diagrams/use-case.png`)
+- Leaving `## Wireframes` empty in `docs/report.md` when images exist under `docs/wireframes/`
+- Embedding wireframes as `docs/wireframes/...` inside `docs/report.md` (broken relative link; use `wireframes/<file>`)
 - Agent-drawn wireframes
 - Starting the next *phase* in the same chat (except Phase 5 workflows / optional Phase 6 continue)
 - Requiring a new chat to start the next Phase 5 workflow
@@ -104,8 +116,10 @@ When building or exporting the report, stop implementing, run student-judge, wri
 - Deploying (Phase 6) before Phase 5 polish engagement
 - Implementing every core layer with zero code-understanding checks
 - Verifying the app for the student with complex one-off PowerShell/Python scripts, UI scraping, or agent-side smoke tests
-- Implementing every layer yourself with no student file snippets, or skipping the required SQLModel + route pair
-- Failing to increase Phase 5 questions/snippets when implement confidence drops
+- Implementing every layer yourself with no student file snippets, or skipping the required SQLModel + thin-route pair
+- Accepting a route snippet that runs SQL / `select` / `db.exec` / filters instead of calling a service
+- Failing to increase Phase 5 questions/snippets when implement confidence drops (including after an architecture break)
+- Scaffolding or completing a fat route for the student instead of requiring service/repository abstractions
 - Implementing a different schema or UI than the student’s ERD and wireframes
 - Freestyling Phase 5 when the ERD or covering wireframe is missing
 - MCQ options or stems that telegraph the answer (definitions, “because it handles …”, or stems that only one layer can satisfy)
@@ -118,7 +132,8 @@ When building or exporting the report, stop implementing, run student-judge, wri
 - Exporting the report PDF without running student-judge and writing `docs/judge.md`
 - Requiring the student to request an explore report before you implement
 - Treating a short “now do the next workflow” or a wireframe mismatch note as a weak prompt
-- Building/exporting the report without writing `docs/judge.md` and running `python manage.py report` (that dumps `docs/transcripts/` + zip)
-- Asking the student to hand-paste chats into `docs/` mid-build (the agent dumps them at report time for submission)
-- Looking in `docs/transcripts/` as a substitute for reading native chats when judging before the dump
+- Building/exporting the report without writing `docs/judge.md`, without the Guide writing `docs/transcripts/*.md` chats, or without `python manage.py report`
+- Assuming Cursor `.jsonl` / a Python IDE scrape will fill transcripts for Copilot students
+- Asking the student to hand-paste chats into `docs/` mid-build (the Guide pulls them at report time)
+- Looking in `docs/transcripts/` as a substitute for reading live chats when judging before the Guide has written them
 - Editing `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`

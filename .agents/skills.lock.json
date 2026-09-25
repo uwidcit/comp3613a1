@@ -1,18 +1,18 @@
 {
   "algorithm": "sha256",
   "normalization": "utf-8-lf",
-  "root": "0505e5debc73d36e2be07ebce310571324cce5deb0bde5d1c6d8227d6b13e950",
+  "root": "ce34182a895a73721c43e087f303a8c40df84489556301bddab58d0cef65d7b9",
   "files": {
-    ".agents/skills/README.md": "3a0975e71a8bc919566d9dc1cd9d2b90e73da93cca386313c0efbe77d8a2d662",
-    ".agents/skills/student-build/SKILL.md": "d69ca7e3dbd16f2ba27807907dd1366d630f538253eb0f1de44b6e2311845210",
-    ".agents/skills/student-build/framework-phases.md": "9a5343932b1f05aa470dc20a1d07507123b1911c2c5ef7905f75873a3da2f3bb",
-    ".agents/skills/student-judge/SKILL.md": "4183454ddb17021dabc89bf0d554e187c2b70a4b6e9d93cfd6719407c09a8371",
-    ".agents/skills/student-judge/framework-phases.md": "9a5343932b1f05aa470dc20a1d07507123b1911c2c5ef7905f75873a3da2f3bb",
-    ".cursor/skills/README.md": "3a0975e71a8bc919566d9dc1cd9d2b90e73da93cca386313c0efbe77d8a2d662",
-    ".cursor/skills/student-build/SKILL.md": "d69ca7e3dbd16f2ba27807907dd1366d630f538253eb0f1de44b6e2311845210",
-    ".cursor/skills/student-build/framework-phases.md": "9a5343932b1f05aa470dc20a1d07507123b1911c2c5ef7905f75873a3da2f3bb",
-    ".cursor/skills/student-judge/SKILL.md": "4183454ddb17021dabc89bf0d554e187c2b70a4b6e9d93cfd6719407c09a8371",
-    ".cursor/skills/student-judge/framework-phases.md": "9a5343932b1f05aa470dc20a1d07507123b1911c2c5ef7905f75873a3da2f3bb",
-    "AGENTS.md": "c11e743f519771183be1212a30f5d166ffadfb9bae9809bbcbedcaa61a7e6195"
+    ".agents/skills/README.md": "537518908bf733bf166078bfdca0084a1221538db610d9c907d4ca3f60c144da",
+    ".agents/skills/student-build/SKILL.md": "58272cdb8572c4e242026d94c9509279c327c7b52805e895802220afa124eefc",
+    ".agents/skills/student-build/framework-phases.md": "8e18583b05c5f63e9562cbc44744cfab8f1136fc8da0033ab3ad541430c457ed",
+    ".agents/skills/student-judge/SKILL.md": "ed807dbe8def28c0bfefbcbba0513e5e1d763c5f6d268b43f245cbd9eff33d03",
+    ".agents/skills/student-judge/framework-phases.md": "8e18583b05c5f63e9562cbc44744cfab8f1136fc8da0033ab3ad541430c457ed",
+    ".cursor/skills/README.md": "537518908bf733bf166078bfdca0084a1221538db610d9c907d4ca3f60c144da",
+    ".cursor/skills/student-build/SKILL.md": "58272cdb8572c4e242026d94c9509279c327c7b52805e895802220afa124eefc",
+    ".cursor/skills/student-build/framework-phases.md": "8e18583b05c5f63e9562cbc44744cfab8f1136fc8da0033ab3ad541430c457ed",
+    ".cursor/skills/student-judge/SKILL.md": "ed807dbe8def28c0bfefbcbba0513e5e1d763c5f6d268b43f245cbd9eff33d03",
+    ".cursor/skills/student-judge/framework-phases.md": "8e18583b05c5f63e9562cbc44744cfab8f1136fc8da0033ab3ad541430c457ed",
+    "AGENTS.md": "2e773373df8e2fcfd90e4a3e908ae87dc0532d684a48cd0e0b059f2f45685e68"
   }
 }
