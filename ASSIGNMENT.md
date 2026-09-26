@@ -2,11 +2,9 @@
 
 **Individual** · this file lives in the [comp3613a1](https://github.com/uwidcit/comp3613a1) starter repo.
 
-Student-facing Google Doc: https://docs.google.com/document/d/15tCfviVZO9vnqT7wvXJ5VDMkuPzfKJOLIOf2cZB6E6Y/edit
-
 ## Description
 
-In this assignment you will interpret a **brief problem description**, decide what an MVP needs, identify **at least three** main workflows, model a solution, design a usable interface, and implement a working web application.
+In this assignment you will take a **brief problem description**, name **at least three** main workflows, model a solution, design a usable interface, and implement a working web application.
 
 Build with **this** starter ([comp3613a1](https://github.com/uwidcit/comp3613a1), FastStarter) and develop with **Cursor**, **GitHub Copilot** (agent mode), or **OpenCode**, using the Buildmine Guide skill. Your process (not only the final code) will be assessed.
 
@@ -18,17 +16,16 @@ Install, app commands, the Guide start prompt, and Render deploy steps are in [R
 
 ## Learning outcomes
 
-1. Produce a reasonably in-depth interpretation of a short problem brief (actors, goals, assumptions, edge cases, MVP scope).
-2. Derive **at least three** important MVP workflows from that brief (three is the minimum, not a cap — not a laundry list of extras).
-3. Model entities and relationships that support those workflows.
-4. Design wireframes for those workflows and implement them as a usable UI on FastStarter.
-5. Deploy the application and a Postgres database on Render.
-6. Work with an LLM as a coach under Guide rules — you own decisions, verification, and explanations. Judge converts conversation confidence into the impression mark.
-7. Demo the main workflows in a short video without wasting time on an empty app, signup, login, or basic CRUD.
+1. Derive **at least three** important MVP workflows from an assigned brief (three is the minimum, not a cap — not a laundry list of extras).
+2. Model entities and relationships that support those workflows.
+3. Design wireframes for those workflows and implement them as a usable UI on FastStarter.
+4. Deploy the application and a Postgres database on Render.
+5. Work with an LLM as a coach under Guide rules — you own decisions, verification, and explanations. Judge converts conversation confidence into the impression mark.
+6. Demo the main workflows in a short video without wasting time on an empty app, signup, login, or basic CRUD.
 
 ## Project selection
 
-Refer to the assignment spreadsheet (myeLearning) for your **assigned** project. Each option is only a **problem brief**. You must interpret it and define the MVP yourself.
+Refer to the assignment spreadsheet (myeLearning) for your **assigned** project. Each option is only a **problem brief**. You define the MVP through your named workflows, model, and wireframes.
 
 ### 1. Alumni App
 
@@ -53,9 +50,6 @@ Students gain hours by volunteering, appear on a leaderboard, unlock milestones,
 ### 6. Student Accommodation
 
 An Airbnb-like marketplace for finding nearby student accommodation: trusted listings, reviews, and tenant / booking management.
-
-### 7. Research App
-Platform for authors to share their research work and explore others  
 
 You may add minimal supporting behaviour (login, roles, seed data, navigation) required to make the MVP workflows usable. Do **not** invent a second product. Depth on solid workflows beats a shallow feature dump. Three workflows is the minimum; more is allowed.
 
@@ -87,7 +81,7 @@ State theming and branding preferences (colors, type, tone, logo or wordmark). T
 
 ### Phase 6 — Deploy
 
-Only after Phase 5 polish. Deploy **both** a Render Postgres database and the web service with the **Render MCP**. Steps are in [README.md](README.md). Put the public URL in the report. A local-only app cannot earn full implementation marks.
+Only after Phase 5 polish. Deploy **both** a Render Postgres database and the web service with the **Render MCP**. Steps are in [README.md](README.md). Put the public URL in the report. A local-only app earns **0** on deployment.
 
 Markers will exercise **your** named workflows on the deployed app. If a named workflow cannot be completed, you lose marks for that area.
 
@@ -160,23 +154,27 @@ App commands and the Guide start prompt are in [README.md](README.md). One slice
 
 ## Deliverables
 
-### A. Interpretation and workflows (PDF)
+### A. Workflows (PDF)
 
-Actors, primary job, assumptions, out-of-scope items, edge cases, and **at least three** named workflows. Screen steps belong in the wireframes.
+**At least three** named workflows as `Feature (user)`. Screen steps belong in the wireframes.
 
 ### B. Modelling and design (PDF)
 
-UML use-case diagram (PNG), Mermaid model diagram (including revisions from implementation), and the wireframe images for those workflows.
+UML use-case diagram (PNG), Mermaid model diagram (including revisions from implementation), and the wireframe images for those workflows **embedded in the report**.
 
-### C. Implementation and deployment (GitHub + Render)
+### C. Implementation (GitHub)
 
-FastStarter web UI (not CLI-only), models matching the current diagram (including Phase 5 polish revisions), all named workflows usable end-to-end, seed data. Wireframe images in `docs/wireframes/`. Student-steered polish after the first build (verify notes, UI/workflow fine-tunes). A Render Postgres database and a public web service (**Phase 6**), URL in the PDF.
+FastStarter web UI (not CLI-only), models matching the current diagram (including Phase 5 polish revisions), all named workflows usable end-to-end, seed data. Wireframe images in `docs/wireframes/`. Student-steered polish after the first build (verify notes, UI/workflow fine-tunes).
 
-### D. Impression evidence (PDF)
+### D. Deployment (Render)
+
+A Render Postgres database and a public web service (**Phase 6**), URL in the PDF.
+
+### E. Impression evidence (PDF)
 
 Which agent you used. The Judge reads your Guide chats in Copilot Agent, Cursor, or OpenCode when you ask to build the report. The Guide writes those chats into `docs/transcripts/` and the PDF appendix — you do not paste them by hand during the build. The impression mark comes from that conversation, not from a self-written process essay.
 
-### E. 5-minute presentation (unlisted YouTube)
+### F. 5-minute presentation (unlisted YouTube)
 
 Publish **one unlisted** YouTube video, **at most 5 minutes**, and put the **video URL in the PDF report**.
 
@@ -203,14 +201,13 @@ If the video is longer than 5 minutes, only the first 5 minutes are marked. A mi
 One PDF via myeLearning, plus the unlisted YouTube link **inside that PDF**. Keep `docs/transcripts.zip` (or the `docs/transcripts/` dump) with your submission materials — the Guide creates it when the report is built:
 
 1. Cover page — Name, ID, **deployed app link**, **user logins** (username / password / role), GitHub, YouTube URL, agent used, account email
-2. Problem interpretation
-3. The named workflows (at least three)
-4. Use case diagram (UML PNG)
-5. Model diagram (Mermaid; note revisions)
-6. Wireframe images for the named workflows
-7. Implementation and deployment notes (public URL, what is seeded)
-8. Judge impression block (student-judge scorecard appended when the report is built)
-9. Session transcripts appendix (exported Guide chats; also `docs/transcripts/` + `docs/transcripts.zip`)
+2. The named workflows (at least three)
+3. Use case diagram (UML PNG)
+4. Model diagram (Mermaid; note revisions)
+5. Wireframe images for the named workflows (embedded in the report)
+6. Implementation notes (what is seeded) and deployment (public URL)
+7. Judge impression block (student-judge scorecard appended when the report is built)
+8. Session transcripts appendix (exported Guide chats; also `docs/transcripts/` + `docs/transcripts.zip`)
 
 The PDF may include your student ID on the cover page. The **video must not**.
 
@@ -218,25 +215,25 @@ The PDF may include your student ID on the cover page. The **video must not**.
 
 | Feature | Description | Marks |
 | --- | --- | --- |
-| Problem interpretation | In-depth reading of the brief; clear MVP boundary | 10 |
 | Workflows | At least three; concrete, role-aware, drive model and UI | 10 |
-| Use case diagram | UML image; actors and use cases for the named workflows | 10 |
-| Model diagram | Mermaid; first draft revised as the features are built | 10 |
-| UI design | External wireframes for the named workflows; every use case covered | 10 |
-| Implementation and deployment | FastStarter; named workflows end-to-end; seed data; Render Postgres and public web URL | 30 |
+| Use case diagram | UML image; actors and use cases for the named workflows | 5 |
+| Model diagram | Mermaid; first draft revised as the features are built | 5 |
+| UI design | External wireframes for the named workflows; every use case covered; embedded in the report | 10 |
+| Implementation | FastStarter; named workflows end-to-end; seed data; student-steered polish | 30 |
+| Deployment | Render Postgres and a public web URL | 10 |
 | Presentation | 5-min unlisted YouTube: project, features, demo of the named workflows only; name shown, no student ID; link in the report | 10 |
-| Impression | Judge confidence on the conversation, converted to a mark out of 10 | 10 |
+| Impression | Judge confidence on the conversation, converted to a mark out of 20 | 20 |
 | **Total** |  | **100** |
 
-A local-only app can score at most **20/30** on implementation and deployment. The remaining 10 require a live Render URL backed by Render Postgres.
+Deployment is all-or-nothing on the live stack: **0** without a working public URL on Render Postgres; **10** when that URL is in the report and the named workflows run there.
 
 ### Impression conversion
 
 After the build, ask the Guide to build or export the report. That run includes the Judge skill. It reports an **impression confidence** from 0.00 to 1.00. That converts to the impression mark:
 
-**impression marks = round(confidence × 10)** (integer 0–10).
+**impression marks = round(confidence × 20)** (integer 0–20).
 
-Example: confidence 0.74 → 7/10. No Guide conversation to score, or a web-chatbot-only session, scores 0. Chat logs are not submitted in the repo. Suspected external-LLM laundering that is not cleared caps confidence at 0.40 (at most 4/10), even if the app works. This mark is about the conversation, not a second score of the deployed app.
+Example: confidence 0.74 → 15/20. No Guide conversation to score, or a web-chatbot-only session, scores 0. Suspected external-LLM laundering that is not cleared caps confidence at 0.40 (at most 8/20), even if the app works. This mark is about the conversation, not a second score of the deployed app.
 
 ## Notes
 

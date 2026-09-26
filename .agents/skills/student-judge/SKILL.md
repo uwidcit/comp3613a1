@@ -95,7 +95,7 @@ Score each metric **0–4**:
 | ID | Metric | Look for in *this* assignment |
 |----|--------|-------------------------------|
 | M1 | **Phase discipline** | One design phase per chat; no app code before wireframe coverage; implement one named workflow at a time; **Phase 5 includes polish** before **Phase 6 deploy**. Incomplete deploy is a **Phase 6** gate note, not an automatic M1=2. Jumping to deploy after a first dump with no polish hurts M1 and the Phase 5 gate. |
-| M2 | **Problem framing** | Project + `Feature (user)` lines, include/extend or shared-use-case answers, engagement with obvious-gap reconsider questions, entity/property lists, relationship choices, theming prefs, and report interpretation in the student’s words. Do **not** require a who/steps/done interview. Soft on gaps: engaging the question or keeping a gap on purpose with a reason still scores solid. Terse implement/polish prompts are fine once those exist. |
+| M2 | **Problem framing** | Project + `Feature (user)` lines, include/extend or shared-use-case answers, engagement with obvious-gap reconsider questions, entity/property lists, relationship choices, and theming prefs in the student’s words. Do **not** require a who/steps/done interview or a separate interpretation essay. Soft on gaps: engaging the question or keeping a gap on purpose with a reason still scores solid. Terse implement/polish prompts are fine once those exist. |
 | M3 | **Decision ownership** | Student chose project, workflows, include/extend sharing, whether to add an obvious companion use case, entities, relationships (including reconsidering a poor fit), wireframe fidelity, theming, public vs protected, create-if-missing, polish corrections, and model revisions. Agent implementing most of the how is expected. Cap only if the agent invented the product. Mild ding only if they ignore a gap that breaks a named workflow after Guide asked. |
 | M4 | **Artefact-before-code** | Used the report, **ERD**, and wireframes (and existing FastStarter routes) as the spec and **implemented those**, not a substitute design. Credit mismatch hunting, polish-driven model revisions, and “why is this behind login?” Agent file reads count. **Do not** require an explore report. Score 1 only if they demanded code with no model/wireframe when those were supposed to exist, or the agent shipped an unrelated schema/UI while artefacts existed. |
 | M5 | **Verification habit** | Ran/clicked when asked; reported observed vs wireframe (or clear mismatch notes); continued after the first build. **Do not** require one final browser walkthrough of every named workflow in a single turn. Per-workflow “what I saw” after Guide asked them to run is enough. **Score down** if they never verified and only accepted the first dump. Agent-run smoke tests do not replace student observation and are not required. |
@@ -203,8 +203,8 @@ scoreable max     = metrics scored × 4
 awarded total     = sum of scored cells (ignore N/A)
 overall           = awarded total ÷ metrics scored
                   (equal to the simple average of scored cells)
-impression mark   = round(Guide confidence × 10) out of 10
-                  if no confidence logged: round(overall / 4 × 10)
+impression mark   = round(Guide confidence × 20) out of 20
+                  if no confidence logged: round(overall / 4 × 20)
 ```
 
 Show **awarded total / scoreable max** and **overall / 4**. Never present overall as if the denominator were always 48. Never average in N/A as zero.
@@ -227,7 +227,7 @@ Show **awarded total / scoreable max** and **overall / 4**. Never present overal
 | Scoreable max | N × 4 |
 | Awarded total | X / (N × 4) |
 | **Overall (avg of scored)** | **X.X / 4** |
-| Impression mark | K / 10 |
+| Impression mark | K / 20 |
 
 ## Scorecard
 

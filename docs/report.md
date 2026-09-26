@@ -6,8 +6,6 @@ Do not put your student ID in this file if you will commit it. The PDF cover add
 
 ## Assigned project
 
-## Problem interpretation
-
 ## Three workflows
 
 ### 1.
