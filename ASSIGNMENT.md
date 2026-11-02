@@ -95,13 +95,13 @@ python manage.py report --name "Your Name" --id "816000000"
 
 That merges `docs/judge.md`, packages `docs/transcripts/` (+ zip), and writes `docs/report.pdf`. Include the PDF (and keep the transcript dump with your submission materials). You may export an incomplete draft at any phase. Missing URL, logins, diagrams, or wireframes do not block the export. The final submission still needs the public URL and marker logins for full marks. Export fails only if the course skills were edited. Submit the PDF you want marked. The YouTube video must show your name and must **not** show or say your student ID. App logins belong in the report. Database passwords do not.
 
-Do **not** edit `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`. Export hashes those files and stamps the result on the PDF cover. A mismatch is an integrity fail. Markers re-check with `python manage.py skills-verify`.
+Do **not** edit `.agents/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`. Export hashes those files and stamps the result on the PDF cover. A mismatch is an integrity fail. Markers re-check with `python manage.py skills-verify`.
 
 Deploy, install, and the Guide start prompt: [README.md](README.md).
 
 ## Agents, Education license, and setup
 
-Pick **one** agent. Skills are already in this repo (`.agents/skills/` and `.cursor/skills/`). Web chatbots do not load them.
+Pick **one** agent. Skills are already in this repo under `.agents/skills/`. Web chatbots do not load them.
 
 **Student license:** sign in and apply at https://github.com/settings/education/benefits
 

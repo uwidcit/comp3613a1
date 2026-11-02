@@ -20,7 +20,6 @@ _LOCK_ENV_ALIASES = (LOCK_ENV, "FASTMVC_SKILLS_LOCK")
 
 _GLOBS = (
     ".agents/skills/**/*.md",
-    ".cursor/skills/**/*.md",
 )
 _EXTRA_FILES = ("AGENTS.md",)
 
@@ -176,7 +175,7 @@ def stamp_markdown(markdown: str, result: IntegrityResult) -> str:
     section = (
         "## Skill integrity\n\n"
         "Course skills are hashed at export and compared to `.agents/skills.lock.json`. "
-        "Do not edit `.agents/skills/`, `.cursor/skills/`, or `AGENTS.md`.\n\n"
+        "Do not edit `.agents/skills/` or `AGENTS.md`.\n\n"
         f"- Status: **{result.status}**\n"
         f"- Root: `{result.root}`\n"
         f"{mismatch_lines}\n"

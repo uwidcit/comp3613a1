@@ -136,4 +136,4 @@ When building or exporting the report, stop implementing, run student-judge, wri
 - Assuming Cursor `.jsonl` / a Python IDE scrape will fill transcripts for Copilot students
 - Asking the student to hand-paste chats into `docs/` mid-build (the Guide pulls them at report time)
 - Looking in `docs/transcripts/` as a substitute for reading live chats when judging before the Guide has written them
-- Editing `.agents/skills/`, `.cursor/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`
+- Editing `.agents/skills/`, `AGENTS.md`, or `.agents/skills.lock.json`

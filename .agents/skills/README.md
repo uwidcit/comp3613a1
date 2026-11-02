@@ -7,11 +7,11 @@ Canonical skills for all three agents:
 | Assignment coach | `.agents/skills/student-build/SKILL.md` |
 | Judge | `.agents/skills/student-judge/SKILL.md` |
 
-A copy also lives under `.cursor/skills/` for older Cursor builds.
+Layout follows the [Agent Skills](https://agentskills.io/specification) format: each skill is a directory with required `SKILL.md` (YAML frontmatter + body) and optional `references/` for progressive disclosure.
 
 | Agent | How it loads these |
 |-------|--------------------|
-| **Cursor** | Discovers `.agents/skills/` and `.cursor/skills/`. Start a new Agent chat, then `/student-build`. |
+| **Cursor** | Discovers `.agents/skills/`. Start a new Agent chat, then `/student-build`. |
 | **GitHub Copilot** | Agent mode and Copilot CLI load `.agents/skills/*/SKILL.md` plus `AGENTS.md` and `.github/copilot-instructions.md`. Use **Agent** mode (not Ask/Edit, not autocomplete-only). |
 | **OpenCode** | Loads `.agents/skills/` and always reads `AGENTS.md`. Run from the project root. Do not run `/init` (it overwrites `AGENTS.md`). |
 
@@ -39,7 +39,7 @@ https://github.com/settings/education/benefits
 
 Web chat (chatgpt.com, claude.ai, gemini.google.com) does **not** load these files. That path is not allowed for the assignment.
 
-When you change a skill, update **both** `.agents/skills/` and `.cursor/skills/` so they stay the same.
+Course authors edit skills only under `.agents/skills/`, then refresh the lock with `FASTSTARTER_SKILLS_LOCK=1 python manage.py skills-lock`.
 
 ## This assignment's phases
 

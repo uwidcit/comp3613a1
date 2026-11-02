@@ -290,7 +290,6 @@ A route that runs `select(…)` / `db.exec(…)` breaks the architecture. Put fi
 ```text
 comp3613a1
 |-- .agents/skills/           # Guide + Judge (Cursor, Copilot, OpenCode)
-|-- .cursor/skills/          # same skills (older Cursor)
 |-- .cursor/mcp.json         # Render MCP (Cursor)
 |-- .vscode/mcp.json         # Render MCP (Copilot / VS Code)
 |-- opencode.json            # Render MCP (OpenCode)
